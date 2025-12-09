@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useCreateProject } from '@/hooks/useProjects';
 import { useClients } from '@/hooks/useClients';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import {
   Dialog,
   DialogContent,
@@ -19,7 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Loader2 } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Plus, Loader2, CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Props {
   trigger?: React.ReactNode;
@@ -32,10 +41,10 @@ export function CreateProjectDialog({ trigger }: Props) {
     description: '',
     client_id: '',
     status: 'pending' as const,
-    start_date: '',
-    end_date: '',
     budget: '',
   });
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
 
   const { mutate: createProject, isPending } = useCreateProject();
   const { data: clients } = useClients();
@@ -48,8 +57,8 @@ export function CreateProjectDialog({ trigger }: Props) {
         description: formData.description || undefined,
         client_id: formData.client_id || undefined,
         status: formData.status,
-        start_date: formData.start_date || undefined,
-        end_date: formData.end_date || undefined,
+        start_date: startDate ? format(startDate, 'yyyy-MM-dd') : undefined,
+        end_date: endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
         budget: formData.budget ? parseFloat(formData.budget) : undefined,
       },
       {
@@ -60,10 +69,10 @@ export function CreateProjectDialog({ trigger }: Props) {
             description: '',
             client_id: '',
             status: 'pending',
-            start_date: '',
-            end_date: '',
             budget: '',
           });
+          setStartDate(undefined);
+          setEndDate(undefined);
         },
       }
     );
@@ -147,23 +156,58 @@ export function CreateProjectDialog({ trigger }: Props) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="start_date">Fecha Inicio</Label>
-              <Input
-                id="start_date"
-                type="date"
-                value={formData.start_date}
-                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-              />
+              <Label>Fecha Inicio</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !startDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "PPP", { locale: es }) : "Seleccionar fecha"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="end_date">Fecha Fin</Label>
-              <Input
-                id="end_date"
-                type="date"
-                value={formData.end_date}
-                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-              />
+              <Label>Fecha Fin</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !endDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? format(endDate, "PPP", { locale: es }) : "Seleccionar fecha"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    disabled={(date) => startDate ? date < startDate : false}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
