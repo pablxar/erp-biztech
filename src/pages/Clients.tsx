@@ -14,16 +14,38 @@ import {
   DollarSign,
   FolderKanban,
   Calendar,
-  ChevronRight,
+  Edit,
+  Trash2,
+  ExternalLink,
+  Copy,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { useClients } from "@/hooks/useClients";
+import { useClients, useDeleteClient, Client } from "@/hooks/useClients";
 import { useProjects } from "@/hooks/useProjects";
 import { useTransactions } from "@/hooks/useTransactions";
 import { CreateClientDialog } from "@/components/clients/CreateClientDialog";
+import { EditClientDialog } from "@/components/clients/EditClientDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { toast } from "sonner";
 
 const statusConfig = {
   active: { label: "Activo", color: "bg-success/20 text-success border-success/30" },
@@ -35,8 +57,14 @@ export default function Clients() {
   const { data: clients, isLoading } = useClients();
   const { data: projects } = useProjects();
   const { data: transactions } = useTransactions();
+  const deleteClient = useDeleteClient();
+  
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
 
   // Filter clients based on search
   const filteredClients = clients?.filter(client => 
@@ -62,6 +90,43 @@ export default function Clients() {
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
+
+  const handleEditClient = (client: Client) => {
+    setEditingClient(client);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDeleteClick = (client: Client) => {
+    setClientToDelete(client);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (clientToDelete) {
+      deleteClient.mutate(clientToDelete.id, {
+        onSuccess: () => {
+          setDeleteDialogOpen(false);
+          setClientToDelete(null);
+          if (selectedClientId === clientToDelete.id) {
+            setSelectedClientId(null);
+          }
+        },
+      });
+    }
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copiado al portapapeles`);
+  };
+
+  const openEmail = (email: string) => {
+    window.open(`mailto:${email}`, '_blank');
+  };
+
+  const openPhone = (phone: string) => {
+    window.open(`tel:${phone}`, '_blank');
   };
 
   if (isLoading) {
@@ -126,7 +191,7 @@ export default function Clients() {
                   key={client.id}
                   onClick={() => setSelectedClientId(client.id)}
                   className={cn(
-                    "glass glass-hover rounded-xl p-4 cursor-pointer animate-fade-in",
+                    "glass glass-hover rounded-xl p-4 cursor-pointer animate-fade-in group",
                     selectedClient?.id === client.id && "ring-2 ring-primary"
                   )}
                 >
@@ -157,11 +222,56 @@ export default function Clients() {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-primary">${stats.totalRevenue.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {stats.activeProjects} activos • {stats.completedProjects} completados
-                      </p>
+                    <div className="flex items-start gap-2">
+                      <div className="text-right">
+                        <p className="font-semibold text-primary">${stats.totalRevenue.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {stats.activeProjects} activos • {stats.completedProjects} completados
+                        </p>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenuItem onClick={() => handleEditClient(client)}>
+                            <Edit className="w-4 h-4 mr-2" />
+                            Editar cliente
+                          </DropdownMenuItem>
+                          {client.email && (
+                            <DropdownMenuItem onClick={() => openEmail(client.email!)}>
+                              <Mail className="w-4 h-4 mr-2" />
+                              Enviar email
+                            </DropdownMenuItem>
+                          )}
+                          {client.phone && (
+                            <DropdownMenuItem onClick={() => openPhone(client.phone!)}>
+                              <Phone className="w-4 h-4 mr-2" />
+                              Llamar
+                            </DropdownMenuItem>
+                          )}
+                          {client.email && (
+                            <DropdownMenuItem onClick={() => copyToClipboard(client.email!, "Email")}>
+                              <Copy className="w-4 h-4 mr-2" />
+                              Copiar email
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteClick(client)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Eliminar cliente
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>
@@ -187,22 +297,52 @@ export default function Clients() {
                       </Badge>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="w-5 h-5" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="w-5 h-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEditClient(selectedClient)}>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Editar cliente
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => handleDeleteClick(selectedClient)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Eliminar cliente
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
 
                 <div className="space-y-3">
                   {selectedClient.email && (
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
-                      <Mail className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">{selectedClient.email}</span>
+                    <div 
+                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer group"
+                      onClick={() => openEmail(selectedClient.email!)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Mail className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm">{selectedClient.email}</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   )}
                   {selectedClient.phone && (
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">{selectedClient.phone}</span>
+                    <div 
+                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer group"
+                      onClick={() => openPhone(selectedClient.phone!)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Phone className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm">{selectedClient.phone}</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   )}
                   {selectedClient.company && (
@@ -238,11 +378,20 @@ export default function Clients() {
                 })()}
 
                 <div className="flex gap-2 mt-6">
-                  <Button className="flex-1 gap-2">
+                  <Button 
+                    className="flex-1 gap-2"
+                    onClick={() => selectedClient.email && openEmail(selectedClient.email)}
+                    disabled={!selectedClient.email}
+                  >
                     <Mail className="w-4 h-4" />
                     Enviar Email
                   </Button>
-                  <Button variant="outline" className="flex-1 gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 gap-2"
+                    onClick={() => selectedClient.phone && openPhone(selectedClient.phone)}
+                    disabled={!selectedClient.phone}
+                  >
                     <Phone className="w-4 h-4" />
                     Llamar
                   </Button>
@@ -253,7 +402,7 @@ export default function Clients() {
               {selectedClient.notes && (
                 <div className="glass rounded-xl p-6 animate-slide-up">
                   <h4 className="font-semibold mb-4">Notas</h4>
-                  <p className="text-sm text-muted-foreground">{selectedClient.notes}</p>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedClient.notes}</p>
                 </div>
               )}
 
@@ -272,10 +421,49 @@ export default function Clients() {
                   </div>
                 </div>
               </div>
+
+              {/* Quick Edit Button */}
+              <Button 
+                variant="outline" 
+                className="w-full gap-2"
+                onClick={() => handleEditClient(selectedClient)}
+              >
+                <Edit className="w-4 h-4" />
+                Editar información del cliente
+              </Button>
             </div>
           )}
         </div>
       )}
+
+      {/* Edit Client Dialog */}
+      <EditClientDialog
+        client={editingClient}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará permanentemente a <strong>{clientToDelete?.name}</strong> y no se puede deshacer.
+              Los proyectos y transacciones asociados no serán eliminados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
