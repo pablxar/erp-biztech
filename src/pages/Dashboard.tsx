@@ -9,8 +9,35 @@ import {
   Users,
   TrendingUp,
 } from "lucide-react";
+import { useProjects } from "@/hooks/useProjects";
+import { useClients } from "@/hooks/useClients";
+import { useFinancialStats } from "@/hooks/useTransactions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
+  const { data: projects } = useProjects();
+  const { data: clients } = useClients();
+  const { data: financeStats, isLoading: financeLoading } = useFinancialStats();
+
+  const activeProjects = projects?.filter(p => p.status === 'active').length || 0;
+  const completedThisMonth = projects?.filter(p => {
+    if (p.status !== 'completed') return false;
+    const date = new Date(p.updated_at);
+    const now = new Date();
+    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  }).length || 0;
+
+  const totalClients = clients?.length || 0;
+  const newClientsThisMonth = clients?.filter(c => {
+    const date = new Date(c.created_at);
+    const now = new Date();
+    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  }).length || 0;
+
+  const monthlyIncome = financeStats?.monthlyIncome || 0;
+  const monthlyExpenses = financeStats?.monthlyExpenses || 0;
+  const margin = monthlyIncome > 0 ? ((monthlyIncome - monthlyExpenses) / monthlyIncome * 100).toFixed(1) : 0;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -25,34 +52,45 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard
-          title="Ingresos del Mes"
-          value="$95,420"
-          change="+12.5% vs mes anterior"
-          changeType="positive"
-          icon={DollarSign}
-        />
-        <StatsCard
-          title="Proyectos Activos"
-          value="12"
-          change="3 completados este mes"
-          changeType="positive"
-          icon={FolderKanban}
-        />
-        <StatsCard
-          title="Clientes Activos"
-          value="48"
-          change="+5 nuevos este mes"
-          changeType="positive"
-          icon={Users}
-        />
-        <StatsCard
-          title="Margen Promedio"
-          value="42%"
-          change="+3.2% vs mes anterior"
-          changeType="positive"
-          icon={TrendingUp}
-        />
+        {financeLoading ? (
+          <>
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+          </>
+        ) : (
+          <>
+            <StatsCard
+              title="Ingresos del Mes"
+              value={`$${monthlyIncome.toLocaleString()}`}
+              change={monthlyIncome > 0 ? "Este mes" : "Sin ingresos aún"}
+              changeType={monthlyIncome > 0 ? "positive" : "neutral"}
+              icon={DollarSign}
+            />
+            <StatsCard
+              title="Proyectos Activos"
+              value={activeProjects.toString()}
+              change={`${completedThisMonth} completados este mes`}
+              changeType="positive"
+              icon={FolderKanban}
+            />
+            <StatsCard
+              title="Clientes"
+              value={totalClients.toString()}
+              change={newClientsThisMonth > 0 ? `+${newClientsThisMonth} nuevos este mes` : "Sin nuevos este mes"}
+              changeType={newClientsThisMonth > 0 ? "positive" : "neutral"}
+              icon={Users}
+            />
+            <StatsCard
+              title="Margen"
+              value={`${margin}%`}
+              change={Number(margin) > 0 ? "Margen positivo" : "Sin datos suficientes"}
+              changeType={Number(margin) > 0 ? "positive" : "neutral"}
+              icon={TrendingUp}
+            />
+          </>
+        )}
       </div>
 
       {/* Main Content Grid */}

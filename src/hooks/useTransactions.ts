@@ -74,6 +74,10 @@ export function useFinancialStats() {
       
       if (error) throw error;
       
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      
       const income = data
         .filter(t => t.type === 'income')
         .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -82,9 +86,25 @@ export function useFinancialStats() {
         .filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + Number(t.amount), 0);
       
+      const monthlyIncome = data
+        .filter(t => {
+          const date = new Date(t.date);
+          return t.type === 'income' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+        })
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+      
+      const monthlyExpenses = data
+        .filter(t => {
+          const date = new Date(t.date);
+          return t.type === 'expense' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+        })
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+      
       return {
         totalIncome: income,
         totalExpenses: expenses,
+        monthlyIncome,
+        monthlyExpenses,
         netMargin: income - expenses,
         marginPercentage: income > 0 ? ((income - expenses) / income * 100) : 0,
       };
