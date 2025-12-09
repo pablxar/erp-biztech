@@ -38,7 +38,8 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Task, useUpdateTask, useDeleteTask } from "@/hooks/useTasks";
-import { useTeamMembers } from "@/hooks/useTeamMembers";
+import { useTaskAssignments, useBulkAssignTask } from "@/hooks/useTaskAssignments";
+import { TaskAssigneeSelector } from "./TaskAssigneeSelector";
 
 interface EditTaskDialogProps {
   task: Task | null;
@@ -52,13 +53,14 @@ export function EditTaskDialog({ task, open, onOpenChange }: EditTaskDialogProps
     description: "",
     status: "todo" as Task["status"],
     priority: "medium" as Task["priority"],
-    assigned_to: "",
   });
   const [dueDate, setDueDate] = useState<Date | undefined>();
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
 
   const { mutate: updateTask, isPending } = useUpdateTask();
   const { mutate: deleteTask, isPending: isDeleting } = useDeleteTask();
-  const { data: teamMembers } = useTeamMembers();
+  const { mutateAsync: bulkAssign } = useBulkAssignTask();
+  const { data: assignments } = useTaskAssignments(task?.id);
 
   useEffect(() => {
     if (task) {
@@ -67,30 +69,40 @@ export function EditTaskDialog({ task, open, onOpenChange }: EditTaskDialogProps
         description: task.description || "",
         status: task.status,
         priority: task.priority,
-        assigned_to: task.assigned_to || "",
       });
       setDueDate(task.due_date ? new Date(task.due_date) : undefined);
     }
   }, [task]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (assignments) {
+      setSelectedAssignees(assignments.map(a => a.user_id));
+    }
+  }, [assignments]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!task) return;
 
-    updateTask(
-      {
-        id: task.id,
-        title: formData.title,
-        description: formData.description || null,
-        status: formData.status,
-        priority: formData.priority,
-        assigned_to: formData.assigned_to || null,
-        due_date: dueDate ? format(dueDate, "yyyy-MM-dd") : null,
-      },
-      {
-        onSuccess: () => onOpenChange(false),
-      }
-    );
+    try {
+      await bulkAssign({ taskId: task.id, userIds: selectedAssignees });
+      
+      updateTask(
+        {
+          id: task.id,
+          title: formData.title,
+          description: formData.description || null,
+          status: formData.status,
+          priority: formData.priority,
+          due_date: dueDate ? format(dueDate, "yyyy-MM-dd") : null,
+        },
+        {
+          onSuccess: () => onOpenChange(false),
+        }
+      );
+    } catch (error) {
+      console.error('Error updating task:', error);
+    }
   };
 
   const handleDelete = () => {
@@ -167,52 +179,36 @@ export function EditTaskDialog({ task, open, onOpenChange }: EditTaskDialogProps
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Asignado a</Label>
-              <Select
-                value={formData.assigned_to}
-                onValueChange={(value) => setFormData({ ...formData, assigned_to: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sin asignar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {teamMembers?.map((member) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      {member.full_name || member.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <TaskAssigneeSelector
+            selectedUserIds={selectedAssignees}
+            onSelectionChange={setSelectedAssignees}
+          />
 
-            <div className="space-y-2">
-              <Label>Fecha Límite</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !dueDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, "PPP", { locale: es }) : "Seleccionar"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={dueDate}
-                    onSelect={setDueDate}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+          <div className="space-y-2">
+            <Label>Fecha Límite</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !dueDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dueDate ? format(dueDate, "PPP", { locale: es }) : "Seleccionar fecha"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dueDate}
+                  onSelect={setDueDate}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="flex justify-between pt-4">

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useCreateTask } from '@/hooks/useTasks';
-import { useTeamMembers } from '@/hooks/useTeamMembers';
-import { useAuth } from '@/contexts/AuthContext';
+import { useBulkAssignTask } from '@/hooks/useTaskAssignments';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { TaskAssigneeSelector } from './TaskAssigneeSelector';
 import { Plus, Loader2 } from 'lucide-react';
 
 interface Props {
@@ -29,50 +29,46 @@ interface Props {
 
 export function CreateTaskDialog({ projectId, trigger }: Props) {
   const [open, setOpen] = useState(false);
-  const { user } = useAuth();
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    assigned_to: '',
     status: 'todo' as const,
     priority: 'medium' as const,
     due_date: '',
   });
 
-  const { mutate: createTask, isPending } = useCreateTask();
-  const { data: teamMembers } = useTeamMembers();
+  const { mutateAsync: createTask, isPending } = useCreateTask();
+  const { mutateAsync: bulkAssign } = useBulkAssignTask();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    createTask(
-      {
+    
+    try {
+      const task = await createTask({
         title: formData.title,
         description: formData.description || undefined,
         project_id: projectId,
-        assigned_to: formData.assigned_to || undefined,
         status: formData.status,
         priority: formData.priority,
         due_date: formData.due_date || undefined,
-      },
-      {
-        onSuccess: () => {
-          setOpen(false);
-          setFormData({
-            title: '',
-            description: '',
-            assigned_to: '',
-            status: 'todo',
-            priority: 'medium',
-            due_date: '',
-          });
-        },
-      }
-    );
-  };
+      });
 
-  const handleAssignToMe = () => {
-    if (user) {
-      setFormData({ ...formData, assigned_to: user.id });
+      if (selectedAssignees.length > 0) {
+        await bulkAssign({ taskId: task.id, userIds: selectedAssignees });
+      }
+
+      setOpen(false);
+      setFormData({
+        title: '',
+        description: '',
+        status: 'todo',
+        priority: 'medium',
+        due_date: '',
+      });
+      setSelectedAssignees([]);
+    } catch (error) {
+      console.error('Error creating task:', error);
     }
   };
 
@@ -149,35 +145,10 @@ export function CreateTaskDialog({ projectId, trigger }: Props) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="assigned_to">Asignar a</Label>
-              <Button 
-                type="button" 
-                variant="link" 
-                size="sm" 
-                className="h-auto p-0 text-primary"
-                onClick={handleAssignToMe}
-              >
-                Asignarme
-              </Button>
-            </div>
-            <Select
-              value={formData.assigned_to}
-              onValueChange={(value) => setFormData({ ...formData, assigned_to: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar miembro" />
-              </SelectTrigger>
-              <SelectContent>
-                {teamMembers?.map((member) => (
-                  <SelectItem key={member.id} value={member.id}>
-                    {member.full_name || member.email}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <TaskAssigneeSelector
+            selectedUserIds={selectedAssignees}
+            onSelectionChange={setSelectedAssignees}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="due_date">Fecha de Vencimiento</Label>

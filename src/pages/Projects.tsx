@@ -40,11 +40,12 @@ import {
 import { cn } from "@/lib/utils";
 import { useProjects, useDeleteProject, Project } from "@/hooks/useProjects";
 import { useTasks, useUpdateTask, Task } from "@/hooks/useTasks";
-import { useTeamMembers } from "@/hooks/useTeamMembers";
+
 import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
 import { CreateTaskDialog } from "@/components/projects/CreateTaskDialog";
 import { EditProjectDialog } from "@/components/projects/EditProjectDialog";
 import { EditTaskDialog } from "@/components/projects/EditTaskDialog";
+import { TaskAssigneesDisplay } from "@/components/projects/TaskAssigneesDisplay";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
@@ -90,7 +91,7 @@ export default function Projects() {
   const [dropTargetColumn, setDropTargetColumn] = useState<TaskStatus | null>(null);
   
   const { data: projects, isLoading: loadingProjects } = useProjects();
-  const { data: teamMembers } = useTeamMembers();
+  
   const deleteProject = useDeleteProject();
   
   // Filter projects
@@ -108,21 +109,6 @@ export default function Projects() {
 
   const getTasksByStatus = (status: TaskStatus) =>
     tasks?.filter((t) => t.status === status) || [];
-
-  const getMemberName = (userId: string | null) => {
-    if (!userId) return null;
-    const member = teamMembers?.find(m => m.id === userId);
-    return member?.full_name || member?.email;
-  };
-
-  const getMemberInitials = (userId: string | null) => {
-    if (!userId) return "?";
-    const member = teamMembers?.find(m => m.id === userId);
-    if (member?.full_name) {
-      return member.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    }
-    return member?.email?.slice(0, 2).toUpperCase() || "?";
-  };
 
   // Drag handlers
   const handleDragStart = (e: DragEvent<HTMLDivElement>, task: Task) => {
@@ -416,12 +402,7 @@ export default function Projects() {
                                 <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{task.description}</p>
                               )}
                               <div className="flex items-center justify-between">
-                                <div 
-                                  className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary"
-                                  title={getMemberName(task.assigned_to) || "Sin asignar"}
-                                >
-                                  {getMemberInitials(task.assigned_to)}
-                                </div>
+                                <TaskAssigneesDisplay taskId={task.id} size="sm" max={3} />
                                 {task.due_date && (
                                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                                     <Clock className="w-3 h-3" />
@@ -477,14 +458,7 @@ export default function Projects() {
                             </Badge>
                           </td>
                           <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary">
-                                {getMemberInitials(task.assigned_to)}
-                              </div>
-                              <span className="text-sm text-muted-foreground">
-                                {getMemberName(task.assigned_to) || "Sin asignar"}
-                              </span>
-                            </div>
+                            <TaskAssigneesDisplay taskId={task.id} size="md" max={4} />
                           </td>
                           <td className="p-4 text-sm text-muted-foreground">
                             {task.due_date 
