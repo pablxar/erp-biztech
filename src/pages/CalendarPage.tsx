@@ -1,17 +1,15 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, DragEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   ChevronLeft,
   ChevronRight,
   Plus,
   Clock,
   Users,
-  Video,
-  MapPin,
+  GripVertical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEvents, useTodayEvents, useCreateEvent } from "@/hooks/useEvents";
+import { useEvents, useTodayEvents, useCreateEvent, useUpdateEvent, Event } from "@/hooks/useEvents";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, addMonths, subMonths } from "date-fns";
 import { es } from "date-fns/locale";
@@ -26,20 +24,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { EventDetailDialog } from "@/components/calendar/EventDetailDialog";
 
 const daysOfWeek = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-
-const typeConfig = {
-  meeting: { icon: Users, label: "Reunión" },
-  call: { icon: Video, label: "Llamada" },
-  presentation: { icon: Users, label: "Presentación" },
-  deadline: { icon: Clock, label: "Fecha límite" },
-};
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [draggedEvent, setDraggedEvent] = useState<Event | null>(null);
+  const [dropTargetDate, setDropTargetDate] = useState<Date | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: "",
     description: "",
@@ -48,11 +44,8 @@ export default function CalendarPage() {
   });
   
   const { data: events, isLoading } = useEvents();
-  const { data: todayEvents } = useTodayEvents();
   const createEvent = useCreateEvent();
-
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  const updateEvent = useUpdateEvent();
 
   // Generate calendar days
   const calendarDays = useMemo(() => {
@@ -60,7 +53,6 @@ export default function CalendarPage() {
     const end = endOfMonth(currentDate);
     const days = eachDayOfInterval({ start, end });
     
-    // Add padding for first week
     const firstDayOfWeek = getDay(start);
     const padding = Array(firstDayOfWeek).fill(null);
     
@@ -103,6 +95,68 @@ export default function CalendarPage() {
     } catch (error) {
       toast.error("Error al crear evento");
     }
+  };
+
+  // Drag and drop handlers
+  const handleDragStart = (e: DragEvent<HTMLDivElement>, event: Event) => {
+    e.stopPropagation();
+    setDraggedEvent(event);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", event.id);
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>, day: Date) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDropTargetDate(day);
+  };
+
+  const handleDragLeave = () => {
+    setDropTargetDate(null);
+  };
+
+  const handleDrop = async (e: DragEvent<HTMLDivElement>, targetDay: Date) => {
+    e.preventDefault();
+    setDropTargetDate(null);
+    
+    if (!draggedEvent) return;
+    
+    const originalStart = new Date(draggedEvent.start_time);
+    const originalEnd = new Date(draggedEvent.end_time);
+    
+    // Calculate duration in milliseconds
+    const duration = originalEnd.getTime() - originalStart.getTime();
+    
+    // Create new start date keeping the same time
+    const newStart = new Date(targetDay);
+    newStart.setHours(originalStart.getHours(), originalStart.getMinutes(), 0, 0);
+    
+    // Create new end date
+    const newEnd = new Date(newStart.getTime() + duration);
+    
+    try {
+      await updateEvent.mutateAsync({
+        id: draggedEvent.id,
+        start_time: newStart.toISOString(),
+        end_time: newEnd.toISOString(),
+      });
+      toast.success("Evento movido");
+    } catch (error) {
+      toast.error("Error al mover evento");
+    }
+    
+    setDraggedEvent(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedEvent(null);
+    setDropTargetDate(null);
+  };
+
+  const handleEventClick = (e: React.MouseEvent, event: Event) => {
+    e.stopPropagation();
+    setSelectedEvent(event);
+    setIsEventDetailOpen(true);
   };
 
   // Get selected day's events
@@ -210,6 +264,12 @@ export default function CalendarPage() {
             </div>
           </div>
 
+          {/* Drag hint */}
+          <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1">
+            <GripVertical className="w-3 h-3" />
+            Arrastra los eventos para moverlos a otra fecha
+          </p>
+
           {/* Days Header */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {daysOfWeek.map((day) => (
@@ -229,16 +289,21 @@ export default function CalendarPage() {
               const dayEvents = getEventsForDay(day);
               const isToday = isSameDay(day, new Date());
               const isSelected = isSameDay(day, selectedDate);
+              const isDropTarget = dropTargetDate && isSameDay(day, dropTargetDate);
 
               return (
                 <div
                   key={day.toISOString()}
                   onClick={() => setSelectedDate(day)}
+                  onDragOver={(e) => handleDragOver(e, day)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, day)}
                   className={cn(
                     "min-h-[100px] p-2 rounded-lg transition-all cursor-pointer",
                     "hover:bg-secondary/50",
                     isSelected && "bg-secondary",
-                    isToday && "ring-2 ring-primary"
+                    isToday && "ring-2 ring-primary",
+                    isDropTarget && "bg-primary/20 ring-2 ring-primary ring-dashed"
                   )}
                 >
                   <span className={cn(
@@ -251,9 +316,19 @@ export default function CalendarPage() {
                     {dayEvents.slice(0, 2).map((event) => (
                       <div
                         key={event.id}
-                        className="text-xs px-2 py-1 rounded truncate bg-primary text-primary-foreground"
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, event)}
+                        onDragEnd={handleDragEnd}
+                        onClick={(e) => handleEventClick(e, event)}
+                        className={cn(
+                          "text-xs px-2 py-1 rounded truncate bg-primary text-primary-foreground",
+                          "cursor-grab active:cursor-grabbing hover:opacity-90 transition-opacity",
+                          "flex items-center gap-1 group",
+                          draggedEvent?.id === event.id && "opacity-50"
+                        )}
                       >
-                        {event.title}
+                        <GripVertical className="w-3 h-3 opacity-0 group-hover:opacity-70 flex-shrink-0" />
+                        <span className="truncate">{event.title}</span>
                       </div>
                     ))}
                     {dayEvents.length > 2 && (
@@ -286,14 +361,20 @@ export default function CalendarPage() {
                 selectedDayEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer"
+                    onClick={() => {
+                      setSelectedEvent(event);
+                      setIsEventDetailOpen(true);
+                    }}
+                    className="p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer group"
                   >
                     <div className="flex items-start gap-3">
                       <div className="p-2 rounded-lg bg-primary/10">
                         <Users className="w-4 h-4 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-sm">{event.title}</h4>
+                        <h4 className="font-medium text-sm group-hover:text-primary transition-colors">
+                          {event.title}
+                        </h4>
                         <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
@@ -301,8 +382,11 @@ export default function CalendarPage() {
                           </span>
                         </div>
                         {event.description && (
-                          <p className="text-xs text-muted-foreground mt-2">{event.description}</p>
+                          <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{event.description}</p>
                         )}
+                        <p className="text-xs text-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          Clic para editar →
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -326,7 +410,10 @@ export default function CalendarPage() {
               <Button 
                 variant="outline" 
                 className="w-full justify-start gap-2"
-                onClick={() => setSelectedDate(new Date())}
+                onClick={() => {
+                  setSelectedDate(new Date());
+                  setCurrentDate(new Date());
+                }}
               >
                 <Clock className="w-4 h-4" />
                 Ir a Hoy
@@ -335,6 +422,13 @@ export default function CalendarPage() {
           </div>
         </div>
       </div>
+
+      {/* Event Detail Dialog */}
+      <EventDetailDialog
+        event={selectedEvent}
+        open={isEventDetailOpen}
+        onOpenChange={setIsEventDetailOpen}
+      />
     </div>
   );
 }

@@ -97,6 +97,35 @@ export function useCreateEvent() {
   });
 }
 
+export function useUpdateEvent() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: {
+      id: string;
+      title?: string;
+      description?: string | null;
+      start_time?: string;
+      end_time?: string;
+      all_day?: boolean;
+      project_id?: string | null;
+    }) => {
+      const { data, error } = await supabase
+        .from('events')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+    },
+  });
+}
+
 export function useDeleteEvent() {
   const queryClient = useQueryClient();
   
