@@ -34,7 +34,7 @@ export function UpcomingEvents() {
     <div className="glass rounded-xl p-6 animate-slide-up">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold">Eventos de Hoy</h3>
-        <a href="/calendar" className="text-sm text-primary hover:underline">
+        <a path="/calendar" className="text-sm text-primary hover:underline">
           Ver calendario
         </a>
       </div>
@@ -65,9 +65,7 @@ export function UpcomingEvents() {
                       <Clock className="w-3 h-3" />
                       {startTime} - {endTime}
                     </span>
-                    {event.project && (
-                      <span>{event.project.name}</span>
-                    )}
+                    {event.project && <span>{event.project.name}</span>}
                   </div>
                 </div>
               </div>
