@@ -13,7 +13,7 @@ export function MainLayout() {
       <div
         className={cn(
           "transition-all duration-300",
-          collapsed ? "pl-20" : "pl-64"
+          collapsed ? "pl-[72px]" : "pl-64"
         )}
       >
         <TopBar />
