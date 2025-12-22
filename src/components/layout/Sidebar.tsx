@@ -14,11 +14,7 @@ import {
   ChevronRight,
   Sparkles,
 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -33,7 +29,7 @@ const navItems = [
 export function Sidebar() {
   const { collapsed, toggle } = useSidebarContext();
 
-  const NavItem = ({ item }: { item: typeof navItems[0] }) => {
+  const NavItem = ({ item }: { item: (typeof navItems)[0] }) => {
     const link = (
       <NavLink
         to={item.path}
@@ -43,18 +39,12 @@ export function Sidebar() {
             collapsed ? "p-3 justify-center" : "px-4 py-3",
             isActive
               ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-              : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground",
           )
         }
       >
-        <item.icon
-          className={cn(
-            "w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
-          )}
-        />
-        {!collapsed && (
-          <span className="font-medium text-sm">{item.label}</span>
-        )}
+        <item.icon className={cn("w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110")} />
+        {!collapsed && <span className="font-medium text-sm">{item.label}</span>}
       </NavLink>
     );
 
@@ -62,8 +52,8 @@ export function Sidebar() {
       return (
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>{link}</TooltipTrigger>
-          <TooltipContent 
-            side="right" 
+          <TooltipContent
+            side="right"
             sideOffset={12}
             className="bg-popover text-popover-foreground border border-border shadow-xl px-3 py-2 text-sm font-medium rounded-lg"
           >
@@ -80,14 +70,16 @@ export function Sidebar() {
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col",
-        collapsed ? "w-[72px]" : "w-64"
+        collapsed ? "w-72px" : "w-64",
       )}
     >
       {/* Logo */}
-      <div className={cn(
-        "flex items-center h-16 border-b border-sidebar-border transition-all duration-300",
-        collapsed ? "px-3 justify-center" : "px-4"
-      )}>
+      <div
+        className={cn(
+          "flex items-center h-16 border-b border-sidebar-border transition-all duration-300",
+          collapsed ? "px-3 justify-center" : "px-4",
+        )}
+      >
         <img
           src={bizTechLogo}
           alt="BizTech"
@@ -96,20 +88,14 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className={cn(
-        "flex-1 py-4 space-y-1 overflow-y-auto scrollbar-none",
-        collapsed ? "px-2" : "px-3"
-      )}>
+      <nav className={cn("flex-1 py-4 space-y-1 overflow-y-auto scrollbar-none", collapsed ? "px-2" : "px-3")}>
         {navItems.map((item) => (
           <NavItem key={item.path} item={item} />
         ))}
       </nav>
 
       {/* Settings & Collapse */}
-      <div className={cn(
-        "py-3 border-t border-sidebar-border space-y-1",
-        collapsed ? "px-2" : "px-3"
-      )}>
+      <div className={cn("py-3 border-t border-sidebar-border space-y-1", collapsed ? "px-2" : "px-3")}>
         {collapsed ? (
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
@@ -120,15 +106,15 @@ export function Sidebar() {
                     "flex items-center justify-center p-3 rounded-xl transition-all duration-200",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground",
                   )
                 }
               >
                 <Settings className="w-5 h-5 flex-shrink-0" />
               </NavLink>
             </TooltipTrigger>
-            <TooltipContent 
-              side="right" 
+            <TooltipContent
+              side="right"
               sideOffset={12}
               className="bg-popover text-popover-foreground border border-border shadow-xl px-3 py-2 text-sm font-medium rounded-lg"
             >
@@ -143,7 +129,7 @@ export function Sidebar() {
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
                 isActive
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground",
               )
             }
           >
@@ -158,7 +144,7 @@ export function Sidebar() {
               onClick={toggle}
               className={cn(
                 "flex items-center gap-3 rounded-xl w-full text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-200",
-                collapsed ? "p-3 justify-center" : "px-4 py-3"
+                collapsed ? "p-3 justify-center" : "px-4 py-3",
               )}
             >
               {collapsed ? (
@@ -172,8 +158,8 @@ export function Sidebar() {
             </button>
           </TooltipTrigger>
           {collapsed && (
-            <TooltipContent 
-              side="right" 
+            <TooltipContent
+              side="right"
               sideOffset={12}
               className="bg-popover text-popover-foreground border border-border shadow-xl px-3 py-2 text-sm font-medium rounded-lg"
             >
