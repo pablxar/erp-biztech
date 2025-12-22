@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useSidebarContext } from "@/contexts/SidebarContext";
 import bizTechLogo from "@/assets/biztech-logo.png";
 import {
   LayoutDashboard,
@@ -14,6 +14,11 @@ import {
   ChevronRight,
   Sparkles,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -26,7 +31,46 @@ const navItems = [
 ];
 
 export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, toggle } = useSidebarContext();
+
+  const NavItem = ({ item }: { item: typeof navItems[0] }) => {
+    const link = (
+      <NavLink
+        to={item.path}
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group",
+            isActive
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
+            collapsed && "justify-center"
+          )
+        }
+      >
+        <item.icon
+          className={cn(
+            "w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
+          )}
+        />
+        {!collapsed && (
+          <span className="font-medium text-sm">{item.label}</span>
+        )}
+      </NavLink>
+    );
+
+    if (collapsed) {
+      return (
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>{link}</TooltipTrigger>
+          <TooltipContent side="right" sideOffset={10}>
+            {item.label}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return link;
+  };
 
   return (
     <aside
@@ -36,7 +80,10 @@ export function Sidebar() {
       )}
     >
       {/* Logo */}
-      <div className="flex items-center h-16 px-4 border-b border-sidebar-border">
+      <div className={cn(
+        "flex items-center h-16 border-b border-sidebar-border transition-all duration-300",
+        collapsed ? "px-2 justify-center" : "px-4"
+      )}>
         <img
           src={bizTechLogo}
           alt="BizTech"
@@ -47,60 +94,75 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => (
+          <NavItem key={item.path} item={item} />
+        ))}
+      </nav>
+
+      {/* Settings & Collapse */}
+      <div className="p-3 border-t border-sidebar-border space-y-1">
+        {collapsed ? (
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <NavLink
+                to="/settings"
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center justify-center px-3 py-3 rounded-lg transition-all duration-200",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  )
+                }
+              >
+                <Settings className="w-5 h-5 flex-shrink-0" />
+              </NavLink>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={10}>
+              Configuración
+            </TooltipContent>
+          </Tooltip>
+        ) : (
           <NavLink
-            key={item.path}
-            to={item.path}
+            to="/settings"
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group",
+                "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200",
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )
             }
           >
-            <item.icon
-              className={cn(
-                "w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
-              )}
-            />
-            {!collapsed && (
-              <span className="font-medium text-sm">{item.label}</span>
-            )}
+            <Settings className="w-5 h-5 flex-shrink-0" />
+            <span className="font-medium text-sm">Configuración</span>
           </NavLink>
-        ))}
-      </nav>
+        )}
 
-      {/* Settings & Collapse */}
-      <div className="p-3 border-t border-sidebar-border space-y-1">
-        <NavLink
-          to="/settings"
-          className={({ isActive }) =>
-            cn(
-              "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200",
-              isActive
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-            )
-          }
-        >
-          <Settings className="w-5 h-5 flex-shrink-0" />
-          {!collapsed && <span className="font-medium text-sm">Configuración</span>}
-        </NavLink>
-
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center gap-3 px-3 py-3 rounded-lg w-full text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200"
-        >
-          {collapsed ? (
-            <ChevronRight className="w-5 h-5 flex-shrink-0" />
-          ) : (
-            <>
-              <ChevronLeft className="w-5 h-5 flex-shrink-0" />
-              <span className="font-medium text-sm">Colapsar</span>
-            </>
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <button
+              onClick={toggle}
+              className={cn(
+                "flex items-center gap-3 px-3 py-3 rounded-lg w-full text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200",
+                collapsed && "justify-center"
+              )}
+            >
+              {collapsed ? (
+                <ChevronRight className="w-5 h-5 flex-shrink-0" />
+              ) : (
+                <>
+                  <ChevronLeft className="w-5 h-5 flex-shrink-0" />
+                  <span className="font-medium text-sm">Colapsar</span>
+                </>
+              )}
+            </button>
+          </TooltipTrigger>
+          {collapsed && (
+            <TooltipContent side="right" sideOffset={10}>
+              Expandir
+            </TooltipContent>
           )}
-        </button>
+        </Tooltip>
       </div>
     </aside>
   );
