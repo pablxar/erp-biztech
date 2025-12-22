@@ -70,7 +70,7 @@ export function Sidebar() {
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col",
-        collapsed ? "w-[72]px" : "w-250",
+        collapsed ? "w-[72]px" : "w-64px",
       )}
     >
       {/* Logo */}
