@@ -11,6 +11,7 @@ import Projects from "./pages/Projects";
 import Finance from "./pages/Finance";
 import CalendarPage from "./pages/CalendarPage";
 import Clients from "./pages/Clients";
+import Leads from "./pages/Leads";
 import Reports from "./pages/Reports";
 import AIAssistant from "./pages/AIAssistant";
 import Settings from "./pages/Settings";
@@ -87,6 +88,7 @@ function AppRoutes() {
         <Route path="/projects" element={<Projects />} />
         <Route path="/finance" element={<Finance />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/leads" element={<Leads />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/ai-assistant" element={<AIAssistant />} />
