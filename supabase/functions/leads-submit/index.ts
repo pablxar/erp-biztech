@@ -8,17 +8,38 @@ const corsHeaders = {
 };
 
 interface LeadSubmission {
+  // Basic info
   name: string;
   email?: string;
   phone?: string;
   company?: string;
-  source?: string;
+  country_code?: string;
+  
+  // Business info
+  referral_source?: string;
+  company_size?: string;
+  company_stage?: string;
+  industry?: string;
+  services?: string[];
+  challenges?: string;
+  
+  // Meeting
+  wants_meeting?: boolean;
+  preferred_date?: string; // ISO date string YYYY-MM-DD
+  preferred_time?: string; // HH:MM format
+  
+  // Lead management
+  status?: string;
+  priority?: string;
   notes?: string;
-  meeting?: {
-    date: string; // ISO date string YYYY-MM-DD
-    time: string; // HH:MM format
-    duration?: number; // minutes, default 30
-  };
+  source?: string;
+  
+  // Tracking
+  ip_address?: string;
+  user_agent?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
 }
 
 function validateEmail(email: string): boolean {
@@ -32,7 +53,7 @@ function validateTime(time: string): boolean {
 }
 
 function validateDate(date: string): boolean {
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  const dateRegex = /^\d{4}-\d{2}-\d{2}/;
   if (!dateRegex.test(date)) return false;
   const parsed = new Date(date);
   return !isNaN(parsed.getTime());
@@ -82,20 +103,26 @@ serve(async (req) => {
       errors.push('Company must be less than 100 characters');
     }
 
-    if (body.notes && body.notes.length > 1000) {
-      errors.push('Notes must be less than 1000 characters');
+    if (body.notes && body.notes.length > 2000) {
+      errors.push('Notes must be less than 2000 characters');
     }
 
-    if (body.meeting) {
-      if (!body.meeting.date || !validateDate(body.meeting.date)) {
-        errors.push('Invalid meeting date format (expected YYYY-MM-DD)');
-      }
-      if (!body.meeting.time || !validateTime(body.meeting.time)) {
-        errors.push('Invalid meeting time format (expected HH:MM)');
-      }
-      if (body.meeting.duration && (body.meeting.duration < 15 || body.meeting.duration > 480)) {
-        errors.push('Meeting duration must be between 15 and 480 minutes');
-      }
+    if (body.challenges && body.challenges.length > 2000) {
+      errors.push('Challenges must be less than 2000 characters');
+    }
+
+    if (body.preferred_date && !validateDate(body.preferred_date)) {
+      errors.push('Invalid preferred_date format (expected YYYY-MM-DD)');
+    }
+
+    if (body.preferred_time && !validateTime(body.preferred_time)) {
+      errors.push('Invalid preferred_time format (expected HH:MM)');
+    }
+
+    // Validate priority
+    const validPriorities = ['low', 'medium', 'high'];
+    if (body.priority && !validPriorities.includes(body.priority)) {
+      errors.push('Invalid priority. Must be: low, medium, or high');
     }
 
     if (errors.length > 0) {
@@ -113,8 +140,11 @@ serve(async (req) => {
 
     // Calculate meeting times if provided
     let meetingScheduledAt: string | null = null;
-    if (body.meeting) {
-      meetingScheduledAt = `${body.meeting.date}T${body.meeting.time}:00`;
+    if (body.wants_meeting && body.preferred_date) {
+      const time = body.preferred_time || '09:00';
+      // Handle date format with timezone
+      const dateStr = body.preferred_date.split('T')[0].split('+')[0];
+      meetingScheduledAt = `${dateStr}T${time}:00`;
     }
 
     // Insert lead
@@ -125,17 +155,32 @@ serve(async (req) => {
         email: body.email?.trim() || null,
         phone: body.phone?.trim() || null,
         company: body.company?.trim() || null,
+        country_code: body.country_code?.trim() || null,
+        referral_source: body.referral_source?.trim() || null,
+        company_size: body.company_size?.trim() || null,
+        company_stage: body.company_stage?.trim() || null,
+        industry: body.industry?.trim() || null,
+        services: body.services || [],
+        challenges: body.challenges?.trim() || null,
+        wants_meeting: body.wants_meeting || false,
+        preferred_time: body.preferred_time?.trim() || null,
+        priority: body.priority || 'medium',
         source: body.source?.trim() || 'landing_page',
         notes: body.notes?.trim() || null,
         status: 'new',
         meeting_scheduled_at: meetingScheduledAt,
+        ip_address: body.ip_address || null,
+        user_agent: body.user_agent || null,
+        utm_source: body.utm_source || null,
+        utm_medium: body.utm_medium || null,
+        utm_campaign: body.utm_campaign || null,
       })
       .select()
       .single();
 
     if (leadError) {
       console.error('Error inserting lead:', leadError);
-      return new Response(JSON.stringify({ error: 'Failed to create lead' }), {
+      return new Response(JSON.stringify({ error: 'Failed to create lead', details: leadError.message }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -145,16 +190,32 @@ serve(async (req) => {
 
     // If meeting was scheduled, create an event
     let event = null;
-    if (body.meeting && meetingScheduledAt) {
-      const duration = body.meeting.duration || 30;
+    if (body.wants_meeting && meetingScheduledAt) {
+      const duration = 30; // Default 30 minutes
       const startTime = new Date(meetingScheduledAt);
       const endTime = new Date(startTime.getTime() + duration * 60000);
+
+      // Build description with all available info
+      const descriptionParts = [
+        `Lead: ${body.company || 'Sin empresa'}`,
+        `Email: ${body.email || 'No proporcionado'}`,
+        `Teléfono: ${body.phone ? `${body.country_code || ''} ${body.phone}` : 'No proporcionado'}`,
+      ];
+      
+      if (body.industry) descriptionParts.push(`Industria: ${body.industry}`);
+      if (body.company_size) descriptionParts.push(`Tamaño: ${body.company_size} empleados`);
+      if (body.company_stage) descriptionParts.push(`Etapa: ${body.company_stage}`);
+      if (body.services && body.services.length > 0) {
+        descriptionParts.push(`Servicios de interés: ${body.services.join(', ')}`);
+      }
+      if (body.challenges) descriptionParts.push(`\nDesafíos:\n${body.challenges}`);
+      if (body.notes) descriptionParts.push(`\nNotas:\n${body.notes}`);
 
       const { data: eventData, error: eventError } = await supabase
         .from('events')
         .insert({
-          title: `Reunión con ${body.name}`,
-          description: `Lead: ${body.company || 'Sin empresa'}\nEmail: ${body.email || 'No proporcionado'}\nTeléfono: ${body.phone || 'No proporcionado'}\n\nNotas: ${body.notes || 'Sin notas'}`,
+          title: `Reunión con ${body.name}${body.company ? ` - ${body.company}` : ''}`,
+          description: descriptionParts.join('\n'),
           start_time: startTime.toISOString(),
           end_time: endTime.toISOString(),
           all_day: false,

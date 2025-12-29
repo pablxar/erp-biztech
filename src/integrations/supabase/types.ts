@@ -211,45 +211,96 @@ export type Database = {
       leads: {
         Row: {
           assigned_to: string | null
+          challenges: string | null
           company: string | null
+          company_size: string | null
+          company_stage: string | null
+          contacted_at: string | null
+          converted_at: string | null
+          country_code: string | null
           created_at: string
           email: string | null
           id: string
+          industry: string | null
+          ip_address: string | null
           meeting_scheduled_at: string | null
           name: string
           notes: string | null
           phone: string | null
+          preferred_time: string | null
+          priority: Database["public"]["Enums"]["lead_priority"] | null
+          referral_source: string | null
+          services: Json | null
           source: string | null
           status: Database["public"]["Enums"]["lead_status"]
           updated_at: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          wants_meeting: boolean | null
         }
         Insert: {
           assigned_to?: string | null
+          challenges?: string | null
           company?: string | null
+          company_size?: string | null
+          company_stage?: string | null
+          contacted_at?: string | null
+          converted_at?: string | null
+          country_code?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          industry?: string | null
+          ip_address?: string | null
           meeting_scheduled_at?: string | null
           name: string
           notes?: string | null
           phone?: string | null
+          preferred_time?: string | null
+          priority?: Database["public"]["Enums"]["lead_priority"] | null
+          referral_source?: string | null
+          services?: Json | null
           source?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          wants_meeting?: boolean | null
         }
         Update: {
           assigned_to?: string | null
+          challenges?: string | null
           company?: string | null
+          company_size?: string | null
+          company_stage?: string | null
+          contacted_at?: string | null
+          converted_at?: string | null
+          country_code?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          industry?: string | null
+          ip_address?: string | null
           meeting_scheduled_at?: string | null
           name?: string
           notes?: string | null
           phone?: string | null
+          preferred_time?: string | null
+          priority?: Database["public"]["Enums"]["lead_priority"] | null
+          referral_source?: string | null
+          services?: Json | null
           source?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          wants_meeting?: boolean | null
         }
         Relationships: [
           {
@@ -614,6 +665,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "member"
+      lead_priority: "low" | "medium" | "high"
       lead_status: "new" | "contacted" | "qualified" | "discarded" | "converted"
       project_status: "active" | "completed" | "pending" | "on_hold"
       task_priority: "high" | "medium" | "low"
@@ -747,6 +799,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "member"],
+      lead_priority: ["low", "medium", "high"],
       lead_status: ["new", "contacted", "qualified", "discarded", "converted"],
       project_status: ["active", "completed", "pending", "on_hold"],
       task_priority: ["high", "medium", "low"],
