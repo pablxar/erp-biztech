@@ -13,12 +13,16 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
+  UserPlus,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { useNewLeadsCount } from "@/hooks/useLeads";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: FolderKanban, label: "Proyectos", path: "/projects" },
+  { icon: UserPlus, label: "Leads", path: "/leads", showBadge: true },
   { icon: DollarSign, label: "Finanzas", path: "/finance" },
   { icon: Calendar, label: "Calendario", path: "/calendar" },
   { icon: Users, label: "Clientes", path: "/clients" },
@@ -28,14 +32,17 @@ const navItems = [
 
 export function Sidebar() {
   const { collapsed, toggle } = useSidebarContext();
+  const { data: newLeadsCount } = useNewLeadsCount();
 
   const NavItem = ({ item }: { item: (typeof navItems)[0] }) => {
+    const showBadge = item.showBadge && newLeadsCount && newLeadsCount > 0;
+    
     const link = (
       <NavLink
         to={item.path}
         className={({ isActive }) =>
           cn(
-            "flex items-center gap-3 rounded-xl transition-all duration-200 group",
+            "flex items-center gap-3 rounded-xl transition-all duration-200 group relative",
             collapsed ? "p-3 justify-center" : "px-4 py-3",
             isActive
               ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
@@ -44,7 +51,21 @@ export function Sidebar() {
         }
       >
         <item.icon className={cn("w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110")} />
-        {!collapsed && <span className="font-medium text-sm">{item.label}</span>}
+        {!collapsed && (
+          <>
+            <span className="font-medium text-sm flex-1">{item.label}</span>
+            {showBadge && (
+              <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
+                {newLeadsCount}
+              </Badge>
+            )}
+          </>
+        )}
+        {collapsed && showBadge && (
+          <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full text-[10px] text-destructive-foreground flex items-center justify-center font-bold">
+            {newLeadsCount > 9 ? '9+' : newLeadsCount}
+          </span>
+        )}
       </NavLink>
     );
 
@@ -58,6 +79,7 @@ export function Sidebar() {
             className="bg-popover text-popover-foreground border border-border shadow-xl px-3 py-2 text-sm font-medium rounded-lg"
           >
             {item.label}
+            {showBadge && ` (${newLeadsCount} nuevos)`}
           </TooltipContent>
         </Tooltip>
       );
