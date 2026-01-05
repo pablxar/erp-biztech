@@ -11,6 +11,7 @@ import {
   Settings,
   Sparkles,
   UserPlus,
+  ListTodo,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNewLeadsCount } from "@/hooks/useLeads";
@@ -20,6 +21,7 @@ const navItems = [
   { icon: UserPlus, label: "Leads", path: "/leads", showBadge: true },
   { icon: Users, label: "Clientes", path: "/clients" },
   { icon: FolderKanban, label: "Proyectos", path: "/projects" },
+  { icon: ListTodo, label: "Tareas Internas", path: "/team-tasks" },
   { icon: Calendar, label: "Calendario", path: "/calendar" },
   { icon: DollarSign, label: "Finanzas", path: "/finance" },
   { icon: BarChart3, label: "Reportes", path: "/reports" },
