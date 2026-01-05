@@ -1,6 +1,5 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useSidebarContext } from "@/contexts/SidebarContext";
 import bizTechLogo from "@/assets/biztech-logo.png";
 import {
   LayoutDashboard,
@@ -10,12 +9,9 @@ import {
   Users,
   BarChart3,
   Settings,
-  ChevronLeft,
-  ChevronRight,
   Sparkles,
   UserPlus,
 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { useNewLeadsCount } from "@/hooks/useLeads";
 
@@ -31,19 +27,17 @@ const navItems = [
 ];
 
 export function Sidebar() {
-  const { collapsed, toggle } = useSidebarContext();
   const { data: newLeadsCount } = useNewLeadsCount();
 
   const NavItem = ({ item }: { item: (typeof navItems)[0] }) => {
     const showBadge = item.showBadge && newLeadsCount && newLeadsCount > 0;
     
-    const link = (
+    return (
       <NavLink
         to={item.path}
         className={({ isActive }) =>
           cn(
-            "flex items-center gap-3 rounded-xl transition-all duration-300 group relative overflow-hidden",
-            collapsed ? "p-3 justify-center mx-auto w-14 h-14" : "px-4 py-3.5",
+            "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
             isActive
               ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
               : "text-sidebar-foreground/70 hover:bg-secondary hover:text-sidebar-foreground",
@@ -52,180 +46,59 @@ export function Sidebar() {
       >
         {({ isActive }) => (
           <>
-            {/* Glow effect for active state */}
             {isActive && (
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 opacity-50" />
             )}
-            <item.icon className={cn(
-              "flex-shrink-0 transition-all duration-300 relative z-10",
-              collapsed ? "w-6 h-6" : "w-5 h-5",
-              "group-hover:scale-110"
-            )} />
-            {!collapsed && (
-              <>
-                <span className="font-medium text-sm flex-1 relative z-10">{item.label}</span>
-                {showBadge && (
-                  <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs font-bold relative z-10">
-                    {newLeadsCount}
-                  </Badge>
-                )}
-              </>
-            )}
-            {collapsed && showBadge && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full text-[10px] text-destructive-foreground flex items-center justify-center font-bold shadow-lg animate-pulse z-20">
-                {newLeadsCount > 9 ? '9+' : newLeadsCount}
-              </span>
+            <item.icon className="w-5 h-5 flex-shrink-0 transition-all duration-300 relative z-10 group-hover:scale-110" />
+            <span className="font-medium text-sm flex-1 relative z-10">{item.label}</span>
+            {showBadge && (
+              <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs font-bold relative z-10">
+                {newLeadsCount}
+              </Badge>
             )}
           </>
         )}
       </NavLink>
     );
-
-    if (collapsed) {
-      return (
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>{link}</TooltipTrigger>
-          <TooltipContent
-            side="right"
-            sideOffset={16}
-            className="bg-card text-card-foreground border border-border shadow-2xl px-4 py-2.5 text-sm font-medium rounded-xl backdrop-blur-xl"
-          >
-            <div className="flex items-center gap-2">
-              {item.label}
-              {showBadge && (
-                <Badge variant="destructive" className="h-4 px-1.5 text-[10px]">
-                  {newLeadsCount}
-                </Badge>
-              )}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
-    return link;
   };
 
   return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border transition-all duration-300 ease-out flex flex-col",
-        "bg-gradient-to-b from-sidebar to-background",
-        collapsed ? "w-24" : "w-72",
-      )}
-    >
+    <aside className="fixed left-0 top-0 z-40 h-screen w-72 border-r border-sidebar-border flex flex-col bg-gradient-to-b from-sidebar to-background">
       {/* Subtle glow overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
       
       {/* Logo Section */}
-      <div
-        className={cn(
-          "relative flex items-center h-16 border-b border-sidebar-border/50 transition-all duration-300",
-          collapsed ? "px-4 justify-center" : "px-5",
-        )}
-      >
-        <div className={cn(
-          "transition-all duration-300 flex items-center justify-center",
-          collapsed ? "w-10" : "w-full"
-        )}>
-          <img
-            src={bizTechLogo}
-            alt="BizTech"
-            className={cn(
-              "transition-all duration-300 object-contain drop-shadow-lg",
-              collapsed ? "w-10 h-10" : "h-9 w-auto max-w-[140px]"
-            )}
-          />
-        </div>
+      <div className="relative flex items-center h-16 px-5 border-b border-sidebar-border/50">
+        <img
+          src={bizTechLogo}
+          alt="BizTech"
+          className="h-9 w-auto max-w-[140px] object-contain drop-shadow-lg"
+        />
       </div>
 
       {/* Navigation */}
-      <nav className={cn(
-        "flex-1 py-6 overflow-y-auto scrollbar-none relative",
-        collapsed ? "px-5 space-y-3" : "px-4 space-y-1.5"
-      )}>
+      <nav className="flex-1 py-6 px-4 space-y-1.5 overflow-y-auto scrollbar-none relative">
         {navItems.map((item) => (
           <NavItem key={item.path} item={item} />
         ))}
       </nav>
 
-      {/* Settings & Collapse Section */}
-      <div className={cn(
-        "py-5 border-t border-sidebar-border/50 space-y-3 relative",
-        collapsed ? "px-5" : "px-4"
-      )}>
-        {collapsed ? (
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <NavLink
-                to="/settings"
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center justify-center w-14 h-14 mx-auto rounded-xl transition-all duration-300",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                      : "text-sidebar-foreground/70 hover:bg-secondary hover:text-sidebar-foreground",
-                  )
-                }
-              >
-                <Settings className="w-6 h-6 flex-shrink-0" />
-              </NavLink>
-            </TooltipTrigger>
-            <TooltipContent
-              side="right"
-              sideOffset={16}
-              className="bg-card text-card-foreground border border-border shadow-2xl px-4 py-2.5 text-sm font-medium rounded-xl backdrop-blur-xl"
-            >
-              Configuración
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <NavLink
-            to="/settings"
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                  : "text-sidebar-foreground/70 hover:bg-secondary hover:text-sidebar-foreground",
-              )
-            }
-          >
-            <Settings className="w-5 h-5 flex-shrink-0" />
-            <span className="font-medium text-sm">Configuración</span>
-          </NavLink>
-        )}
-
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <button
-              onClick={toggle}
-              className={cn(
-                "flex items-center gap-3 rounded-xl w-full text-sidebar-foreground/70 transition-all duration-300",
-                "hover:bg-primary hover:text-primary-foreground hover:shadow-lg hover:shadow-primary/20",
-                collapsed ? "p-3 justify-center w-14 h-14 mx-auto" : "px-4 py-3.5",
-              )}
-            >
-              {collapsed ? (
-                <ChevronRight className="w-6 h-6 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
-              ) : (
-                <>
-                  <ChevronLeft className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium text-sm">Colapsar</span>
-                </>
-              )}
-            </button>
-          </TooltipTrigger>
-          {collapsed && (
-            <TooltipContent
-              side="right"
-              sideOffset={16}
-              className="bg-card text-card-foreground border border-border shadow-2xl px-4 py-2.5 text-sm font-medium rounded-xl backdrop-blur-xl"
-            >
-              Expandir
-            </TooltipContent>
-          )}
-        </Tooltip>
+      {/* Settings */}
+      <div className="py-5 px-4 border-t border-sidebar-border/50 relative">
+        <NavLink
+          to="/settings"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300",
+              isActive
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+                : "text-sidebar-foreground/70 hover:bg-secondary hover:text-sidebar-foreground",
+            )
+          }
+        >
+          <Settings className="w-5 h-5 flex-shrink-0" />
+          <span className="font-medium text-sm">Configuración</span>
+        </NavLink>
       </div>
     </aside>
   );
