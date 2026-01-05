@@ -76,9 +76,9 @@ export function CreateTaskDialog({ projectId, trigger }: Props) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="ghost" className="w-full border border-dashed border-border text-muted-foreground hover:text-foreground">
-            <Plus className="w-4 h-4 mr-2" />
-            Añadir Tarea
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" />
+            Nueva Tarea
           </Button>
         )}
       </DialogTrigger>

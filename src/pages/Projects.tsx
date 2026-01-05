@@ -1,9 +1,16 @@
-import { useState, DragEvent } from "react";
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,42 +34,26 @@ import {
   LayoutGrid,
   List,
   MoreHorizontal,
-  Clock,
   Loader2,
   Edit,
   Trash2,
-  GripVertical,
   Calendar,
-  DollarSign,
-  CheckCircle2,
   Users,
+  ArrowRight,
+  Code2,
+  Megaphone,
+  Video,
+  Globe,
+  Filter,
+  SortAsc,
+  Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProjects, useDeleteProject, Project } from "@/hooks/useProjects";
-import { useTasks, useUpdateTask, Task } from "@/hooks/useTasks";
-
 import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
-import { CreateTaskDialog } from "@/components/projects/CreateTaskDialog";
 import { EditProjectDialog } from "@/components/projects/EditProjectDialog";
-import { EditTaskDialog } from "@/components/projects/EditTaskDialog";
-import { TaskAssigneesDisplay } from "@/components/projects/TaskAssigneesDisplay";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { toast } from "sonner";
-
-type TaskStatus = "todo" | "in_progress" | "completed";
-
-const columns: { id: TaskStatus; title: string; color: string }[] = [
-  { id: "todo", title: "Por Hacer", color: "bg-muted" },
-  { id: "in_progress", title: "En Progreso", color: "bg-info/20" },
-  { id: "completed", title: "Completado", color: "bg-success/20" },
-];
-
-const priorityConfig = {
-  high: { color: "text-destructive", bg: "bg-destructive/10", label: "Alta" },
-  medium: { color: "text-warning", bg: "bg-warning/10", label: "Media" },
-  low: { color: "text-info", bg: "bg-info/10", label: "Baja" },
-};
 
 const statusConfig = {
   active: { label: "Activo", color: "bg-primary/20 text-primary border-primary/30" },
@@ -71,89 +62,113 @@ const statusConfig = {
   on_hold: { label: "En Espera", color: "bg-warning/20 text-warning border-warning/30" },
 };
 
+const serviceTypeConfig = {
+  software_development: { 
+    label: "Desarrollo de Software", 
+    shortLabel: "Software",
+    icon: Code2, 
+    color: "text-primary",
+    bgColor: "bg-primary/10",
+    description: "ERP, CRM, SCM, Apps Internas"
+  },
+  digital_marketing: { 
+    label: "Marketing Digital", 
+    shortLabel: "Marketing",
+    icon: Megaphone, 
+    color: "text-success",
+    bgColor: "bg-success/10",
+    description: "Meta Ads, Google Ads, Email Marketing, CRO"
+  },
+  audiovisual: { 
+    label: "Audiovisual", 
+    shortLabel: "Audiovisual",
+    icon: Video, 
+    color: "text-warning",
+    bgColor: "bg-warning/10",
+    description: "Videos, Fotografía y Contenido Visual"
+  },
+  web_development: { 
+    label: "Web Development", 
+    shortLabel: "Web",
+    icon: Globe, 
+    color: "text-info",
+    bgColor: "bg-info/10",
+    description: "E-commerce y Landing Pages"
+  },
+};
+
+type ServiceType = keyof typeof serviceTypeConfig;
+
 export default function Projects() {
-  const [view, setView] = useState<"kanban" | "list">("kanban");
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [view, setView] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterService, setFilterService] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("recent");
   
-  // Edit states
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isEditProjectOpen, setIsEditProjectOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [isEditTaskOpen, setIsEditTaskOpen] = useState(false);
-  
-  // Delete states
   const [deleteProjectOpen, setDeleteProjectOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   
-  // Drag and drop
-  const [draggedTask, setDraggedTask] = useState<Task | null>(null);
-  const [dropTargetColumn, setDropTargetColumn] = useState<TaskStatus | null>(null);
-  
-  const { data: projects, isLoading: loadingProjects } = useProjects();
-  
+  const { data: projects, isLoading } = useProjects();
   const deleteProject = useDeleteProject();
-  
-  // Filter projects
-  const filteredProjects = projects?.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
-  
-  const selectedProject = selectedProjectId 
-    ? projects?.find(p => p.id === selectedProjectId) 
-    : filteredProjects[0];
-  
-  const { data: tasks, isLoading: loadingTasks } = useTasks(selectedProject?.id);
-  const { mutate: updateTask } = useUpdateTask();
 
-  const getTasksByStatus = (status: TaskStatus) =>
-    tasks?.filter((t) => t.status === status) || [];
-
-  // Drag handlers
-  const handleDragStart = (e: DragEvent<HTMLDivElement>, task: Task) => {
-    setDraggedTask(task);
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDragOver = (e: DragEvent<HTMLDivElement>, status: TaskStatus) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    setDropTargetColumn(status);
-  };
-
-  const handleDragLeave = () => {
-    setDropTargetColumn(null);
-  };
-
-  const handleDrop = (e: DragEvent<HTMLDivElement>, status: TaskStatus) => {
-    e.preventDefault();
-    setDropTargetColumn(null);
+  const filteredAndSortedProjects = useMemo(() => {
+    let result = projects || [];
     
-    if (!draggedTask || draggedTask.status === status) {
-      setDraggedTask(null);
-      return;
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(p => 
+        p.name.toLowerCase().includes(query) ||
+        p.description?.toLowerCase().includes(query) ||
+        p.clients?.name?.toLowerCase().includes(query)
+      );
     }
+    
+    // Status filter
+    if (filterStatus !== "all") {
+      result = result.filter(p => p.status === filterStatus);
+    }
+    
+    // Service filter
+    if (filterService !== "all") {
+      result = result.filter(p => p.service_type === filterService);
+    }
+    
+    // Sorting
+    result = [...result].sort((a, b) => {
+      switch (sortBy) {
+        case "recent":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "name":
+          return a.name.localeCompare(b.name);
+        case "progress":
+          return (b.progress || 0) - (a.progress || 0);
+        case "deadline":
+          if (!a.end_date) return 1;
+          if (!b.end_date) return -1;
+          return new Date(a.end_date).getTime() - new Date(b.end_date).getTime();
+        default:
+          return 0;
+      }
+    });
+    
+    return result;
+  }, [projects, searchQuery, filterStatus, filterService, sortBy]);
 
-    updateTask(
-      { id: draggedTask.id, status },
-      { onSuccess: () => toast.success("Tarea movida") }
-    );
-    setDraggedTask(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedTask(null);
-    setDropTargetColumn(null);
-  };
-
-  // Action handlers
-  const handleEditProject = (project: Project) => {
+  const handleEditProject = (project: Project, e: React.MouseEvent) => {
+    e.stopPropagation();
     setEditingProject(project);
     setIsEditProjectOpen(true);
   };
 
-  const handleDeleteProject = (project: Project) => {
+  const handleDeleteProject = (project: Project, e: React.MouseEvent) => {
+    e.stopPropagation();
     setProjectToDelete(project);
     setDeleteProjectOpen(true);
   };
@@ -164,20 +179,27 @@ export default function Projects() {
         onSuccess: () => {
           setDeleteProjectOpen(false);
           setProjectToDelete(null);
-          if (selectedProjectId === projectToDelete.id) {
-            setSelectedProjectId(null);
-          }
         },
       });
     }
   };
 
-  const handleEditTask = (task: Task) => {
-    setEditingTask(task);
-    setIsEditTaskOpen(true);
+  const handleViewProject = (projectId: string) => {
+    navigate(`/projects/${projectId}`);
   };
 
-  if (loadingProjects) {
+  // Stats
+  const stats = useMemo(() => {
+    const all = projects || [];
+    return {
+      total: all.length,
+      active: all.filter(p => p.status === 'active').length,
+      completed: all.filter(p => p.status === 'completed').length,
+      pending: all.filter(p => p.status === 'pending' || p.status === 'on_hold').length,
+    };
+  }, [projects]);
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -187,343 +209,386 @@ export default function Projects() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Proyectos</h1>
-          <p className="text-muted-foreground mt-1">Gestiona tus proyectos y tareas</p>
+          <h1 className="text-3xl font-bold tracking-tight">Proyectos</h1>
+          <p className="text-muted-foreground mt-1">
+            Gestiona todos los proyectos de tus clientes
+          </p>
         </div>
         <CreateProjectDialog />
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="glass rounded-xl p-4 border border-border/50">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Total</p>
+          <p className="text-2xl font-bold mt-1">{stats.total}</p>
+        </div>
+        <div className="glass rounded-xl p-4 border border-primary/20">
+          <p className="text-xs text-primary uppercase tracking-wider">Activos</p>
+          <p className="text-2xl font-bold mt-1 text-primary">{stats.active}</p>
+        </div>
+        <div className="glass rounded-xl p-4 border border-success/20">
+          <p className="text-xs text-success uppercase tracking-wider">Completados</p>
+          <p className="text-2xl font-bold mt-1 text-success">{stats.completed}</p>
+        </div>
+        <div className="glass rounded-xl p-4 border border-muted">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Pendientes</p>
+          <p className="text-2xl font-bold mt-1">{stats.pending}</p>
+        </div>
+      </div>
+
+      {/* Filters & Actions Bar */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
             placeholder="Buscar proyectos..." 
-            className="pl-10"
+            className="pl-10 bg-secondary/50"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-2 p-1 bg-secondary rounded-lg">
-          <Button variant={view === "kanban" ? "default" : "ghost"} size="sm" onClick={() => setView("kanban")}>
+        
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-[140px] bg-secondary/50">
+            <Filter className="w-4 h-4 mr-2" />
+            <SelectValue placeholder="Estado" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="active">Activos</SelectItem>
+            <SelectItem value="pending">Pendientes</SelectItem>
+            <SelectItem value="on_hold">En Espera</SelectItem>
+            <SelectItem value="completed">Completados</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Select value={filterService} onValueChange={setFilterService}>
+          <SelectTrigger className="w-[160px] bg-secondary/50">
+            <SelectValue placeholder="Servicio" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los servicios</SelectItem>
+            <SelectItem value="software_development">Software</SelectItem>
+            <SelectItem value="digital_marketing">Marketing</SelectItem>
+            <SelectItem value="audiovisual">Audiovisual</SelectItem>
+            <SelectItem value="web_development">Web</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[140px] bg-secondary/50">
+            <SortAsc className="w-4 h-4 mr-2" />
+            <SelectValue placeholder="Ordenar" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="recent">Más recientes</SelectItem>
+            <SelectItem value="oldest">Más antiguos</SelectItem>
+            <SelectItem value="name">Nombre A-Z</SelectItem>
+            <SelectItem value="progress">Progreso</SelectItem>
+            <SelectItem value="deadline">Fecha límite</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <div className="flex items-center gap-1 p-1 bg-secondary/50 rounded-lg ml-auto">
+          <Button 
+            variant={view === "grid" ? "default" : "ghost"} 
+            size="sm" 
+            onClick={() => setView("grid")}
+            className="h-8 w-8 p-0"
+          >
             <LayoutGrid className="w-4 h-4" />
           </Button>
-          <Button variant={view === "list" ? "default" : "ghost"} size="sm" onClick={() => setView("list")}>
+          <Button 
+            variant={view === "list" ? "default" : "ghost"} 
+            size="sm" 
+            onClick={() => setView("list")}
+            className="h-8 w-8 p-0"
+          >
             <List className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
-      {!filteredProjects.length ? (
-        <div className="glass rounded-xl p-12 text-center">
+      {/* Projects Grid/List */}
+      {!filteredAndSortedProjects.length ? (
+        <div className="glass rounded-xl p-12 text-center border border-dashed border-border">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <Plus className="w-8 h-8 text-primary" />
+          </div>
           <h3 className="text-xl font-semibold mb-2">
-            {searchQuery ? "No se encontraron proyectos" : "No hay proyectos"}
+            {searchQuery || filterStatus !== "all" || filterService !== "all" 
+              ? "No se encontraron proyectos" 
+              : "No hay proyectos"
+            }
           </h3>
-          <p className="text-muted-foreground mb-4">
-            {searchQuery ? "Intenta con otro término de búsqueda" : "Crea tu primer proyecto para comenzar"}
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            {searchQuery || filterStatus !== "all" || filterService !== "all"
+              ? "Intenta ajustar los filtros de búsqueda"
+              : "Crea tu primer proyecto para comenzar a gestionar el trabajo de tus clientes"
+            }
           </p>
-          {!searchQuery && <CreateProjectDialog />}
+          {!searchQuery && filterStatus === "all" && filterService === "all" && (
+            <CreateProjectDialog />
+          )}
+        </div>
+      ) : view === "grid" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filteredAndSortedProjects.map((project) => (
+            <ProjectCard 
+              key={project.id} 
+              project={project}
+              onView={() => handleViewProject(project.id)}
+              onEdit={(e) => handleEditProject(project, e)}
+              onDelete={(e) => handleDeleteProject(project, e)}
+            />
+          ))}
         </div>
       ) : (
-        <Tabs value={selectedProject?.id} className="space-y-6">
-          <TabsList className="bg-secondary/50 p-1 flex-wrap h-auto gap-1">
-            {filteredProjects.map((project) => (
-              <TabsTrigger
-                key={project.id}
-                value={project.id}
-                onClick={() => setSelectedProjectId(project.id)}
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2"
-              >
-                <span className={cn(
-                  "w-2 h-2 rounded-full",
-                  project.status === "active" && "bg-primary",
-                  project.status === "completed" && "bg-success",
-                  project.status === "pending" && "bg-muted-foreground",
-                  project.status === "on_hold" && "bg-warning"
-                )} />
-                {project.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          {selectedProject && (
-            <TabsContent value={selectedProject.id} className="space-y-6">
-              {/* Project Header Card */}
-              <div 
-                className="glass rounded-xl p-6 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all group"
-                onClick={() => handleEditProject(selectedProject)}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2 flex-1">
-                    <div className="flex items-center gap-3">
-                      <h2 className="text-xl font-semibold group-hover:text-primary transition-colors">
-                        {selectedProject.name}
-                      </h2>
-                      <Badge className={cn("border", statusConfig[selectedProject.status].color)}>
-                        {statusConfig[selectedProject.status].label}
-                      </Badge>
+        <div className="glass rounded-xl border border-border/50 overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border/50 bg-secondary/30">
+                <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Proyecto</th>
+                <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider hidden md:table-cell">Cliente</th>
+                <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Servicio</th>
+                <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Estado</th>
+                <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Progreso</th>
+                <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Fecha Límite</th>
+                <th className="text-right p-4"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredAndSortedProjects.map((project) => (
+                <tr 
+                  key={project.id} 
+                  className="border-b border-border/30 hover:bg-secondary/20 transition-colors cursor-pointer group"
+                  onClick={() => handleViewProject(project.id)}
+                >
+                  <td className="p-4">
+                    <div>
+                      <p className="font-medium group-hover:text-primary transition-colors">{project.name}</p>
+                      {project.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{project.description}</p>
+                      )}
                     </div>
-                    {selectedProject.description && (
-                      <p className="text-muted-foreground text-sm">{selectedProject.description}</p>
+                  </td>
+                  <td className="p-4 hidden md:table-cell">
+                    <p className="text-sm">{project.clients?.name || "-"}</p>
+                  </td>
+                  <td className="p-4 hidden lg:table-cell">
+                    {project.service_type && serviceTypeConfig[project.service_type as ServiceType] && (
+                      <div className="flex items-center gap-2">
+                        {(() => {
+                          const config = serviceTypeConfig[project.service_type as ServiceType];
+                          const Icon = config.icon;
+                          return (
+                            <>
+                              <Icon className={cn("w-4 h-4", config.color)} />
+                              <span className="text-sm">{config.shortLabel}</span>
+                            </>
+                          );
+                        })()}
+                      </div>
                     )}
-                    {selectedProject.clients && (
-                      <p className="text-sm flex items-center gap-2">
-                        <Users className="w-4 h-4 text-muted-foreground" />
-                        Cliente: <span className="font-medium">{selectedProject.clients.name}</span>
-                      </p>
-                    )}
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="w-5 h-5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenuItem onClick={() => handleEditProject(selectedProject)}>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Editar proyecto
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => handleDeleteProject(selectedProject)}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Eliminar proyecto
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                  <div className="p-4 rounded-lg bg-secondary/50">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span className="text-xs">Progreso</span>
+                  </td>
+                  <td className="p-4">
+                    <Badge className={cn("text-xs border", statusConfig[project.status].color)}>
+                      {statusConfig[project.status].label}
+                    </Badge>
+                  </td>
+                  <td className="p-4 hidden sm:table-cell">
+                    <div className="flex items-center gap-2 min-w-[100px]">
+                      <Progress value={project.progress || 0} className="h-2 flex-1" />
+                      <span className="text-xs text-muted-foreground w-8">{project.progress || 0}%</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">{selectedProject.progress || 0}%</span>
-                      <Progress value={selectedProject.progress || 0} className="h-2 flex-1" />
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 rounded-lg bg-secondary/50">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                      <Calendar className="w-4 h-4" />
-                      <span className="text-xs">Fecha Límite</span>
-                    </div>
-                    <p className="font-semibold">
-                      {selectedProject.end_date 
-                        ? format(new Date(selectedProject.end_date), "d MMM yyyy", { locale: es })
-                        : "Sin fecha"
+                  </td>
+                  <td className="p-4 hidden lg:table-cell">
+                    <p className="text-sm text-muted-foreground">
+                      {project.end_date 
+                        ? format(new Date(project.end_date), "d MMM yyyy", { locale: es })
+                        : "-"
                       }
                     </p>
-                  </div>
-                  
-                  <div className="p-4 rounded-lg bg-secondary/50">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                      <DollarSign className="w-4 h-4" />
-                      <span className="text-xs">Presupuesto</span>
-                    </div>
-                    <p className="font-semibold">${Number(selectedProject.budget || 0).toLocaleString()}</p>
-                  </div>
-                  
-                  <div className="p-4 rounded-lg bg-secondary/50">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                      <LayoutGrid className="w-4 h-4" />
-                      <span className="text-xs">Tareas</span>
-                    </div>
-                    <p className="font-semibold">
-                      {tasks?.filter(t => t.status === 'completed').length || 0} / {tasks?.length || 0}
-                      <span className="text-xs text-muted-foreground ml-1">completadas</span>
-                    </p>
-                  </div>
-                </div>
-
-                <p className="text-xs text-primary mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  Clic para editar proyecto →
-                </p>
-              </div>
-
-              {/* Kanban View */}
-              {view === "kanban" && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1">
-                    <GripVertical className="w-3 h-3" />
-                    Arrastra las tareas para cambiar su estado
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {columns.map((column) => (
-                      <div 
-                        key={column.id} 
-                        className="space-y-3"
-                        onDragOver={(e) => handleDragOver(e, column.id)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, column.id)}
-                      >
-                        <div className={cn("rounded-lg p-3", column.color)}>
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-medium text-sm">{column.title}</h3>
-                            <Badge variant="secondary">{getTasksByStatus(column.id).length}</Badge>
-                          </div>
-                        </div>
-                        <div 
-                          className={cn(
-                            "space-y-3 min-h-[200px] p-2 rounded-lg transition-colors",
-                            dropTargetColumn === column.id && "bg-primary/10 ring-2 ring-primary ring-dashed"
-                          )}
+                  </td>
+                  <td className="p-4 text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuItem onClick={() => handleViewProject(project.id)}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          Ver detalle
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => handleEditProject(project, e as any)}>
+                          <Edit className="w-4 h-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={(e) => handleDeleteProject(project, e as any)}
+                          className="text-destructive focus:text-destructive"
                         >
-                          {getTasksByStatus(column.id).map((task) => (
-                            <div 
-                              key={task.id} 
-                              draggable
-                              onDragStart={(e) => handleDragStart(e, task)}
-                              onDragEnd={handleDragEnd}
-                              onClick={() => handleEditTask(task)}
-                              className={cn(
-                                "glass glass-hover rounded-lg p-4 cursor-pointer animate-scale-in group",
-                                "hover:ring-2 hover:ring-primary/50 transition-all",
-                                draggedTask?.id === task.id && "opacity-50"
-                              )}
-                            >
-                              <div className="flex items-start justify-between mb-2">
-                                <Badge className={cn("text-xs border", priorityConfig[task.priority].bg, priorityConfig[task.priority].color)}>
-                                  {priorityConfig[task.priority].label}
-                                </Badge>
-                                <GripVertical className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing" />
-                              </div>
-                              <h4 className="font-medium text-sm mb-1 group-hover:text-primary transition-colors">
-                                {task.title}
-                              </h4>
-                              {task.description && (
-                                <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{task.description}</p>
-                              )}
-                              <div className="flex items-center justify-between">
-                                <TaskAssigneesDisplay taskId={task.id} size="sm" max={3} />
-                                {task.due_date && (
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    {format(new Date(task.due_date), "d MMM", { locale: es })}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                          <CreateTaskDialog projectId={selectedProject.id} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* List View */}
-              {view === "list" && (
-                <div className="glass rounded-xl overflow-hidden">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border">
-                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Tarea</th>
-                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Estado</th>
-                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Prioridad</th>
-                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Asignado</th>
-                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Fecha</th>
-                        <th className="w-12"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tasks?.map((task) => (
-                        <tr 
-                          key={task.id} 
-                          className="border-b border-border/50 hover:bg-secondary/30 cursor-pointer"
-                          onClick={() => handleEditTask(task)}
-                        >
-                          <td className="p-4">
-                            <p className="font-medium text-sm">{task.title}</p>
-                            {task.description && (
-                              <p className="text-xs text-muted-foreground line-clamp-1">{task.description}</p>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            <Badge variant="secondary">
-                              {columns.find(c => c.id === task.status)?.title}
-                            </Badge>
-                          </td>
-                          <td className="p-4">
-                            <Badge className={cn("border", priorityConfig[task.priority].bg, priorityConfig[task.priority].color)}>
-                              {priorityConfig[task.priority].label}
-                            </Badge>
-                          </td>
-                          <td className="p-4">
-                            <TaskAssigneesDisplay taskId={task.id} size="md" max={4} />
-                          </td>
-                          <td className="p-4 text-sm text-muted-foreground">
-                            {task.due_date 
-                              ? format(new Date(task.due_date), "d MMM yyyy", { locale: es })
-                              : '-'
-                            }
-                          </td>
-                          <td className="p-4">
-                            <Button variant="ghost" size="icon" onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditTask(task);
-                            }}>
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {!tasks?.length && (
-                    <div className="p-8 text-center text-muted-foreground">
-                      No hay tareas. <CreateTaskDialog projectId={selectedProject.id} trigger={<button className="text-primary underline">Crear una</button>} />
-                    </div>
-                  )}
-                </div>
-              )}
-            </TabsContent>
-          )}
-        </Tabs>
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Eliminar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
-      {/* Edit Project Dialog */}
-      <EditProjectDialog
-        project={editingProject}
-        open={isEditProjectOpen}
-        onOpenChange={setIsEditProjectOpen}
-      />
+      {/* Edit Dialog */}
+      {editingProject && (
+        <EditProjectDialog
+          project={editingProject}
+          open={isEditProjectOpen}
+          onOpenChange={(open) => {
+            setIsEditProjectOpen(open);
+            if (!open) setEditingProject(null);
+          }}
+        />
+      )}
 
-      {/* Edit Task Dialog */}
-      <EditTaskDialog
-        task={editingTask}
-        open={isEditTaskOpen}
-        onOpenChange={setIsEditTaskOpen}
-      />
-
-      {/* Delete Project Confirmation */}
+      {/* Delete Confirmation */}
       <AlertDialog open={deleteProjectOpen} onOpenChange={setDeleteProjectOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar proyecto?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción eliminará permanentemente el proyecto <strong>{projectToDelete?.name}</strong> y todas sus tareas asociadas.
+              Esta acción no se puede deshacer. Se eliminará permanentemente el proyecto
+              <span className="font-medium text-foreground"> "{projectToDelete?.name}"</span> y 
+              todas sus tareas asociadas.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDeleteProject}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90"
             >
               Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+// Project Card Component
+interface ProjectCardProps {
+  project: Project;
+  onView: () => void;
+  onEdit: (e: React.MouseEvent) => void;
+  onDelete: (e: React.MouseEvent) => void;
+}
+
+function ProjectCard({ project, onView, onEdit, onDelete }: ProjectCardProps) {
+  const serviceConfig = project.service_type 
+    ? serviceTypeConfig[project.service_type as ServiceType] 
+    : null;
+  const ServiceIcon = serviceConfig?.icon;
+
+  return (
+    <div 
+      onClick={onView}
+      className="glass rounded-xl p-5 border border-border/50 cursor-pointer group hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          {ServiceIcon && (
+            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", serviceConfig?.bgColor)}>
+              <ServiceIcon className={cn("w-5 h-5", serviceConfig?.color)} />
+            </div>
+          )}
+          {!ServiceIcon && (
+            <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+              <Code2 className="w-5 h-5 text-muted-foreground" />
+            </div>
+          )}
+          <Badge className={cn("text-xs border", statusConfig[project.status].color)}>
+            {statusConfig[project.status].label}
+          </Badge>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onClick={onView}>
+              <Eye className="w-4 h-4 mr-2" />
+              Ver detalle
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onEdit}>
+              <Edit className="w-4 h-4 mr-2" />
+              Editar
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Eliminar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Content */}
+      <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors line-clamp-1">
+        {project.name}
+      </h3>
+      {project.description && (
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{project.description}</p>
+      )}
+      {!project.description && <div className="mb-4" />}
+
+      {/* Client */}
+      {project.clients && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+          <Users className="w-4 h-4" />
+          <span>{project.clients.name}</span>
+          {project.clients.company && (
+            <span className="text-xs">• {project.clients.company}</span>
+          )}
+        </div>
+      )}
+
+      {/* Progress */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between text-xs mb-1.5">
+          <span className="text-muted-foreground">Progreso</span>
+          <span className="font-medium">{project.progress || 0}%</span>
+        </div>
+        <Progress value={project.progress || 0} className="h-1.5" />
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-3 border-t border-border/50">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Calendar className="w-3.5 h-3.5" />
+          {project.end_date 
+            ? format(new Date(project.end_date), "d MMM yyyy", { locale: es })
+            : "Sin fecha límite"
+          }
+        </div>
+        <div className="flex items-center gap-1 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+          Ver proyecto
+          <ArrowRight className="w-3.5 h-3.5" />
+        </div>
+      </div>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/contexts/SidebarContext";
 import { MainLayout } from "@/components/layout/MainLayout";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
+import ProjectDetail from "./pages/ProjectDetail";
 import Finance from "./pages/Finance";
 import CalendarPage from "./pages/CalendarPage";
 import Clients from "./pages/Clients";
@@ -86,6 +87,7 @@ function AppRoutes() {
       >
         <Route path="/" element={<Dashboard />} />
         <Route path="/projects" element={<Projects />} />
+        <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/finance" element={<Finance />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/leads" element={<Leads />} />
