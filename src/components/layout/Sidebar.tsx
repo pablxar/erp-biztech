@@ -17,11 +17,11 @@ import { useNewLeadsCount } from "@/hooks/useLeads";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-  { icon: FolderKanban, label: "Proyectos", path: "/projects" },
   { icon: UserPlus, label: "Leads", path: "/leads", showBadge: true },
-  { icon: DollarSign, label: "Finanzas", path: "/finance" },
-  { icon: Calendar, label: "Calendario", path: "/calendar" },
   { icon: Users, label: "Clientes", path: "/clients" },
+  { icon: FolderKanban, label: "Proyectos", path: "/projects" },
+  { icon: Calendar, label: "Calendario", path: "/calendar" },
+  { icon: DollarSign, label: "Finanzas", path: "/finance" },
   { icon: BarChart3, label: "Reportes", path: "/reports" },
   { icon: Sparkles, label: "IA Asistente", path: "/ai-assistant" },
 ];
@@ -31,7 +31,7 @@ export function Sidebar() {
 
   const NavItem = ({ item }: { item: (typeof navItems)[0] }) => {
     const showBadge = item.showBadge && newLeadsCount && newLeadsCount > 0;
-    
+
     return (
       <NavLink
         to={item.path}
@@ -46,9 +46,7 @@ export function Sidebar() {
       >
         {({ isActive }) => (
           <>
-            {isActive && (
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 opacity-50" />
-            )}
+            {isActive && <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 opacity-50" />}
             <item.icon className="w-5 h-5 flex-shrink-0 transition-all duration-300 relative z-10 group-hover:scale-110" />
             <span className="font-medium text-sm flex-1 relative z-10">{item.label}</span>
             {showBadge && (
@@ -66,14 +64,10 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 h-screen w-72 border-r border-sidebar-border flex flex-col bg-gradient-to-b from-sidebar to-background">
       {/* Subtle glow overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
-      
+
       {/* Logo Section */}
       <div className="relative flex items-center h-16 px-5 border-b border-sidebar-border/50">
-        <img
-          src={bizTechLogo}
-          alt="BizTech"
-          className="h-9 w-auto max-w-[140px] object-contain drop-shadow-lg"
-        />
+        <img src={bizTechLogo} alt="BizTech" className="h-9 w-auto max-w-[140px] object-contain drop-shadow-lg" />
       </div>
 
       {/* Navigation */}
