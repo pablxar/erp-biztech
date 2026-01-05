@@ -10,7 +10,7 @@ export function MainLayout() {
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
-      <div className={cn("transition-all duration-300", collapsed ? "pl-20" : "pl-72")}>
+      <div className={cn("transition-all duration-300", collapsed ? "pl-24" : "pl-72")}>
         <TopBar />
         <main className="p-6 min-h-[calc(100vh-4rem)]">
           <Outlet />

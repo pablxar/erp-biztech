@@ -43,7 +43,7 @@ export function Sidebar() {
         className={({ isActive }) =>
           cn(
             "flex items-center gap-3 rounded-xl transition-all duration-300 group relative overflow-hidden",
-            collapsed ? "p-3.5 justify-center mx-auto w-12 h-12" : "px-4 py-3.5",
+            collapsed ? "p-3 justify-center mx-auto w-14 h-14" : "px-4 py-3.5",
             isActive
               ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
               : "text-muted-foreground hover:bg-secondary hover:text-foreground",
@@ -58,7 +58,7 @@ export function Sidebar() {
             )}
             <item.icon className={cn(
               "flex-shrink-0 transition-all duration-300 relative z-10",
-              collapsed ? "w-5 h-5" : "w-5 h-5",
+              collapsed ? "w-6 h-6" : "w-5 h-5",
               "group-hover:scale-110"
             )} />
             {!collapsed && (
@@ -111,7 +111,7 @@ export function Sidebar() {
       className={cn(
         "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border transition-all duration-300 ease-out flex flex-col",
         "bg-gradient-to-b from-sidebar to-background",
-        collapsed ? "w-20" : "w-72",
+        collapsed ? "w-24" : "w-72",
       )}
     >
       {/* Subtle glow overlay */}
@@ -141,8 +141,8 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className={cn(
-        "flex-1 py-5 overflow-y-auto scrollbar-none relative",
-        collapsed ? "px-4 space-y-2" : "px-4 space-y-1.5"
+        "flex-1 py-6 overflow-y-auto scrollbar-none relative",
+        collapsed ? "px-5 space-y-3" : "px-4 space-y-1.5"
       )}>
         {navItems.map((item) => (
           <NavItem key={item.path} item={item} />
@@ -151,8 +151,8 @@ export function Sidebar() {
 
       {/* Settings & Collapse Section */}
       <div className={cn(
-        "py-4 border-t border-sidebar-border/50 space-y-2 relative",
-        collapsed ? "px-4" : "px-4"
+        "py-5 border-t border-sidebar-border/50 space-y-3 relative",
+        collapsed ? "px-5" : "px-4"
       )}>
         {collapsed ? (
           <Tooltip delayDuration={0}>
@@ -161,14 +161,14 @@ export function Sidebar() {
                 to="/settings"
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center justify-center w-12 h-12 mx-auto rounded-xl transition-all duration-300",
+                    "flex items-center justify-center w-14 h-14 mx-auto rounded-xl transition-all duration-300",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
                       : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                   )
                 }
               >
-                <Settings className="w-5 h-5 flex-shrink-0" />
+                <Settings className="w-6 h-6 flex-shrink-0" />
               </NavLink>
             </TooltipTrigger>
             <TooltipContent
@@ -203,11 +203,11 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-xl w-full text-muted-foreground transition-all duration-300",
                 "hover:bg-primary hover:text-primary-foreground hover:shadow-lg hover:shadow-primary/20",
-                collapsed ? "p-3.5 justify-center w-12 h-12 mx-auto" : "px-4 py-3.5",
+                collapsed ? "p-3 justify-center w-14 h-14 mx-auto" : "px-4 py-3.5",
               )}
             >
               {collapsed ? (
-                <ChevronRight className="w-5 h-5 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
+                <ChevronRight className="w-6 h-6 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
               ) : (
                 <>
                   <ChevronLeft className="w-5 h-5 flex-shrink-0" />
