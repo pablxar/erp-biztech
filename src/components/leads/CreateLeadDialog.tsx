@@ -72,7 +72,7 @@ export function CreateLeadDialog() {
         company: company.trim() || undefined,
         source: source.trim() || "manual",
         notes: notes.trim() || undefined,
-        assigned_to: assignedTo || undefined,
+        assigned_to: assignedTo && assignedTo !== "unassigned" ? assignedTo : undefined,
         meeting_scheduled_at,
       },
       {
@@ -168,7 +168,7 @@ export function CreateLeadDialog() {
                 <SelectValue placeholder="Sin asignar" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin asignar</SelectItem>
+                <SelectItem value="unassigned">Sin asignar</SelectItem>
                 {teamMembers?.map((member) => (
                   <SelectItem key={member.id} value={member.id}>
                     {member.full_name || member.email}
