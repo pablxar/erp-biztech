@@ -62,7 +62,7 @@ export function EditLeadDialog({ lead, open, onOpenChange }: EditLeadDialogProps
       setSource(lead.source || "");
       setStatus(lead.status);
       setNotes(lead.notes || "");
-      setAssignedTo(lead.assigned_to || "");
+      setAssignedTo(lead.assigned_to || "unassigned");
       
       if (lead.meeting_scheduled_at) {
         const date = new Date(lead.meeting_scheduled_at);
@@ -100,7 +100,7 @@ export function EditLeadDialog({ lead, open, onOpenChange }: EditLeadDialogProps
         source: source.trim() || undefined,
         status,
         notes: notes.trim() || undefined,
-        assigned_to: assignedTo || null,
+        assigned_to: assignedTo && assignedTo !== "unassigned" ? assignedTo : null,
         meeting_scheduled_at,
       },
       {
@@ -205,7 +205,7 @@ export function EditLeadDialog({ lead, open, onOpenChange }: EditLeadDialogProps
                 <SelectValue placeholder="Sin asignar" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin asignar</SelectItem>
+                <SelectItem value="unassigned">Sin asignar</SelectItem>
                 {teamMembers?.map((member) => (
                   <SelectItem key={member.id} value={member.id}>
                     {member.full_name || member.email}
