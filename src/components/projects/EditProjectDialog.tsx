@@ -22,11 +22,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, Code2, Megaphone, Video, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { Project, useUpdateProject } from "@/hooks/useProjects";
+import { Project, useUpdateProject, ServiceType } from "@/hooks/useProjects";
 import { useClients } from "@/hooks/useClients";
 
 interface EditProjectDialogProps {
@@ -35,12 +35,20 @@ interface EditProjectDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const serviceTypes = [
+  { value: 'software_development', label: 'Desarrollo de Software', icon: Code2, description: 'ERP, CRM, SCM, Apps Internas' },
+  { value: 'digital_marketing', label: 'Marketing Digital', icon: Megaphone, description: 'Meta Ads, Google Ads, Email Marketing' },
+  { value: 'audiovisual', label: 'Audiovisual', icon: Video, description: 'Videos, Fotografía y Contenido Visual' },
+  { value: 'web_development', label: 'Web Development', icon: Globe, description: 'E-commerce y Landing Pages' },
+];
+
 export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDialogProps) {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     client_id: "",
     status: "pending" as Project["status"],
+    service_type: "" as ServiceType | "",
     budget: "",
     progress: 0,
   });
@@ -57,6 +65,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
         description: project.description || "",
         client_id: project.client_id || "",
         status: project.status,
+        service_type: project.service_type || "",
         budget: project.budget?.toString() || "",
         progress: project.progress || 0,
       });
@@ -76,6 +85,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
         description: formData.description || null,
         client_id: formData.client_id || null,
         status: formData.status,
+        service_type: formData.service_type || null,
         start_date: startDate ? format(startDate, "yyyy-MM-dd") : null,
         end_date: endDate ? format(endDate, "yyyy-MM-dd") : null,
         budget: formData.budget ? parseFloat(formData.budget) : 0,
@@ -91,7 +101,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Proyecto</DialogTitle>
         </DialogHeader>
@@ -116,6 +126,40 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
               placeholder="Descripción del proyecto..."
               rows={3}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tipo de Servicio</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {serviceTypes.map((type) => {
+                const Icon = type.icon;
+                const isSelected = formData.service_type === type.value;
+                return (
+                  <button
+                    key={type.value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, service_type: type.value as ServiceType })}
+                    className={cn(
+                      "flex items-start gap-3 p-3 rounded-lg border text-left transition-all",
+                      isSelected 
+                        ? "border-primary bg-primary/10 ring-1 ring-primary" 
+                        : "border-border hover:border-primary/50 hover:bg-secondary/50"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+                      isSelected ? "bg-primary/20" : "bg-secondary"
+                    )}>
+                      <Icon className={cn("w-4 h-4", isSelected ? "text-primary" : "text-muted-foreground")} />
+                    </div>
+                    <div>
+                      <p className={cn("text-sm font-medium", isSelected && "text-primary")}>{type.label}</p>
+                      <p className="text-xs text-muted-foreground">{type.description}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

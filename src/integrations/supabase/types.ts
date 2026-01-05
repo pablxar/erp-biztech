@@ -350,6 +350,7 @@ export type Database = {
           id: string
           name: string
           progress: number | null
+          service_type: Database["public"]["Enums"]["service_type"] | null
           start_date: string | null
           status: Database["public"]["Enums"]["project_status"]
           updated_at: string
@@ -364,6 +365,7 @@ export type Database = {
           id?: string
           name: string
           progress?: number | null
+          service_type?: Database["public"]["Enums"]["service_type"] | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           updated_at?: string
@@ -378,6 +380,7 @@ export type Database = {
           id?: string
           name?: string
           progress?: number | null
+          service_type?: Database["public"]["Enums"]["service_type"] | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           updated_at?: string
@@ -668,6 +671,11 @@ export type Database = {
       lead_priority: "low" | "medium" | "high"
       lead_status: "new" | "contacted" | "qualified" | "discarded" | "converted"
       project_status: "active" | "completed" | "pending" | "on_hold"
+      service_type:
+        | "software_development"
+        | "digital_marketing"
+        | "audiovisual"
+        | "web_development"
       task_priority: "high" | "medium" | "low"
       task_status: "todo" | "in_progress" | "completed"
       transaction_type: "income" | "expense"
@@ -802,6 +810,12 @@ export const Constants = {
       lead_priority: ["low", "medium", "high"],
       lead_status: ["new", "contacted", "qualified", "discarded", "converted"],
       project_status: ["active", "completed", "pending", "on_hold"],
+      service_type: [
+        "software_development",
+        "digital_marketing",
+        "audiovisual",
+        "web_development",
+      ],
       task_priority: ["high", "medium", "low"],
       task_status: ["todo", "in_progress", "completed"],
       transaction_type: ["income", "expense"],

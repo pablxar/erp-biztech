@@ -3,12 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
+export type ServiceType = 'software_development' | 'digital_marketing' | 'audiovisual' | 'web_development';
+
 export interface Project {
   id: string;
   name: string;
   description: string | null;
   client_id: string | null;
   status: 'active' | 'completed' | 'pending' | 'on_hold';
+  service_type: ServiceType | null;
   start_date: string | null;
   end_date: string | null;
   budget: number;
@@ -28,6 +31,7 @@ export interface CreateProjectInput {
   description?: string;
   client_id?: string;
   status?: 'active' | 'completed' | 'pending' | 'on_hold';
+  service_type?: ServiceType;
   start_date?: string;
   end_date?: string;
   budget?: number;

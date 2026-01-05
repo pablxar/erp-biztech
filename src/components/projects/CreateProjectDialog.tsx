@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useCreateProject } from '@/hooks/useProjects';
+import { useCreateProject, ServiceType } from '@/hooks/useProjects';
 import { useClients } from '@/hooks/useClients';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -27,12 +27,19 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Plus, Loader2, CalendarIcon } from 'lucide-react';
+import { Plus, Loader2, CalendarIcon, Code2, Megaphone, Video, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Props {
   trigger?: React.ReactNode;
 }
+
+const serviceTypes = [
+  { value: 'software_development', label: 'Desarrollo de Software', icon: Code2, description: 'ERP, CRM, SCM, Apps Internas' },
+  { value: 'digital_marketing', label: 'Marketing Digital', icon: Megaphone, description: 'Meta Ads, Google Ads, Email Marketing' },
+  { value: 'audiovisual', label: 'Audiovisual', icon: Video, description: 'Videos, Fotografía y Contenido Visual' },
+  { value: 'web_development', label: 'Web Development', icon: Globe, description: 'E-commerce y Landing Pages' },
+];
 
 export function CreateProjectDialog({ trigger }: Props) {
   const [open, setOpen] = useState(false);
@@ -41,6 +48,7 @@ export function CreateProjectDialog({ trigger }: Props) {
     description: '',
     client_id: '',
     status: 'pending' as const,
+    service_type: '' as ServiceType | '',
     budget: '',
   });
   const [startDate, setStartDate] = useState<Date | undefined>();
@@ -57,6 +65,7 @@ export function CreateProjectDialog({ trigger }: Props) {
         description: formData.description || undefined,
         client_id: formData.client_id || undefined,
         status: formData.status,
+        service_type: formData.service_type || undefined,
         start_date: startDate ? format(startDate, 'yyyy-MM-dd') : undefined,
         end_date: endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
         budget: formData.budget ? parseFloat(formData.budget) : undefined,
@@ -69,6 +78,7 @@ export function CreateProjectDialog({ trigger }: Props) {
             description: '',
             client_id: '',
             status: 'pending',
+            service_type: '',
             budget: '',
           });
           setStartDate(undefined);
@@ -88,7 +98,7 @@ export function CreateProjectDialog({ trigger }: Props) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Crear Nuevo Proyecto</DialogTitle>
         </DialogHeader>
@@ -113,6 +123,40 @@ export function CreateProjectDialog({ trigger }: Props) {
               placeholder="Descripción del proyecto..."
               rows={3}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tipo de Servicio *</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {serviceTypes.map((type) => {
+                const Icon = type.icon;
+                const isSelected = formData.service_type === type.value;
+                return (
+                  <button
+                    key={type.value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, service_type: type.value as ServiceType })}
+                    className={cn(
+                      "flex items-start gap-3 p-3 rounded-lg border text-left transition-all",
+                      isSelected 
+                        ? "border-primary bg-primary/10 ring-1 ring-primary" 
+                        : "border-border hover:border-primary/50 hover:bg-secondary/50"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+                      isSelected ? "bg-primary/20" : "bg-secondary"
+                    )}>
+                      <Icon className={cn("w-4 h-4", isSelected ? "text-primary" : "text-muted-foreground")} />
+                    </div>
+                    <div>
+                      <p className={cn("text-sm font-medium", isSelected && "text-primary")}>{type.label}</p>
+                      <p className="text-xs text-muted-foreground">{type.description}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
