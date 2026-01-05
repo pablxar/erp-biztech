@@ -49,13 +49,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useLeads, useDeleteLead, useUpdateLead, Lead, LeadStatus } from "@/hooks/useLeads";
@@ -67,51 +61,54 @@ import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
 
-const statusConfig: Record<LeadStatus, { 
-  label: string; 
-  color: string; 
-  bgColor: string;
-  icon: React.ElementType;
-  gradient: string;
-}> = {
-  new: { 
-    label: "Nuevos", 
-    color: "text-blue-400", 
+const statusConfig: Record<
+  LeadStatus,
+  {
+    label: string;
+    color: string;
+    bgColor: string;
+    icon: React.ElementType;
+    gradient: string;
+  }
+> = {
+  new: {
+    label: "Nuevos",
+    color: "text-blue-400",
     bgColor: "bg-blue-500/10 border-blue-500/20",
     icon: Sparkles,
-    gradient: "from-blue-500/20 to-blue-600/10"
+    gradient: "from-blue-500/20 to-blue-600/10",
   },
-  contacted: { 
-    label: "Contactados", 
-    color: "text-amber-400", 
+  contacted: {
+    label: "Contactados",
+    color: "text-amber-400",
     bgColor: "bg-amber-500/10 border-amber-500/20",
     icon: MessageSquare,
-    gradient: "from-amber-500/20 to-amber-600/10"
+    gradient: "from-amber-500/20 to-amber-600/10",
   },
-  qualified: { 
-    label: "Calificados", 
-    color: "text-emerald-400", 
+  qualified: {
+    label: "Calificados",
+    color: "text-emerald-400",
     bgColor: "bg-emerald-500/10 border-emerald-500/20",
     icon: Star,
-    gradient: "from-emerald-500/20 to-emerald-600/10"
+    gradient: "from-emerald-500/20 to-emerald-600/10",
   },
-  discarded: { 
-    label: "Descartados", 
-    color: "text-slate-400", 
+  discarded: {
+    label: "Descartados",
+    color: "text-slate-400",
     bgColor: "bg-slate-500/10 border-slate-500/20",
     icon: Target,
-    gradient: "from-slate-500/20 to-slate-600/10"
+    gradient: "from-slate-500/20 to-slate-600/10",
   },
-  converted: { 
-    label: "Convertidos", 
-    color: "text-violet-400", 
+  converted: {
+    label: "Convertidos",
+    color: "text-violet-400",
     bgColor: "bg-violet-500/10 border-violet-500/20",
     icon: Zap,
-    gradient: "from-violet-500/20 to-violet-600/10"
+    gradient: "from-violet-500/20 to-violet-600/10",
   },
 };
 
-const statusOrder: LeadStatus[] = ['new', 'contacted', 'qualified', 'converted', 'discarded'];
+const statusOrder: LeadStatus[] = ["new", "contacted", "qualified", "converted", "discarded"];
 
 const priorityConfig = {
   high: { label: "Alta", color: "text-red-400 bg-red-500/10" },
@@ -124,7 +121,7 @@ export default function Leads() {
   const { data: teamMembers } = useTeamMembers();
   const deleteLead = useDeleteLead();
   const updateLead = useUpdateLead();
-  
+
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<LeadStatus | "all">("all");
@@ -135,26 +132,33 @@ export default function Leads() {
   const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null);
 
   // Filter leads
-  const filteredLeads = leads?.filter(lead => {
-    const matchesSearch = 
-      lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lead.company?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  }) || [];
+  const filteredLeads =
+    leads?.filter((lead) => {
+      const matchesSearch =
+        lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        lead.company?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    }) || [];
 
-  const selectedLead = selectedLeadId 
-    ? leads?.find(l => l.id === selectedLeadId) 
-    : null;
+  const selectedLead = selectedLeadId ? leads?.find((l) => l.id === selectedLeadId) : null;
 
-  const leadsByStatus = statusOrder.reduce((acc, status) => {
-    acc[status] = filteredLeads.filter(l => l.status === status);
-    return acc;
-  }, {} as Record<LeadStatus, Lead[]>);
+  const leadsByStatus = statusOrder.reduce(
+    (acc, status) => {
+      acc[status] = filteredLeads.filter((l) => l.status === status);
+      return acc;
+    },
+    {} as Record<LeadStatus, Lead[]>,
+  );
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
   };
 
   const handleEditLead = (lead: Lead) => {
@@ -189,16 +193,16 @@ export default function Leads() {
         onSuccess: () => {
           toast.success(`Lead movido a "${statusConfig[newStatus].label}"`);
         },
-      }
+      },
     );
   };
 
   const openEmail = (email: string) => {
-    window.open(`mailto:${email}`, '_blank');
+    window.open(`mailto:${email}`, "_blank");
   };
 
   const openPhone = (phone: string) => {
-    window.open(`tel:${phone}`, '_blank');
+    window.open(`tel:${phone}`, "_blank");
   };
 
   // Stats
@@ -215,10 +219,14 @@ export default function Leads() {
           <Skeleton className="h-10 w-32" />
         </div>
         <div className="grid grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
         </div>
         <div className="grid grid-cols-5 gap-4">
-          {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-96" />)}
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-96" />
+          ))}
         </div>
       </div>
     );
@@ -232,9 +240,7 @@ export default function Leads() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
             Pipeline de Leads
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Gestiona y convierte tus prospectos en clientes
-          </p>
+          <p className="text-muted-foreground mt-1">Gestiona y convierte tus prospectos en clientes</p>
         </div>
         <CreateLeadDialog />
       </div>
@@ -292,8 +298,8 @@ export default function Leads() {
         <div className="flex flex-1 gap-3 w-full sm:w-auto">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
-              placeholder="Buscar leads..." 
+            <Input
+              placeholder="Buscar leads..."
               className="pl-10 bg-background/50"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -306,7 +312,7 @@ export default function Leads() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los estados</SelectItem>
-              {statusOrder.map(status => (
+              {statusOrder.map((status) => (
                 <SelectItem key={status} value={status}>
                   {statusConfig[status].label}
                 </SelectItem>
@@ -322,7 +328,6 @@ export default function Leads() {
             className="gap-2"
           >
             <LayoutGrid className="w-4 h-4" />
-            Kanban
           </Button>
           <Button
             variant={viewMode === "list" ? "secondary" : "ghost"}
@@ -331,7 +336,6 @@ export default function Leads() {
             className="gap-2"
           >
             <List className="w-4 h-4" />
-            Lista
           </Button>
         </div>
       </div>
@@ -343,8 +347,8 @@ export default function Leads() {
           </div>
           <h3 className="text-xl font-semibold mb-2">No hay leads</h3>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            {searchQuery || statusFilter !== "all" 
-              ? "No se encontraron leads con ese criterio de búsqueda" 
+            {searchQuery || statusFilter !== "all"
+              ? "No se encontraron leads con ese criterio de búsqueda"
               : "Comienza a agregar leads manualmente o conéctalos desde tu landing page"}
           </p>
           {!searchQuery && statusFilter === "all" && <CreateLeadDialog />}
@@ -353,22 +357,21 @@ export default function Leads() {
         // Kanban View
         <ScrollArea className="w-full">
           <div className="flex gap-4 pb-4 min-w-max">
-            {statusOrder.map(status => {
+            {statusOrder.map((status) => {
               const config = statusConfig[status];
               const StatusIcon = config.icon;
               const columnLeads = leadsByStatus[status] || [];
-              
+
               return (
-                <div 
-                  key={status} 
-                  className="w-80 flex-shrink-0"
-                >
+                <div key={status} className="w-80 flex-shrink-0">
                   {/* Column Header */}
-                  <div className={cn(
-                    "rounded-t-xl p-4 border border-b-0 border-border/50",
-                    "bg-gradient-to-b",
-                    config.gradient
-                  )}>
+                  <div
+                    className={cn(
+                      "rounded-t-xl p-4 border border-b-0 border-border/50",
+                      "bg-gradient-to-b",
+                      config.gradient,
+                    )}
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <StatusIcon className={cn("w-4 h-4", config.color)} />
@@ -382,7 +385,7 @@ export default function Leads() {
 
                   {/* Column Content */}
                   <div className="glass rounded-b-xl border border-t-0 border-border/50 p-3 min-h-[400px] space-y-3">
-                    {columnLeads.map(lead => (
+                    {columnLeads.map((lead) => (
                       <LeadCard
                         key={lead.id}
                         lead={lead}
@@ -396,9 +399,7 @@ export default function Leads() {
                       />
                     ))}
                     {columnLeads.length === 0 && (
-                      <div className="text-center py-8 text-muted-foreground text-sm">
-                        Sin leads
-                      </div>
+                      <div className="text-center py-8 text-muted-foreground text-sm">Sin leads</div>
                     )}
                   </div>
                 </div>
@@ -419,12 +420,12 @@ export default function Leads() {
             <div className="col-span-1"></div>
           </div>
           <div className="divide-y divide-border/50">
-            {filteredLeads.map(lead => (
-              <div 
+            {filteredLeads.map((lead) => (
+              <div
                 key={lead.id}
                 className={cn(
                   "grid grid-cols-12 gap-4 p-4 hover:bg-muted/20 transition-colors cursor-pointer group",
-                  selectedLeadId === lead.id && "bg-primary/5"
+                  selectedLeadId === lead.id && "bg-primary/5",
                 )}
                 onClick={() => setSelectedLeadId(selectedLeadId === lead.id ? null : lead.id)}
               >
@@ -440,13 +441,13 @@ export default function Leads() {
                   </div>
                 </div>
                 <div className="col-span-2 flex items-center">
-                  <Badge className={cn("text-xs border", statusConfig[lead.status].bgColor, statusConfig[lead.status].color)}>
+                  <Badge
+                    className={cn("text-xs border", statusConfig[lead.status].bgColor, statusConfig[lead.status].color)}
+                  >
                     {statusConfig[lead.status].label}
                   </Badge>
                 </div>
-                <div className="col-span-2 flex items-center text-sm text-muted-foreground">
-                  {lead.company || "-"}
-                </div>
+                <div className="col-span-2 flex items-center text-sm text-muted-foreground">{lead.company || "-"}</div>
                 <div className="col-span-2 flex items-center text-sm text-muted-foreground">
                   {lead.source || "manual"}
                 </div>
@@ -478,10 +479,7 @@ export default function Leads() {
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => handleDeleteClick(lead)}
-                        className="text-destructive"
-                      >
+                      <DropdownMenuItem onClick={() => handleDeleteClick(lead)} className="text-destructive">
                         <Trash2 className="w-4 h-4 mr-2" />
                         Eliminar
                       </DropdownMenuItem>
@@ -508,11 +506,7 @@ export default function Leads() {
       )}
 
       {/* Edit Dialog */}
-      <EditLeadDialog 
-        lead={editingLead} 
-        open={isEditDialogOpen} 
-        onOpenChange={setIsEditDialogOpen} 
-      />
+      <EditLeadDialog lead={editingLead} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -550,14 +544,19 @@ interface LeadCardProps {
 
 function LeadCard({ lead, isSelected, onSelect, onEdit, onDelete, onStatusChange, onEmail, onPhone }: LeadCardProps) {
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
   };
 
   return (
     <div
       className={cn(
         "rounded-xl p-4 bg-background/50 border border-border/50 cursor-pointer transition-all hover:shadow-lg hover:border-primary/30 group",
-        isSelected && "ring-2 ring-primary border-primary/50"
+        isSelected && "ring-2 ring-primary border-primary/50",
       )}
       onClick={onSelect}
     >
@@ -602,12 +601,14 @@ function LeadCard({ lead, isSelected, onSelect, onEdit, onDelete, onStatusChange
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
-            {statusOrder.filter(s => s !== lead.status).map(status => (
-              <DropdownMenuItem key={status} onClick={() => onStatusChange(status)}>
-                <ArrowRight className="w-4 h-4 mr-2" />
-                Mover a {statusConfig[status].label}
-              </DropdownMenuItem>
-            ))}
+            {statusOrder
+              .filter((s) => s !== lead.status)
+              .map((status) => (
+                <DropdownMenuItem key={status} onClick={() => onStatusChange(status)}>
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                  Mover a {statusConfig[status].label}
+                </DropdownMenuItem>
+              ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onDelete} className="text-destructive">
               <Trash2 className="w-4 h-4 mr-2" />
@@ -658,7 +659,12 @@ interface LeadDetailPanelProps {
 
 function LeadDetailPanel({ lead, onClose, onEdit, onDelete, onStatusChange, onEmail, onPhone }: LeadDetailPanelProps) {
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
   };
 
   const config = statusConfig[lead.status];
@@ -692,7 +698,7 @@ function LeadDetailPanel({ lead, onClose, onEdit, onDelete, onStatusChange, onEm
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <Avatar className="w-16 h-16 border-2 border-background">
               <AvatarFallback className="bg-background text-foreground text-xl font-semibold">
@@ -717,7 +723,7 @@ function LeadDetailPanel({ lead, onClose, onEdit, onDelete, onStatusChange, onEm
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {statusOrder.map(status => (
+              {statusOrder.map((status) => (
                 <SelectItem key={status} value={status}>
                   <div className="flex items-center gap-2">
                     {(() => {
@@ -736,21 +742,13 @@ function LeadDetailPanel({ lead, onClose, onEdit, onDelete, onStatusChange, onEm
         <div className="p-4 border-b border-border">
           <div className="grid grid-cols-2 gap-3">
             {lead.email && (
-              <Button 
-                variant="outline" 
-                className="gap-2" 
-                onClick={() => onEmail(lead.email!)}
-              >
+              <Button variant="outline" className="gap-2" onClick={() => onEmail(lead.email!)}>
                 <Mail className="w-4 h-4" />
                 Email
               </Button>
             )}
             {lead.phone && (
-              <Button 
-                variant="outline" 
-                className="gap-2"
-                onClick={() => onPhone(lead.phone!)}
-              >
+              <Button variant="outline" className="gap-2" onClick={() => onPhone(lead.phone!)}>
                 <Phone className="w-4 h-4" />
                 Llamar
               </Button>
@@ -824,9 +822,7 @@ function LeadDetailPanel({ lead, onClose, onEdit, onDelete, onStatusChange, onEm
               <Clock className="w-4 h-4 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">Creado</p>
-                <p className="text-sm">
-                  {format(new Date(lead.created_at), "d 'de' MMMM, yyyy", { locale: es })}
-                </p>
+                <p className="text-sm">{format(new Date(lead.created_at), "d 'de' MMMM, yyyy", { locale: es })}</p>
               </div>
             </div>
 
