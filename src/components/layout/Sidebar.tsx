@@ -46,7 +46,7 @@ export function Sidebar() {
             collapsed ? "p-3 justify-center mx-auto w-14 h-14" : "px-4 py-3.5",
             isActive
               ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-              : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+              : "text-sidebar-foreground/70 hover:bg-secondary hover:text-sidebar-foreground",
           )
         }
       >
@@ -164,7 +164,7 @@ export function Sidebar() {
                     "flex items-center justify-center w-14 h-14 mx-auto rounded-xl transition-all duration-300",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                      : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                      : "text-sidebar-foreground/70 hover:bg-secondary hover:text-sidebar-foreground",
                   )
                 }
               >
@@ -187,7 +187,7 @@ export function Sidebar() {
                 "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300",
                 isActive
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                  : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                  : "text-sidebar-foreground/70 hover:bg-secondary hover:text-sidebar-foreground",
               )
             }
           >
@@ -201,7 +201,7 @@ export function Sidebar() {
             <button
               onClick={toggle}
               className={cn(
-                "flex items-center gap-3 rounded-xl w-full text-muted-foreground transition-all duration-300",
+                "flex items-center gap-3 rounded-xl w-full text-sidebar-foreground/70 transition-all duration-300",
                 "hover:bg-primary hover:text-primary-foreground hover:shadow-lg hover:shadow-primary/20",
                 collapsed ? "p-3 justify-center w-14 h-14 mx-auto" : "px-4 py-3.5",
               )}
