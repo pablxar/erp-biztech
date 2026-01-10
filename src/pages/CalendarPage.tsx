@@ -885,15 +885,20 @@ export default function CalendarPage() {
 
             <div className="space-y-2">
               <Label>Proyecto (opcional)</Label>
-              <Select 
-                value={newEvent.project_id} 
-                onValueChange={(value) => setNewEvent({ ...newEvent, project_id: value })}
+              <Select
+                value={newEvent.project_id}
+                onValueChange={(value) =>
+                  setNewEvent({
+                    ...newEvent,
+                    project_id: value === "__no_project__" ? "" : value,
+                  })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sin proyecto asociado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sin proyecto</SelectItem>
+                  <SelectItem value="__no_project__">Sin proyecto</SelectItem>
                   {projects?.map((project) => (
                     <SelectItem key={project.id} value={project.id}>
                       {project.name}
