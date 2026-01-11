@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import React from "react";
 
 interface MarkdownRendererProps {
   content: string;
@@ -6,13 +7,97 @@ interface MarkdownRendererProps {
 }
 
 export function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
+  
+  const renderInlineMarkdown = (text: string): React.ReactNode => {
+    const elements: React.ReactNode[] = [];
+    let remaining = text;
+    let keyIndex = 0;
+
+    while (remaining.length > 0) {
+      // Check for inline code first: `code`
+      const codeMatch = remaining.match(/^`([^`]+)`/);
+      if (codeMatch) {
+        elements.push(
+          <code 
+            key={keyIndex++} 
+            className="px-1.5 py-0.5 rounded bg-muted text-primary font-mono text-xs"
+          >
+            {codeMatch[1]}
+          </code>
+        );
+        remaining = remaining.slice(codeMatch[0].length);
+        continue;
+      }
+
+      // Check for bold: **text** or __text__
+      const boldMatch = remaining.match(/^(\*\*|__)(.+?)\1/);
+      if (boldMatch) {
+        elements.push(
+          <strong key={keyIndex++} className="font-semibold">
+            {renderInlineMarkdown(boldMatch[2])}
+          </strong>
+        );
+        remaining = remaining.slice(boldMatch[0].length);
+        continue;
+      }
+
+      // Check for italic: *text* or _text_ (single)
+      const italicMatch = remaining.match(/^(\*|_)([^*_]+?)\1/);
+      if (italicMatch) {
+        elements.push(
+          <em key={keyIndex++} className="italic">
+            {renderInlineMarkdown(italicMatch[2])}
+          </em>
+        );
+        remaining = remaining.slice(italicMatch[0].length);
+        continue;
+      }
+
+      // Check for links: [text](url)
+      const linkMatch = remaining.match(/^\[([^\]]+)\]\(([^)]+)\)/);
+      if (linkMatch) {
+        elements.push(
+          <a 
+            key={keyIndex++}
+            href={linkMatch[2]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            {linkMatch[1]}
+          </a>
+        );
+        remaining = remaining.slice(linkMatch[0].length);
+        continue;
+      }
+
+      // Find the next special character
+      const nextSpecial = remaining.search(/[`*_\[]/);
+      if (nextSpecial === -1) {
+        // No more special characters, add the rest as text
+        elements.push(<React.Fragment key={keyIndex++}>{remaining}</React.Fragment>);
+        break;
+      } else if (nextSpecial === 0) {
+        // Special character at start but didn't match any pattern, treat as literal
+        elements.push(<React.Fragment key={keyIndex++}>{remaining[0]}</React.Fragment>);
+        remaining = remaining.slice(1);
+      } else {
+        // Add text before the special character
+        elements.push(<React.Fragment key={keyIndex++}>{remaining.slice(0, nextSpecial)}</React.Fragment>);
+        remaining = remaining.slice(nextSpecial);
+      }
+    }
+
+    return elements.length === 1 ? elements[0] : <>{elements}</>;
+  };
+
   const renderMarkdown = (text: string): React.ReactNode[] => {
     const lines = text.split('\n');
     const elements: React.ReactNode[] = [];
     let inCodeBlock = false;
     let codeBlockContent = '';
     let codeBlockLang = '';
-    let listItems: string[] = [];
+    let listItems: { content: string; indent: number }[] = [];
     let listType: 'ul' | 'ol' | null = null;
 
     const flushList = () => {
@@ -27,8 +112,8 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             )}
           >
             {listItems.map((item, i) => (
-              <li key={i} className="text-sm leading-relaxed">
-                {renderInlineMarkdown(item)}
+              <li key={i} className="text-sm leading-relaxed" style={{ marginLeft: item.indent * 8 }}>
+                {renderInlineMarkdown(item.content)}
               </li>
             ))}
           </ListTag>
@@ -38,96 +123,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
       }
     };
 
-    const renderInlineMarkdown = (text: string): React.ReactNode => {
-      // Handle inline code
-      let result: React.ReactNode[] = [];
-      const parts = text.split(/(`[^`]+`)/g);
-      
-      parts.forEach((part, idx) => {
-        if (part.startsWith('`') && part.endsWith('`')) {
-          result.push(
-            <code 
-              key={idx} 
-              className="px-1.5 py-0.5 rounded bg-muted text-primary font-mono text-xs"
-            >
-              {part.slice(1, -1)}
-            </code>
-          );
-        } else {
-          // Handle bold and italic
-          let processed = part;
-          
-          // Bold: **text** or __text__
-          processed = processed.replace(/\*\*([^*]+)\*\*/g, '%%BOLD_START%%$1%%BOLD_END%%');
-          processed = processed.replace(/__([^_]+)__/g, '%%BOLD_START%%$1%%BOLD_END%%');
-          
-          // Italic: *text* or _text_
-          processed = processed.replace(/\*([^*]+)\*/g, '%%ITALIC_START%%$1%%ITALIC_END%%');
-          processed = processed.replace(/_([^_]+)_/g, '%%ITALIC_START%%$1%%ITALIC_END%%');
-          
-          // Links: [text](url)
-          processed = processed.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '%%LINK_START%%$1%%LINK_DIVIDER%%$2%%LINK_END%%');
-          
-          const segments = processed.split(/(%%[A-Z_]+%%)/g);
-          let isBold = false;
-          let isItalic = false;
-          let linkText = '';
-          let inLink = false;
-          
-          segments.forEach((segment, segIdx) => {
-            if (segment === '%%BOLD_START%%') {
-              isBold = true;
-            } else if (segment === '%%BOLD_END%%') {
-              isBold = false;
-            } else if (segment === '%%ITALIC_START%%') {
-              isItalic = true;
-            } else if (segment === '%%ITALIC_END%%') {
-              isItalic = false;
-            } else if (segment === '%%LINK_START%%') {
-              inLink = true;
-              linkText = '';
-            } else if (segment === '%%LINK_DIVIDER%%') {
-              // Next segment will be URL
-            } else if (segment === '%%LINK_END%%') {
-              inLink = false;
-            } else if (segment && !segment.startsWith('%%')) {
-              if (inLink && !linkText) {
-                linkText = segment;
-              } else if (inLink && linkText) {
-                // This is the URL
-                result.push(
-                  <a 
-                    key={`${idx}-${segIdx}`}
-                    href={segment}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    {linkText}
-                  </a>
-                );
-              } else {
-                let styledSegment: React.ReactNode = segment;
-                
-                if (isBold && isItalic) {
-                  styledSegment = <strong key={`${idx}-${segIdx}`}><em>{segment}</em></strong>;
-                } else if (isBold) {
-                  styledSegment = <strong key={`${idx}-${segIdx}`} className="font-semibold">{segment}</strong>;
-                } else if (isItalic) {
-                  styledSegment = <em key={`${idx}-${segIdx}`}>{segment}</em>;
-                }
-                
-                result.push(styledSegment);
-              }
-            }
-          });
-        }
-      });
-      
-      return result.length === 1 ? result[0] : <>{result}</>;
-    };
-
-    lines.forEach((line, index) => {
+    lines.forEach((line) => {
       // Code block start/end
       if (line.startsWith('```')) {
         if (!inCodeBlock) {
@@ -168,8 +164,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
         flushList();
         const level = headerMatch[1].length;
         const text = headerMatch[2];
-        const HeaderTag = `h${level}` as keyof JSX.IntrinsicElements;
-        const headerClasses = {
+        const headerClasses: Record<number, string> = {
           1: "text-xl font-bold mt-4 mb-2",
           2: "text-lg font-bold mt-3 mb-2",
           3: "text-base font-semibold mt-3 mb-1",
@@ -178,35 +173,39 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
           6: "text-xs font-medium mt-2 mb-1",
         };
         elements.push(
-          <HeaderTag 
-            key={`h-${elements.length}`} 
-            className={headerClasses[level as keyof typeof headerClasses]}
-          >
-            {renderInlineMarkdown(text)}
-          </HeaderTag>
+          React.createElement(
+            `h${level}` as keyof JSX.IntrinsicElements,
+            { 
+              key: `h-${elements.length}`, 
+              className: headerClasses[level] 
+            },
+            renderInlineMarkdown(text)
+          )
         );
         return;
       }
 
       // Unordered list items
-      const ulMatch = line.match(/^[\s]*[-*+]\s+(.+)$/);
+      const ulMatch = line.match(/^(\s*)[-*+]\s+(.+)$/);
       if (ulMatch) {
         if (listType !== 'ul') {
           flushList();
           listType = 'ul';
         }
-        listItems.push(ulMatch[1]);
+        const indent = Math.floor(ulMatch[1].length / 2);
+        listItems.push({ content: ulMatch[2], indent });
         return;
       }
 
       // Ordered list items
-      const olMatch = line.match(/^[\s]*\d+\.\s+(.+)$/);
+      const olMatch = line.match(/^(\s*)\d+\.\s+(.+)$/);
       if (olMatch) {
         if (listType !== 'ol') {
           flushList();
           listType = 'ol';
         }
-        listItems.push(olMatch[1]);
+        const indent = Math.floor(olMatch[1].length / 2);
+        listItems.push({ content: olMatch[2], indent });
         return;
       }
 
