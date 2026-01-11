@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Plus,
   Download,
@@ -11,6 +13,27 @@ import {
   Receipt,
   ArrowUpRight,
   ArrowDownRight,
+  Search,
+  Filter,
+  Calendar,
+  Wallet,
+  CreditCard,
+  BarChart3,
+  LineChart,
+  PieChart as PieChartIcon,
+  Target,
+  Zap,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  DollarSign,
+  Activity,
+  Sparkles,
+  TrendingUpIcon,
+  ArrowRight,
+  Eye,
+  MoreHorizontal,
+  RefreshCw,
 } from "lucide-react";
 import {
   Area,
@@ -22,6 +45,12 @@ import {
   PieChart,
   Pie,
   Cell,
+  BarChart,
+  Bar,
+  CartesianGrid,
+  Legend,
+  ComposedChart,
+  Line,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { useTransactions, useFinancialStats } from "@/hooks/useTransactions";
@@ -29,20 +58,31 @@ import { useInvoices } from "@/hooks/useInvoices";
 import { useProjects } from "@/hooks/useProjects";
 import { CreateTransactionDialog } from "@/components/finance/CreateTransactionDialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 import { es } from "date-fns/locale";
-import { useMemo } from "react";
 
 const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 const statusConfig = {
-  paid: { label: "Pagada", color: "bg-success/20 text-success border-success/30" },
-  pending: { label: "Pendiente", color: "bg-warning/20 text-warning border-warning/30" },
-  overdue: { label: "Vencida", color: "bg-destructive/20 text-destructive border-destructive/30" },
-  draft: { label: "Borrador", color: "bg-muted text-muted-foreground border-muted" },
+  paid: { label: "Pagada", color: "bg-success/20 text-success border-success/30", icon: CheckCircle2 },
+  pending: { label: "Pendiente", color: "bg-warning/20 text-warning border-warning/30", icon: Clock },
+  overdue: { label: "Vencida", color: "bg-destructive/20 text-destructive border-destructive/30", icon: AlertTriangle },
+  draft: { label: "Borrador", color: "bg-muted text-muted-foreground border-muted", icon: Clock },
+};
+
+const categoryIcons: Record<string, typeof Wallet> = {
+  "Software": CreditCard,
+  "Marketing": Target,
+  "Servicios": Zap,
+  "Personal": Wallet,
+  "Otros": BarChart3,
 };
 
 export default function Finance() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "quarter" | "year">("month");
+  const [activeView, setActiveView] = useState<"overview" | "transactions" | "invoices" | "budgets">("overview");
+  
   const { data: transactions, isLoading: transactionsLoading } = useTransactions();
   const { data: stats, isLoading: statsLoading } = useFinancialStats();
   const { data: invoices } = useInvoices();
@@ -50,9 +90,69 @@ export default function Finance() {
 
   const isLoading = transactionsLoading || statsLoading;
 
-  // Calculate monthly data for chart
+  // Advanced analytics calculations
+  const analytics = useMemo(() => {
+    if (!transactions || !stats) return null;
+
+    const now = new Date();
+    const lastMonth = subMonths(now, 1);
+    const twoMonthsAgo = subMonths(now, 2);
+
+    // Current month transactions
+    const currentMonthTx = transactions.filter(tx => {
+      const date = new Date(tx.date);
+      return isWithinInterval(date, { start: startOfMonth(now), end: endOfMonth(now) });
+    });
+
+    // Last month transactions
+    const lastMonthTx = transactions.filter(tx => {
+      const date = new Date(tx.date);
+      return isWithinInterval(date, { start: startOfMonth(lastMonth), end: endOfMonth(lastMonth) });
+    });
+
+    const currentIncome = currentMonthTx.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+    const currentExpenses = currentMonthTx.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+    const lastIncome = lastMonthTx.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+    const lastExpenses = lastMonthTx.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+
+    const incomeGrowth = lastIncome > 0 ? ((currentIncome - lastIncome) / lastIncome) * 100 : 0;
+    const expenseGrowth = lastExpenses > 0 ? ((currentExpenses - lastExpenses) / lastExpenses) * 100 : 0;
+
+    // Average transaction value
+    const avgTransactionValue = transactions.length > 0 
+      ? transactions.reduce((s, t) => s + Number(t.amount), 0) / transactions.length 
+      : 0;
+
+    // Burn rate (monthly expenses average)
+    const monthlyExpenses: number[] = [];
+    for (let i = 0; i < 6; i++) {
+      const month = subMonths(now, i);
+      const monthTx = transactions.filter(tx => {
+        const date = new Date(tx.date);
+        return isWithinInterval(date, { start: startOfMonth(month), end: endOfMonth(month) }) && tx.type === 'expense';
+      });
+      monthlyExpenses.push(monthTx.reduce((s, t) => s + Number(t.amount), 0));
+    }
+    const burnRate = monthlyExpenses.reduce((s, v) => s + v, 0) / 6;
+
+    // Runway (if we have net margin)
+    const runway = burnRate > 0 && stats.netMargin > 0 ? Math.floor(stats.netMargin / burnRate) : 0;
+
+    return {
+      currentIncome,
+      currentExpenses,
+      incomeGrowth,
+      expenseGrowth,
+      avgTransactionValue,
+      burnRate,
+      runway,
+      transactionCount: transactions.length,
+    };
+  }, [transactions, stats]);
+
+  // Monthly chart data with comparison
   const chartData = useMemo(() => {
-    if (!transactions) return months.map(month => ({ month, ingresos: 0, gastos: 0 }));
+    if (!transactions) return months.map(month => ({ month, ingresos: 0, gastos: 0, neto: 0 }));
 
     const currentYear = new Date().getFullYear();
     const monthlyData: Record<number, { ingresos: number; gastos: number }> = {};
@@ -77,35 +177,79 @@ export default function Finance() {
       month,
       ingresos: monthlyData[i].ingresos,
       gastos: monthlyData[i].gastos,
+      neto: monthlyData[i].ingresos - monthlyData[i].gastos,
     }));
   }, [transactions]);
 
-  // Calculate expense distribution
+  // Expense distribution with enhanced data
   const expenseDistribution = useMemo(() => {
     if (!transactions) return [];
     
     const expenses = transactions.filter(t => t.type === 'expense');
     const totalExpenses = expenses.reduce((sum, t) => sum + Number(t.amount), 0);
     
-    const categories: Record<string, number> = {};
+    const categories: Record<string, { amount: number; count: number }> = {};
     expenses.forEach(t => {
       const cat = t.category || 'Otros';
-      categories[cat] = (categories[cat] || 0) + Number(t.amount);
+      if (!categories[cat]) categories[cat] = { amount: 0, count: 0 };
+      categories[cat].amount += Number(t.amount);
+      categories[cat].count += 1;
     });
 
-    const colors = ["hsl(142, 69%, 58%)", "hsl(199, 89%, 48%)", "hsl(38, 92%, 50%)", "hsl(280, 65%, 60%)", "hsl(220, 15%, 40%)"];
+    const colors = [
+      "hsl(142, 69%, 58%)", 
+      "hsl(199, 89%, 48%)", 
+      "hsl(38, 92%, 50%)", 
+      "hsl(280, 65%, 60%)", 
+      "hsl(340, 75%, 55%)",
+      "hsl(220, 15%, 50%)"
+    ];
     
     return Object.entries(categories)
-      .map(([name, value], i) => ({
+      .map(([name, data], i) => ({
         name,
-        value: totalExpenses > 0 ? Math.round((value / totalExpenses) * 100) : 0,
+        value: totalExpenses > 0 ? Math.round((data.amount / totalExpenses) * 100) : 0,
+        amount: data.amount,
+        count: data.count,
         color: colors[i % colors.length],
       }))
       .sort((a, b) => b.value - a.value)
-      .slice(0, 5);
+      .slice(0, 6);
   }, [transactions]);
 
-  // Calculate budget tracking
+  // Weekly comparison data
+  const weeklyData = useMemo(() => {
+    if (!transactions) return [];
+    
+    const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const now = new Date();
+    const dayData: Record<number, { ingresos: number; gastos: number }> = {};
+    
+    for (let i = 0; i < 7; i++) {
+      dayData[i] = { ingresos: 0, gastos: 0 };
+    }
+
+    transactions.forEach(tx => {
+      const date = new Date(tx.date);
+      const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays >= 0 && diffDays < 7) {
+        const dayIndex = (6 - diffDays + date.getDay()) % 7;
+        if (tx.type === 'income') {
+          dayData[dayIndex].ingresos += Number(tx.amount);
+        } else {
+          dayData[dayIndex].gastos += Number(tx.amount);
+        }
+      }
+    });
+
+    return days.map((day, i) => ({
+      day,
+      ingresos: dayData[i].ingresos,
+      gastos: dayData[i].gastos,
+    }));
+  }, [transactions]);
+
+  // Budget tracking with health indicators
   const budgetTracking = useMemo(() => {
     if (!projects || !transactions) return [];
     
@@ -116,233 +260,545 @@ export default function Finance() {
           .filter(t => t.project_id === project.id && t.type === 'expense')
           .reduce((sum, t) => sum + Number(t.amount), 0);
         
+        const earned = transactions
+          .filter(t => t.project_id === project.id && t.type === 'income')
+          .reduce((sum, t) => sum + Number(t.amount), 0);
+        
+        const percentage = (spent / project.budget) * 100;
+        const health = percentage > 90 ? 'critical' : percentage > 70 ? 'warning' : 'healthy';
+        
         return {
-          project: project.name,
+          id: project.id,
+          name: project.name,
           budget: project.budget,
           spent,
+          earned,
           remaining: project.budget - spent,
+          percentage,
+          health,
+          status: project.status,
         };
       })
-      .slice(0, 4);
+      .slice(0, 6);
   }, [projects, transactions]);
 
-  const recentTransactions = transactions?.slice(0, 5) || [];
-  const recentInvoices = invoices?.slice(0, 4) || [];
+  // Pending invoices with urgency
+  const pendingInvoices = useMemo(() => {
+    if (!invoices) return { total: 0, count: 0, urgent: 0, items: [] };
+    
+    const pending = invoices.filter(inv => inv.status === 'pending' || inv.status === 'overdue');
+    const urgent = pending.filter(inv => inv.status === 'overdue').length;
+    
+    return {
+      total: pending.reduce((sum, inv) => sum + Number(inv.amount), 0),
+      count: pending.length,
+      urgent,
+      items: pending.slice(0, 5),
+    };
+  }, [invoices]);
 
-  // Calculate pending invoices amount
-  const pendingInvoicesAmount = invoices
-    ?.filter(inv => inv.status === 'pending' || inv.status === 'overdue')
-    .reduce((sum, inv) => sum + Number(inv.amount), 0) || 0;
-  
-  const pendingInvoicesCount = invoices?.filter(inv => inv.status === 'pending' || inv.status === 'overdue').length || 0;
+  // Recent transactions filtered
+  const filteredTransactions = useMemo(() => {
+    if (!transactions) return [];
+    return transactions
+      .filter(tx => 
+        searchQuery === "" || 
+        tx.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tx.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .slice(0, 8);
+  }, [transactions, searchQuery]);
+
+  // Quick insights
+  const insights = useMemo(() => {
+    if (!analytics || !stats) return [];
+    
+    const items = [];
+    
+    if (analytics.incomeGrowth > 10) {
+      items.push({
+        type: 'success',
+        icon: TrendingUp,
+        title: 'Ingresos en alza',
+        description: `+${analytics.incomeGrowth.toFixed(1)}% vs mes anterior`,
+      });
+    } else if (analytics.incomeGrowth < -10) {
+      items.push({
+        type: 'warning',
+        icon: TrendingDown,
+        title: 'Ingresos decreciendo',
+        description: `${analytics.incomeGrowth.toFixed(1)}% vs mes anterior`,
+      });
+    }
+
+    if (pendingInvoices.urgent > 0) {
+      items.push({
+        type: 'error',
+        icon: AlertTriangle,
+        title: 'Facturas vencidas',
+        description: `${pendingInvoices.urgent} facturas requieren atención`,
+      });
+    }
+
+    if (stats.marginPercentage > 30) {
+      items.push({
+        type: 'success',
+        icon: Target,
+        title: 'Margen saludable',
+        description: `${stats.marginPercentage.toFixed(1)}% de rentabilidad`,
+      });
+    }
+
+    if (analytics.runway > 6) {
+      items.push({
+        type: 'info',
+        icon: Sparkles,
+        title: 'Runway sólido',
+        description: `${analytics.runway} meses de operación`,
+      });
+    }
+
+    return items.slice(0, 3);
+  }, [analytics, stats, pendingInvoices]);
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-1">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Finanzas</h1>
-            <p className="text-muted-foreground mt-1">Control financiero y contabilidad</p>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <div className="flex gap-3">
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-10 w-40" />
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32" />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-36 rounded-xl" />)}
         </div>
-        <Skeleton className="h-96" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="lg:col-span-2 h-[400px] rounded-xl" />
+          <Skeleton className="h-[400px] rounded-xl" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Finanzas</h1>
-          <p className="text-muted-foreground mt-1">
-            Control financiero y contabilidad
-          </p>
+    <div className="space-y-6 p-1">
+      {/* Header Section */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
+              <DollarSign className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold">Centro Financiero</h1>
+              <p className="text-muted-foreground text-sm">
+                Análisis en tiempo real • {format(new Date(), "EEEE, d 'de' MMMM", { locale: es })}
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="gap-2">
+        
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[200px] lg:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar transacciones..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-secondary/50 border-border/50"
+            />
+          </div>
+          <Button variant="outline" size="icon" className="shrink-0">
+            <Filter className="w-4 h-4" />
+          </Button>
+          <Button variant="outline" className="gap-2 shrink-0">
             <Download className="w-4 h-4" />
-            Exportar
+            <span className="hidden sm:inline">Exportar</span>
           </Button>
           <CreateTransactionDialog />
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="glass rounded-xl p-6 animate-fade-in">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Ingresos Totales</p>
-              <p className="text-3xl font-bold">${stats?.totalIncome.toLocaleString() || 0}</p>
-              <p className="text-sm text-success flex items-center gap-1">
-                <ArrowUpRight className="w-4 h-4" />
-                Este año
-              </p>
+      {/* Quick Insights Banner */}
+      {insights.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 animate-fade-in">
+          {insights.map((insight, i) => (
+            <div 
+              key={i}
+              className={cn(
+                "flex items-center gap-3 p-4 rounded-xl border transition-all hover:scale-[1.02]",
+                insight.type === 'success' && "bg-success/5 border-success/20",
+                insight.type === 'warning' && "bg-warning/5 border-warning/20",
+                insight.type === 'error' && "bg-destructive/5 border-destructive/20",
+                insight.type === 'info' && "bg-primary/5 border-primary/20",
+              )}
+            >
+              <div className={cn(
+                "p-2 rounded-lg",
+                insight.type === 'success' && "bg-success/10",
+                insight.type === 'warning' && "bg-warning/10",
+                insight.type === 'error' && "bg-destructive/10",
+                insight.type === 'info' && "bg-primary/10",
+              )}>
+                <insight.icon className={cn(
+                  "w-5 h-5",
+                  insight.type === 'success' && "text-success",
+                  insight.type === 'warning' && "text-warning",
+                  insight.type === 'error' && "text-destructive",
+                  insight.type === 'info' && "text-primary",
+                )} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-sm truncate">{insight.title}</p>
+                <p className="text-xs text-muted-foreground truncate">{insight.description}</p>
+              </div>
             </div>
-            <div className="p-3 rounded-lg bg-success/10">
-              <TrendingUp className="w-6 h-6 text-success" />
+          ))}
+        </div>
+      )}
+
+      {/* Main Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Income */}
+        <div className="glass rounded-xl p-5 animate-fade-in group hover:border-primary/30 transition-all">
+          <div className="flex items-start justify-between mb-3">
+            <div className="p-2.5 rounded-lg bg-success/10 group-hover:bg-success/20 transition-colors">
+              <TrendingUp className="w-5 h-5 text-success" />
             </div>
+            {analytics && analytics.incomeGrowth !== 0 && (
+              <Badge variant="outline" className={cn(
+                "text-xs border",
+                analytics.incomeGrowth > 0 ? "bg-success/10 text-success border-success/30" : "bg-destructive/10 text-destructive border-destructive/30"
+              )}>
+                {analytics.incomeGrowth > 0 ? "+" : ""}{analytics.incomeGrowth.toFixed(1)}%
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mb-1">Ingresos Totales</p>
+          <p className="text-2xl lg:text-3xl font-bold">${stats?.totalIncome.toLocaleString() || 0}</p>
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <ArrowUpRight className="w-3.5 h-3.5 text-success" />
+            <span>Este mes: ${analytics?.currentIncome.toLocaleString() || 0}</span>
           </div>
         </div>
 
-        <div className="glass rounded-xl p-6 animate-fade-in">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Gastos Totales</p>
-              <p className="text-3xl font-bold">${stats?.totalExpenses.toLocaleString() || 0}</p>
-              <p className="text-sm text-destructive flex items-center gap-1">
-                <ArrowDownRight className="w-4 h-4" />
-                Este año
-              </p>
+        {/* Total Expenses */}
+        <div className="glass rounded-xl p-5 animate-fade-in group hover:border-destructive/30 transition-all">
+          <div className="flex items-start justify-between mb-3">
+            <div className="p-2.5 rounded-lg bg-destructive/10 group-hover:bg-destructive/20 transition-colors">
+              <TrendingDown className="w-5 h-5 text-destructive" />
             </div>
-            <div className="p-3 rounded-lg bg-destructive/10">
-              <TrendingDown className="w-6 h-6 text-destructive" />
-            </div>
+            {analytics && analytics.expenseGrowth !== 0 && (
+              <Badge variant="outline" className={cn(
+                "text-xs border",
+                analytics.expenseGrowth < 0 ? "bg-success/10 text-success border-success/30" : "bg-warning/10 text-warning border-warning/30"
+              )}>
+                {analytics.expenseGrowth > 0 ? "+" : ""}{analytics.expenseGrowth.toFixed(1)}%
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mb-1">Gastos Totales</p>
+          <p className="text-2xl lg:text-3xl font-bold">${stats?.totalExpenses.toLocaleString() || 0}</p>
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <ArrowDownRight className="w-3.5 h-3.5 text-destructive" />
+            <span>Este mes: ${analytics?.currentExpenses.toLocaleString() || 0}</span>
           </div>
         </div>
 
-        <div className="glass rounded-xl p-6 animate-fade-in">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Margen Neto</p>
-              <p className="text-3xl font-bold">${stats?.netMargin.toLocaleString() || 0}</p>
-              <p className="text-sm text-success flex items-center gap-1">
-                <ArrowUpRight className="w-4 h-4" />
-                {stats?.marginPercentage.toFixed(1) || 0}% margen
-              </p>
+        {/* Net Margin */}
+        <div className="glass rounded-xl p-5 animate-fade-in group hover:border-primary/30 transition-all">
+          <div className="flex items-start justify-between mb-3">
+            <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <PiggyBank className="w-5 h-5 text-primary" />
             </div>
-            <div className="p-3 rounded-lg bg-primary/10">
-              <PiggyBank className="w-6 h-6 text-primary" />
-            </div>
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
+              {stats?.marginPercentage.toFixed(1) || 0}%
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground mb-1">Margen Neto</p>
+          <p className="text-2xl lg:text-3xl font-bold">${stats?.netMargin.toLocaleString() || 0}</p>
+          <div className="mt-2">
+            <Progress 
+              value={Math.min(stats?.marginPercentage || 0, 100)} 
+              className="h-1.5"
+            />
           </div>
         </div>
 
-        <div className="glass rounded-xl p-6 animate-fade-in">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Por Cobrar</p>
-              <p className="text-3xl font-bold">${pendingInvoicesAmount.toLocaleString()}</p>
-              <p className="text-sm text-warning">{pendingInvoicesCount} facturas pendientes</p>
+        {/* Pending Invoices */}
+        <div className="glass rounded-xl p-5 animate-fade-in group hover:border-warning/30 transition-all">
+          <div className="flex items-start justify-between mb-3">
+            <div className="p-2.5 rounded-lg bg-warning/10 group-hover:bg-warning/20 transition-colors">
+              <Receipt className="w-5 h-5 text-warning" />
             </div>
-            <div className="p-3 rounded-lg bg-warning/10">
-              <Receipt className="w-6 h-6 text-warning" />
-            </div>
+            {pendingInvoices.urgent > 0 && (
+              <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30 text-xs animate-pulse">
+                {pendingInvoices.urgent} vencidas
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mb-1">Por Cobrar</p>
+          <p className="text-2xl lg:text-3xl font-bold">${pendingInvoices.total.toLocaleString()}</p>
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock className="w-3.5 h-3.5" />
+            <span>{pendingInvoices.count} facturas pendientes</span>
           </div>
         </div>
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Revenue Chart */}
-        <div className="lg:col-span-2 glass rounded-xl p-6 animate-slide-up">
-          <div className="flex items-center justify-between mb-6">
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Main Revenue Chart */}
+        <div className="xl:col-span-2 glass rounded-xl p-6 animate-slide-up">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h3 className="text-lg font-semibold">Flujo de Caja</h3>
-              <p className="text-sm text-muted-foreground">Comparativa mensual {new Date().getFullYear()}</p>
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Activity className="w-5 h-5 text-primary" />
+                Flujo de Caja
+              </h3>
+              <p className="text-sm text-muted-foreground">Análisis mensual {new Date().getFullYear()}</p>
             </div>
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-4 text-xs">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-primary" />
                 <span className="text-muted-foreground">Ingresos</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-destructive/60" />
+                <div className="w-3 h-3 rounded-full bg-destructive/70" />
                 <span className="text-muted-foreground">Gastos</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-info" />
+                <span className="text-muted-foreground">Neto</span>
               </div>
             </div>
           </div>
-          <div className="h-[300px]">
+          
+          <div className="h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
+              <ComposedChart data={chartData}>
                 <defs>
-                  <linearGradient id="colorIngresos2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(142, 69%, 58%)" stopOpacity={0.3} />
+                  <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(142, 69%, 58%)" stopOpacity={0.4} />
                     <stop offset="95%" stopColor="hsl(142, 69%, 58%)" stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="colorGastos2" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id="colorGastos" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(0, 72%, 51%)" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="hsl(0, 72%, 51%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="month" stroke="hsl(220, 10%, 55%)" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="hsl(220, 10%, 55%)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v / 1000}k`} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(220, 15%, 10%)", border: "1px solid hsl(220, 15%, 15%)", borderRadius: "8px", color: "white" }} formatter={(v: number) => [`$${v.toLocaleString()}`, ""]} />
-                <Area type="monotone" dataKey="ingresos" stroke="hsl(142, 69%, 58%)" strokeWidth={2} fillOpacity={1} fill="url(#colorIngresos2)" />
-                <Area type="monotone" dataKey="gastos" stroke="hsl(0, 72%, 51%)" strokeWidth={2} fillOpacity={1} fill="url(#colorGastos2)" />
-              </AreaChart>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 15%)" vertical={false} />
+                <XAxis 
+                  dataKey="month" 
+                  stroke="hsl(220, 10%, 55%)" 
+                  fontSize={11} 
+                  tickLine={false} 
+                  axisLine={false} 
+                />
+                <YAxis 
+                  stroke="hsl(220, 10%, 55%)" 
+                  fontSize={11} 
+                  tickLine={false} 
+                  axisLine={false} 
+                  tickFormatter={(v) => `$${v / 1000}k`} 
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: "hsl(220, 15%, 8%)", 
+                    border: "1px solid hsl(220, 15%, 15%)", 
+                    borderRadius: "12px", 
+                    color: "white",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
+                  }} 
+                  formatter={(v: number, name: string) => [
+                    `$${v.toLocaleString()}`, 
+                    name === 'ingresos' ? 'Ingresos' : name === 'gastos' ? 'Gastos' : 'Neto'
+                  ]} 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="ingresos" 
+                  stroke="hsl(142, 69%, 58%)" 
+                  strokeWidth={2} 
+                  fillOpacity={1} 
+                  fill="url(#colorIngresos)" 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="gastos" 
+                  stroke="hsl(0, 72%, 51%)" 
+                  strokeWidth={2} 
+                  fillOpacity={1} 
+                  fill="url(#colorGastos)" 
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="neto" 
+                  stroke="hsl(199, 89%, 48%)" 
+                  strokeWidth={2.5}
+                  strokeDasharray="5 5"
+                  dot={{ fill: "hsl(199, 89%, 48%)", r: 3 }}
+                />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Expense Distribution */}
         <div className="glass rounded-xl p-6 animate-slide-up">
-          <h3 className="text-lg font-semibold mb-6">Distribución de Gastos</h3>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <PieChartIcon className="w-5 h-5 text-primary" />
+                Distribución
+              </h3>
+              <p className="text-sm text-muted-foreground">Por categoría</p>
+            </div>
+          </div>
+          
           {expenseDistribution.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">Sin gastos registrados</p>
+            <div className="flex flex-col items-center justify-center h-[280px] text-center">
+              <div className="p-4 rounded-full bg-secondary/50 mb-3">
+                <BarChart3 className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">Sin gastos registrados</p>
+            </div>
           ) : (
             <>
-              <div className="h-[200px]">
+              <div className="h-[180px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={expenseDistribution} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                    <Pie 
+                      data={expenseDistribution} 
+                      cx="50%" 
+                      cy="50%" 
+                      innerRadius={50} 
+                      outerRadius={75} 
+                      paddingAngle={3} 
+                      dataKey="value"
+                      strokeWidth={0}
+                    >
                       {expenseDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.color}
+                          className="transition-all hover:opacity-80"
+                        />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: "hsl(220, 15%, 10%)", border: "1px solid hsl(220, 15%, 15%)", borderRadius: "8px", color: "white" }} formatter={(v: number) => [`${v}%`, ""]} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: "hsl(220, 15%, 8%)", 
+                        border: "1px solid hsl(220, 15%, 15%)", 
+                        borderRadius: "12px", 
+                        color: "white" 
+                      }} 
+                      formatter={(v: number, name: string, props: any) => [
+                        `${v}% ($${props.payload.amount.toLocaleString()})`, 
+                        props.payload.name
+                      ]} 
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
+              
               <div className="space-y-2 mt-4">
-                {expenseDistribution.map((cat) => (
-                  <div key={cat.name} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
-                      <span>{cat.name}</span>
+                {expenseDistribution.slice(0, 5).map((cat) => {
+                  const Icon = categoryIcons[cat.name] || BarChart3;
+                  return (
+                    <div 
+                      key={cat.name} 
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary/30 transition-colors group"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div 
+                          className="w-8 h-8 rounded-lg flex items-center justify-center"
+                          style={{ backgroundColor: `${cat.color}20` }}
+                        >
+                          <Icon className="w-4 h-4" style={{ color: cat.color }} />
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium">{cat.name}</span>
+                          <p className="text-xs text-muted-foreground">{cat.count} transacciones</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-semibold text-sm">{cat.value}%</span>
+                        <p className="text-xs text-muted-foreground">${cat.amount.toLocaleString()}</p>
+                      </div>
                     </div>
-                    <span className="font-medium">{cat.value}%</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           )}
         </div>
       </div>
 
-      {/* Tables Row */}
+      {/* Secondary Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Transactions */}
         <div className="glass rounded-xl p-6 animate-slide-up">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Transacciones Recientes</h3>
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-primary" />
+              Transacciones Recientes
+            </h3>
+            <Button variant="ghost" size="sm" className="text-xs gap-1.5">
+              Ver todas <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
           </div>
-          {recentTransactions.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">Sin transacciones</p>
+          
+          {filteredTransactions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="p-4 rounded-full bg-secondary/50 mb-3">
+                <Wallet className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {searchQuery ? "No se encontraron transacciones" : "Sin transacciones"}
+              </p>
+            </div>
           ) : (
-            <div className="space-y-3">
-              {recentTransactions.map((tx) => (
-                <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+            <div className="space-y-2">
+              {filteredTransactions.map((tx, i) => (
+                <div 
+                  key={tx.id} 
+                  className="flex items-center justify-between p-3 rounded-xl bg-secondary/20 hover:bg-secondary/40 transition-all group cursor-pointer"
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
                   <div className="flex items-center gap-3">
-                    <div className={cn("p-2 rounded-lg", tx.type === "income" ? "bg-success/10" : "bg-destructive/10")}>
+                    <div className={cn(
+                      "p-2.5 rounded-xl transition-transform group-hover:scale-110",
+                      tx.type === "income" ? "bg-success/10" : "bg-destructive/10"
+                    )}>
                       {tx.type === "income" ? (
                         <ArrowUpRight className="w-4 h-4 text-success" />
                       ) : (
                         <ArrowDownRight className="w-4 h-4 text-destructive" />
                       )}
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">{tx.description}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(tx.date), "d MMM yyyy", { locale: es })}
-                      </p>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate max-w-[180px]">{tx.description}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{format(new Date(tx.date), "d MMM", { locale: es })}</span>
+                        {tx.category && (
+                          <>
+                            <span>•</span>
+                            <span className="truncate">{tx.category}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <span className={cn("font-semibold", tx.type === "income" ? "text-success" : "text-destructive")}>
+                  <span className={cn(
+                    "font-semibold tabular-nums",
+                    tx.type === "income" ? "text-success" : "text-destructive"
+                  )}>
                     {tx.type === "income" ? "+" : "-"}${Number(tx.amount).toLocaleString()}
                   </span>
                 </div>
@@ -353,30 +809,59 @@ export default function Finance() {
 
         {/* Invoices */}
         <div className="glass rounded-xl p-6 animate-slide-up">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Facturas</h3>
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-primary" />
+              Facturas Pendientes
+            </h3>
+            <Button variant="ghost" size="sm" className="text-xs gap-1.5">
+              Ver todas <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
           </div>
-          {recentInvoices.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">Sin facturas</p>
+          
+          {pendingInvoices.items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="p-4 rounded-full bg-success/10 mb-3">
+                <CheckCircle2 className="w-8 h-8 text-success" />
+              </div>
+              <p className="text-sm font-medium text-success">¡Todo al día!</p>
+              <p className="text-xs text-muted-foreground">No hay facturas pendientes</p>
+            </div>
           ) : (
-            <div className="space-y-3">
-              {recentInvoices.map((inv) => {
+            <div className="space-y-2">
+              {pendingInvoices.items.map((inv, i) => {
                 const config = statusConfig[inv.status as keyof typeof statusConfig] || statusConfig.pending;
+                const StatusIcon = config.icon;
                 return (
-                  <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-sm">{inv.invoice_number}</p>
-                        <Badge className={cn("text-xs border", config.color)}>
-                          {config.label}
-                        </Badge>
+                  <div 
+                    key={inv.id} 
+                    className="flex items-center justify-between p-3 rounded-xl bg-secondary/20 hover:bg-secondary/40 transition-all group cursor-pointer"
+                    style={{ animationDelay: `${i * 50}ms` }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "p-2.5 rounded-xl",
+                        inv.status === 'overdue' ? "bg-destructive/10" : "bg-warning/10"
+                      )}>
+                        <StatusIcon className={cn(
+                          "w-4 h-4",
+                          inv.status === 'overdue' ? "text-destructive" : "text-warning"
+                        )} />
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {inv.client?.name || 'Sin cliente'} 
-                        {inv.due_date && ` • Vence: ${format(new Date(inv.due_date), "d MMM yyyy", { locale: es })}`}
-                      </p>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-sm">{inv.invoice_number}</p>
+                          <Badge className={cn("text-[10px] px-1.5 py-0 border", config.color)}>
+                            {config.label}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                          {inv.client?.name || 'Sin cliente'} 
+                          {inv.due_date && ` • ${format(new Date(inv.due_date), "d MMM", { locale: es })}`}
+                        </p>
+                      </div>
                     </div>
-                    <span className="font-semibold">${Number(inv.amount).toLocaleString()}</span>
+                    <span className="font-semibold tabular-nums">${Number(inv.amount).toLocaleString()}</span>
                   </div>
                 );
               })}
@@ -388,25 +873,113 @@ export default function Finance() {
       {/* Budget Tracking */}
       {budgetTracking.length > 0 && (
         <div className="glass rounded-xl p-6 animate-slide-up">
-          <h3 className="text-lg font-semibold mb-6">Presupuestos por Proyecto</h3>
-          <div className="space-y-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Target className="w-5 h-5 text-primary" />
+                Control de Presupuestos
+              </h3>
+              <p className="text-sm text-muted-foreground">Seguimiento por proyecto</p>
+            </div>
+            <Button variant="ghost" size="sm" className="text-xs gap-1.5">
+              Ver todos <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {budgetTracking.map((budget) => (
-              <div key={budget.project} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{budget.project}</span>
-                  <span className="text-sm text-muted-foreground">
-                    ${budget.spent.toLocaleString()} / ${budget.budget.toLocaleString()}
-                  </span>
+              <div 
+                key={budget.id} 
+                className={cn(
+                  "p-4 rounded-xl border transition-all hover:scale-[1.02]",
+                  budget.health === 'critical' && "bg-destructive/5 border-destructive/20",
+                  budget.health === 'warning' && "bg-warning/5 border-warning/20",
+                  budget.health === 'healthy' && "bg-secondary/30 border-border/50 hover:border-primary/30",
+                )}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">{budget.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {budget.status === 'active' ? 'En progreso' : budget.status}
+                    </p>
+                  </div>
+                  <Badge 
+                    variant="outline" 
+                    className={cn(
+                      "text-[10px] px-1.5 shrink-0",
+                      budget.health === 'critical' && "bg-destructive/10 text-destructive border-destructive/30",
+                      budget.health === 'warning' && "bg-warning/10 text-warning border-warning/30",
+                      budget.health === 'healthy' && "bg-success/10 text-success border-success/30",
+                    )}
+                  >
+                    {budget.percentage.toFixed(0)}%
+                  </Badge>
                 </div>
-                <Progress value={(budget.spent / budget.budget) * 100} className={cn("h-2", budget.spent / budget.budget > 0.9 && "[&>div]:bg-warning")} />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Gastado: {((budget.spent / budget.budget) * 100).toFixed(0)}%</span>
-                  <span className={cn(budget.remaining < 5000 ? "text-warning" : "text-success")}>
-                    Restante: ${budget.remaining.toLocaleString()}
-                  </span>
+                
+                <Progress 
+                  value={Math.min(budget.percentage, 100)} 
+                  className={cn(
+                    "h-2 mb-3",
+                    budget.health === 'critical' && "[&>div]:bg-destructive",
+                    budget.health === 'warning' && "[&>div]:bg-warning",
+                  )}
+                />
+                
+                <div className="flex justify-between text-xs">
+                  <div>
+                    <p className="text-muted-foreground">Gastado</p>
+                    <p className="font-semibold">${budget.spent.toLocaleString()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-muted-foreground">Restante</p>
+                    <p className={cn(
+                      "font-semibold",
+                      budget.remaining < 0 ? "text-destructive" : budget.health === 'warning' ? "text-warning" : "text-success"
+                    )}>
+                      ${budget.remaining.toLocaleString()}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Analytics Cards */}
+      {analytics && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="glass rounded-xl p-4 animate-fade-in">
+            <div className="flex items-center gap-2 mb-2">
+              <BarChart3 className="w-4 h-4 text-primary" />
+              <span className="text-xs text-muted-foreground">Promedio por Transacción</span>
+            </div>
+            <p className="text-xl font-bold">${analytics.avgTransactionValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+          </div>
+          
+          <div className="glass rounded-xl p-4 animate-fade-in">
+            <div className="flex items-center gap-2 mb-2">
+              <Activity className="w-4 h-4 text-info" />
+              <span className="text-xs text-muted-foreground">Total Transacciones</span>
+            </div>
+            <p className="text-xl font-bold">{analytics.transactionCount}</p>
+          </div>
+          
+          <div className="glass rounded-xl p-4 animate-fade-in">
+            <div className="flex items-center gap-2 mb-2">
+              <Zap className="w-4 h-4 text-warning" />
+              <span className="text-xs text-muted-foreground">Burn Rate Mensual</span>
+            </div>
+            <p className="text-xl font-bold">${analytics.burnRate.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+          </div>
+          
+          <div className="glass rounded-xl p-4 animate-fade-in">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-success" />
+              <span className="text-xs text-muted-foreground">Runway Estimado</span>
+            </div>
+            <p className="text-xl font-bold">{analytics.runway > 0 ? `${analytics.runway} meses` : '—'}</p>
           </div>
         </div>
       )}
