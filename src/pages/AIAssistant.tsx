@@ -14,86 +14,101 @@ import {
   Clock,
   Zap,
   Brain,
-  MessageSquarePlus,
   Trash2,
   Copy,
   Check,
-  RefreshCw,
   ChevronRight,
   Activity,
   TrendingUp,
   Target,
   Loader2,
-  AlertCircle,
-  Mic,
   PanelRightClose,
   PanelRight,
   Settings2,
-  History,
+  Database,
+  Users,
+  FolderKanban,
+  Receipt,
+  CalendarDays,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { fetchDataContext, DataContext } from "@/lib/aiDataContext";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`;
 
 const quickActions = [
   { 
     icon: BarChart3, 
-    text: "Genera un reporte financiero del último mes", 
-    category: "Reportes",
-    gradient: "from-success/20 to-success/5"
+    text: "Dame un resumen ejecutivo del estado actual del negocio", 
+    category: "Reporte",
+    gradient: "from-primary/20 to-primary/5",
+    dataType: "all"
+  },
+  { 
+    icon: FolderKanban, 
+    text: "¿Cuál es el estado de los proyectos activos?", 
+    category: "Proyectos",
+    gradient: "from-info/20 to-info/5",
+    dataType: "projects"
   },
   { 
     icon: TrendingUp, 
-    text: "Analiza el rendimiento de proyectos activos", 
-    category: "Análisis",
-    gradient: "from-info/20 to-info/5"
-  },
-  { 
-    icon: Clock, 
-    text: "¿Qué tareas tienen prioridad alta pendientes?", 
-    category: "Tareas",
-    gradient: "from-warning/20 to-warning/5"
+    text: "Analiza las finanzas y el flujo de caja del mes", 
+    category: "Finanzas",
+    gradient: "from-success/20 to-success/5",
+    dataType: "finance"
   },
   { 
     icon: Target, 
-    text: "Resume el estado de los leads este mes", 
+    text: "¿Cómo están los leads y el pipeline de ventas?", 
     category: "Ventas",
-    gradient: "from-primary/20 to-primary/5"
+    gradient: "from-warning/20 to-warning/5",
+    dataType: "leads"
   },
 ];
 
 const capabilities = [
   {
-    icon: Brain,
-    title: "Análisis Inteligente",
-    description: "Interpreta datos de proyectos, finanzas y clientes con insights accionables.",
+    icon: Database,
+    title: "Datos en Tiempo Real",
+    description: "Consulta información actualizada de proyectos, finanzas y clientes.",
     color: "text-primary",
     bg: "bg-primary/10",
   },
   {
-    icon: FileText,
-    title: "Generación de Reportes",
-    description: "Crea informes ejecutivos, financieros y de KPIs automáticamente.",
+    icon: Brain,
+    title: "Análisis Inteligente",
+    description: "Interpreta patrones y genera insights accionables.",
     color: "text-info",
     bg: "bg-info/10",
   },
   {
-    icon: Zap,
-    title: "Automatización",
-    description: "Optimiza flujos de trabajo y sugiere automatizaciones inteligentes.",
+    icon: FileText,
+    title: "Reportes Automáticos",
+    description: "Crea resúmenes ejecutivos basados en datos reales.",
     color: "text-warning",
     bg: "bg-warning/10",
   },
   {
     icon: Lightbulb,
     title: "Recomendaciones",
-    description: "Proporciona sugerencias basadas en patrones y mejores prácticas.",
+    description: "Sugiere acciones basadas en el análisis de datos.",
     color: "text-success",
     bg: "bg-success/10",
   },
+];
+
+const dataCommands = [
+  { icon: FolderKanban, label: "Proyectos", keyword: "proyectos" },
+  { icon: Users, label: "Clientes", keyword: "clientes" },
+  { icon: TrendingUp, label: "Finanzas", keyword: "finanzas" },
+  { icon: Target, label: "Leads", keyword: "leads" },
+  { icon: Clock, label: "Tareas", keyword: "tareas" },
+  { icon: CalendarDays, label: "Eventos", keyword: "eventos" },
+  { icon: Receipt, label: "Facturas", keyword: "facturas" },
 ];
 
 interface Message {
@@ -102,12 +117,14 @@ interface Message {
   content: string;
   timestamp: Date;
   isStreaming?: boolean;
+  dataContext?: string[];
 }
 
 export default function AIAssistant() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showSidebar, setShowSidebar] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -123,14 +140,17 @@ export default function AIAssistant() {
 
   const generateId = () => Math.random().toString(36).substring(2, 15);
 
-  const streamChat = async (userMessages: { role: string; content: string }[]) => {
+  const streamChat = async (
+    userMessages: { role: string; content: string }[],
+    dataContext?: DataContext
+  ) => {
     const resp = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ messages: userMessages }),
+      body: JSON.stringify({ messages: userMessages, dataContext }),
     });
 
     if (resp.status === 429) {
@@ -144,6 +164,20 @@ export default function AIAssistant() {
     }
 
     return resp;
+  };
+
+  const getDataContextLabels = (context: DataContext): string[] => {
+    const labels: string[] = [];
+    if (context.projects?.length) labels.push(`${context.projects.length} proyectos`);
+    if (context.clients?.length) labels.push(`${context.clients.length} clientes`);
+    if (context.transactions?.length) labels.push(`${context.transactions.length} transacciones`);
+    if (context.leads?.length) labels.push(`${context.leads.length} leads`);
+    if (context.tasks?.length) labels.push(`${context.tasks.length} tareas`);
+    if (context.todos?.length) labels.push(`${context.todos.length} todos`);
+    if (context.events?.length) labels.push(`${context.events.length} eventos`);
+    if (context.invoices?.length) labels.push(`${context.invoices.length} facturas`);
+    if (context.stats) labels.push("estadísticas");
+    return labels;
   };
 
   const handleSend = async (customMessage?: string) => {
@@ -160,6 +194,20 @@ export default function AIAssistant() {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    setIsFetchingData(true);
+
+    let dataContext: DataContext | undefined;
+    let contextLabels: string[] = [];
+
+    try {
+      // Fetch relevant data based on the message
+      dataContext = await fetchDataContext(messageText);
+      contextLabels = getDataContextLabels(dataContext);
+    } catch (error) {
+      console.error("Error fetching data context:", error);
+    }
+    
+    setIsFetchingData(false);
 
     const assistantId = generateId();
     let assistantContent = "";
@@ -171,6 +219,7 @@ export default function AIAssistant() {
       content: "",
       timestamp: new Date(),
       isStreaming: true,
+      dataContext: contextLabels,
     }]);
 
     try {
@@ -179,7 +228,7 @@ export default function AIAssistant() {
         content: m.content,
       }));
 
-      const resp = await streamChat(conversationHistory);
+      const resp = await streamChat(conversationHistory, dataContext);
       const reader = resp.body!.getReader();
       const decoder = new TextDecoder();
       let textBuffer = "";
@@ -230,7 +279,6 @@ export default function AIAssistant() {
     } catch (error) {
       console.error("Chat error:", error);
       
-      // Remove the streaming message
       setMessages(prev => prev.filter(m => m.id !== assistantId));
 
       if (error instanceof Error) {
@@ -291,11 +339,12 @@ export default function AIAssistant() {
             <div>
               <h2 className="font-semibold flex items-center gap-2">
                 Asistente IA
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/30">
-                  Gemini 3 Flash
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-success/10 text-success border-success/30">
+                  <Database className="w-2.5 h-2.5 mr-1" />
+                  Conectado
                 </Badge>
               </h2>
-              <p className="text-xs text-muted-foreground">Tu copiloto empresarial inteligente</p>
+              <p className="text-xs text-muted-foreground">Consulta datos reales del sistema</p>
             </div>
           </div>
           
@@ -333,15 +382,29 @@ export default function AIAssistant() {
                     <Bot className="w-12 h-12 text-primary" />
                   </div>
                   <div className="absolute -top-2 -right-2 p-2 rounded-xl bg-success/20 border border-success/30">
-                    <Sparkles className="w-4 h-4 text-success" />
+                    <Database className="w-4 h-4 text-success" />
                   </div>
                 </div>
                 
-                <h2 className="text-2xl font-bold mb-2">¡Hola! Soy tu Asistente IA</h2>
-                <p className="text-muted-foreground mb-8 max-w-md">
-                  Estoy aquí para ayudarte con análisis de datos, reportes, predicciones y automatizaciones. 
-                  ¿En qué puedo asistirte hoy?
+                <h2 className="text-2xl font-bold mb-2">Asistente con Datos Reales</h2>
+                <p className="text-muted-foreground mb-6 max-w-md text-sm">
+                  Consulto automáticamente la base de datos para darte respuestas precisas sobre proyectos, finanzas, clientes, leads y más.
                 </p>
+
+                {/* Data Commands */}
+                <div className="flex flex-wrap justify-center gap-2 mb-6">
+                  {dataCommands.map((cmd, i) => (
+                    <Badge 
+                      key={i}
+                      variant="outline" 
+                      className="text-xs gap-1.5 py-1 px-2.5 cursor-pointer hover:bg-primary/10 hover:border-primary/30 transition-colors"
+                      onClick={() => setInput(`Dame información sobre ${cmd.keyword}`)}
+                    >
+                      <cmd.icon className="w-3 h-3" />
+                      {cmd.label}
+                    </Badge>
+                  ))}
+                </div>
 
                 {/* Quick Actions */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl">
@@ -406,14 +469,39 @@ export default function AIAssistant() {
                           : "bg-primary text-primary-foreground"
                       )}
                     >
+                      {/* Data Context Badge */}
+                      {message.role === "assistant" && message.dataContext && message.dataContext.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {message.dataContext.map((label, i) => (
+                            <Badge 
+                              key={i} 
+                              variant="outline" 
+                              className="text-[9px] px-1.5 py-0 bg-primary/5 border-primary/20"
+                            >
+                              <Database className="w-2 h-2 mr-1" />
+                              {label}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      
                       <div className={cn(
                         "text-sm whitespace-pre-wrap leading-relaxed",
                         message.isStreaming && "animate-pulse"
                       )}>
                         {message.content || (
                           <span className="flex items-center gap-2 text-muted-foreground">
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Pensando...
+                            {isFetchingData ? (
+                              <>
+                                <Database className="w-4 h-4 animate-pulse" />
+                                Consultando datos...
+                              </>
+                            ) : (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Analizando...
+                              </>
+                            )}
                           </span>
                         )}
                       </div>
@@ -458,7 +546,7 @@ export default function AIAssistant() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Escribe tu mensaje o pregunta..."
+                placeholder="Pregunta sobre proyectos, finanzas, clientes, leads..."
                 disabled={isLoading}
                 className="flex-1 border-0 bg-transparent focus-visible:ring-0 px-2"
               />
@@ -477,7 +565,7 @@ export default function AIAssistant() {
               </Button>
             </div>
             <p className="text-[10px] text-center text-muted-foreground mt-2">
-              El asistente puede cometer errores. Verifica la información importante.
+              Los datos se consultan automáticamente según tu pregunta
             </p>
           </div>
         </div>
@@ -517,29 +605,23 @@ export default function AIAssistant() {
           </div>
         </div>
 
-        {/* Tips */}
+        {/* Data Sources */}
         <div className="glass rounded-2xl p-5 animate-slide-up">
           <div className="flex items-center gap-2 mb-4">
-            <Lightbulb className="w-4 h-4 text-warning" />
-            <h3 className="font-semibold text-sm">Tips de Uso</h3>
+            <Database className="w-4 h-4 text-success" />
+            <h3 className="font-semibold text-sm">Fuentes de Datos</h3>
           </div>
-          <div className="space-y-3 text-xs text-muted-foreground">
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-              <p>Sé específico con fechas y métricas que necesitas</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-              <p>Pide comparaciones entre períodos para mejor contexto</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-              <p>Solicita acciones concretas, no solo información</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-              <p>Puedes continuar la conversación para profundizar</p>
-            </div>
+          <div className="grid grid-cols-2 gap-2">
+            {dataCommands.map((cmd, i) => (
+              <button
+                key={i}
+                onClick={() => setInput(`Dame un resumen de ${cmd.keyword}`)}
+                className="flex items-center gap-2 p-2.5 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-all text-left"
+              >
+                <cmd.icon className="w-4 h-4 text-primary" />
+                <span className="text-xs font-medium">{cmd.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -547,7 +629,7 @@ export default function AIAssistant() {
         <div className="glass rounded-2xl p-5 animate-slide-up">
           <div className="flex items-center gap-2 mb-3">
             <Settings2 className="w-4 h-4 text-muted-foreground" />
-            <h3 className="font-semibold text-sm">Modelo Activo</h3>
+            <h3 className="font-semibold text-sm">Configuración</h3>
           </div>
           <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/30">
             <div className="flex items-center gap-2">
@@ -556,7 +638,7 @@ export default function AIAssistant() {
               </div>
               <div>
                 <p className="text-xs font-medium">Gemini 3 Flash</p>
-                <p className="text-[10px] text-muted-foreground">google/gemini-3-flash-preview</p>
+                <p className="text-[10px] text-muted-foreground">+ Datos ERP</p>
               </div>
             </div>
             <Badge variant="outline" className="text-[10px] bg-success/10 text-success border-success/30">
