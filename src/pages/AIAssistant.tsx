@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import {
   Sparkles,
   Send,
@@ -486,11 +487,12 @@ export default function AIAssistant() {
                       )}
                       
                       <div className={cn(
-                        "text-sm whitespace-pre-wrap leading-relaxed",
                         message.isStreaming && "animate-pulse"
                       )}>
-                        {message.content || (
-                          <span className="flex items-center gap-2 text-muted-foreground">
+                        {message.content ? (
+                          <MarkdownRenderer content={message.content} />
+                        ) : (
+                          <span className="flex items-center gap-2 text-muted-foreground text-sm">
                             {isFetchingData ? (
                               <>
                                 <Database className="w-4 h-4 animate-pulse" />
