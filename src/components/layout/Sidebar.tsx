@@ -69,7 +69,7 @@ export function Sidebar() {
 
       {/* Logo Section */}
       <div className="relative flex items-center justify-center h-16 px-5 border-b border-sidebar-border/50">
-        <img src={bizTechLogo} alt="BizTech" className="h-9 w-auto max-w-[140px] object-contain drop-shadow-lg" />
+        <img src={bizTechLogo} alt="BizTech" className="h-7 w-auto max-w-[140px] object-contain drop-shadow-lg" />
       </div>
 
       {/* Navigation */}
