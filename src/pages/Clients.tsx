@@ -65,7 +65,7 @@ export default function Clients() {
   const { data: projects } = useProjects();
   const { data: transactions } = useTransactions();
   const deleteClient = useDeleteClient();
-  
+
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -76,41 +76,42 @@ export default function Clients() {
 
   // Filter clients based on search
   const filteredClients = useMemo(() => {
-    return clients?.filter(client => 
-      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.company?.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
+    return (
+      clients?.filter(
+        (client) =>
+          client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          client.company?.toLowerCase().includes(searchQuery.toLowerCase()),
+      ) || []
+    );
   }, [clients, searchQuery]);
 
-  const selectedClient = selectedClientId 
-    ? clients?.find(c => c.id === selectedClientId) 
-    : null;
+  const selectedClient = selectedClientId ? clients?.find((c) => c.id === selectedClientId) : null;
 
   // Calculate client stats
   const getClientStats = (clientId: string) => {
-    const clientProjects = projects?.filter(p => p.client_id === clientId) || [];
-    const clientTransactions = transactions?.filter(t => t.client_id === clientId && t.type === 'income') || [];
+    const clientProjects = projects?.filter((p) => p.client_id === clientId) || [];
+    const clientTransactions = transactions?.filter((t) => t.client_id === clientId && t.type === "income") || [];
     const totalRevenue = clientTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-    const activeProjects = clientProjects.filter(p => p.status === 'active').length;
-    const completedProjects = clientProjects.filter(p => p.status === 'completed').length;
-    
+    const activeProjects = clientProjects.filter((p) => p.status === "active").length;
+    const completedProjects = clientProjects.filter((p) => p.status === "completed").length;
+
     return { totalRevenue, activeProjects, completedProjects, totalProjects: clientProjects.length };
   };
 
   // Global stats
   const globalStats = useMemo(() => {
     if (!clients) return { total: 0, totalRevenue: 0, avgRevenue: 0, withProjects: 0 };
-    
+
     let totalRevenue = 0;
     let withProjects = 0;
-    
-    clients.forEach(client => {
+
+    clients.forEach((client) => {
       const stats = getClientStats(client.id);
       totalRevenue += stats.totalRevenue;
       if (stats.totalProjects > 0) withProjects++;
     });
-    
+
     return {
       total: clients.length,
       totalRevenue,
@@ -120,7 +121,12 @@ export default function Clients() {
   }, [clients, projects, transactions]);
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
   };
 
   const handleEditClient = (client: Client) => {
@@ -153,15 +159,21 @@ export default function Clients() {
   };
 
   const openEmail = (email: string) => {
-    window.open(`mailto:${email}`, '_blank');
+    window.open(`mailto:${email}`, "_blank");
   };
 
   const openPhone = (phone: string) => {
-    window.open(`tel:${phone}`, '_blank');
+    window.open(`tel:${phone}`, "_blank");
   };
 
   // Stats Card Component
-  const StatsCard = ({ icon: Icon, label, value, subValue, color }: {
+  const StatsCard = ({
+    icon: Icon,
+    label,
+    value,
+    subValue,
+    color,
+  }: {
     icon: React.ElementType;
     label: string;
     value: string | number;
@@ -169,15 +181,20 @@ export default function Clients() {
     color: string;
   }) => (
     <div className="glass rounded-xl p-5 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
-      <div className={cn("absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2", color)} />
+      <div
+        className={cn(
+          "absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2",
+          color,
+        )}
+      />
       <div className="flex items-start justify-between relative z-10">
         <div>
           <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{label}</p>
           <p className="text-2xl font-bold mt-1">{value}</p>
           {subValue && <p className="text-xs text-muted-foreground mt-1">{subValue}</p>}
         </div>
-        <div className={cn("p-2.5 rounded-lg", color.replace('bg-', 'bg-').replace('/20', '/15'))}>
-          <Icon className={cn("w-5 h-5", color.replace('bg-', 'text-').replace('/20', ''))} />
+        <div className={cn("p-2.5 rounded-lg", color.replace("bg-", "bg-").replace("/20", "/15"))}>
+          <Icon className={cn("w-5 h-5", color.replace("bg-", "text-").replace("/20", ""))} />
         </div>
       </div>
     </div>
@@ -187,17 +204,17 @@ export default function Clients() {
   const ClientCard = ({ client }: { client: Client }) => {
     const stats = getClientStats(client.id);
     const isSelected = selectedClientId === client.id;
-    
+
     return (
       <div
         onClick={() => setSelectedClientId(client.id)}
         className={cn(
           "glass rounded-xl p-5 cursor-pointer group transition-all duration-300 hover:scale-[1.02] animate-fade-in relative overflow-hidden",
-          isSelected && "ring-2 ring-primary shadow-lg shadow-primary/10"
+          isSelected && "ring-2 ring-primary shadow-lg shadow-primary/10",
         )}
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
-        
+
         <div className="flex items-start justify-between relative z-10">
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -218,12 +235,12 @@ export default function Clients() {
               )}
             </div>
           </div>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <MoreHorizontal className="w-4 h-4" />
@@ -247,7 +264,7 @@ export default function Clients() {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => handleDeleteClick(client)}
                 className="text-destructive focus:text-destructive"
               >
@@ -293,13 +310,13 @@ export default function Clients() {
   const ClientRow = ({ client }: { client: Client }) => {
     const stats = getClientStats(client.id);
     const isSelected = selectedClientId === client.id;
-    
+
     return (
       <div
         onClick={() => setSelectedClientId(client.id)}
         className={cn(
           "glass rounded-xl p-4 cursor-pointer group transition-all duration-200 hover:bg-secondary/30 animate-fade-in flex items-center gap-4",
-          isSelected && "ring-2 ring-primary bg-primary/5"
+          isSelected && "ring-2 ring-primary bg-primary/5",
         )}
       >
         <Avatar className="w-11 h-11 border-2 border-primary/20 flex-shrink-0">
@@ -307,15 +324,13 @@ export default function Clients() {
             {getInitials(client.name)}
           </AvatarFallback>
         </Avatar>
-        
+
         <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 items-center">
           <div className="min-w-0">
             <h3 className="font-semibold text-sm truncate">{client.name}</h3>
-            {client.company && (
-              <p className="text-xs text-muted-foreground truncate">{client.company}</p>
-            )}
+            {client.company && <p className="text-xs text-muted-foreground truncate">{client.company}</p>}
           </div>
-          
+
           <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
             {client.email && (
               <>
@@ -324,12 +339,12 @@ export default function Clients() {
               </>
             )}
           </div>
-          
+
           <div className="hidden md:flex items-center gap-4 text-sm">
             <span className="text-primary font-medium">${stats.totalRevenue.toLocaleString()}</span>
             <span className="text-muted-foreground">{stats.totalProjects} proyectos</span>
           </div>
-          
+
           <div className="hidden md:flex items-center justify-end gap-2">
             <Badge variant="outline" className="text-xs bg-success/10 text-success border-success/30">
               Activo
@@ -340,9 +355,9 @@ export default function Clients() {
         <div className="flex items-center gap-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <MoreHorizontal className="w-4 h-4" />
@@ -366,7 +381,7 @@ export default function Clients() {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => handleDeleteClick(client)}
                 className="text-destructive focus:text-destructive"
               >
@@ -385,7 +400,7 @@ export default function Clients() {
   const DetailPanel = () => {
     if (!selectedClient) return null;
     const stats = getClientStats(selectedClient.id);
-    
+
     return (
       <div className="glass rounded-2xl overflow-hidden animate-slide-up h-fit sticky top-6">
         {/* Header */}
@@ -399,7 +414,7 @@ export default function Clients() {
           >
             <X className="w-4 h-4" />
           </Button>
-          
+
           <div className="relative flex items-center gap-4">
             <Avatar className="w-16 h-16 border-3 border-primary/30 shadow-lg shadow-primary/20">
               <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-xl font-bold">
@@ -414,9 +429,7 @@ export default function Clients() {
                   {selectedClient.company}
                 </p>
               )}
-              <Badge className="mt-2 bg-success/20 text-success border-success/30">
-                Cliente Activo
-              </Badge>
+              <Badge className="mt-2 bg-success/20 text-success border-success/30">Cliente Activo</Badge>
             </div>
           </div>
         </div>
@@ -438,7 +451,7 @@ export default function Clients() {
         {/* Contact Info */}
         <div className="p-4 space-y-2">
           <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">Contacto</h4>
-          
+
           {selectedClient.email && (
             <button
               onClick={() => openEmail(selectedClient.email!)}
@@ -456,7 +469,7 @@ export default function Clients() {
               <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
           )}
-          
+
           {selectedClient.phone && (
             <button
               onClick={() => openPhone(selectedClient.phone!)}
@@ -474,7 +487,7 @@ export default function Clients() {
               <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
           )}
-          
+
           {selectedClient.address && (
             <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
               <div className="p-2 rounded-lg bg-warning/10">
@@ -511,7 +524,7 @@ export default function Clients() {
 
         {/* Actions */}
         <div className="p-4 border-t border-border/50 flex gap-2">
-          <Button 
+          <Button
             className="flex-1 gap-2"
             onClick={() => selectedClient.email && openEmail(selectedClient.email)}
             disabled={!selectedClient.email}
@@ -519,8 +532,8 @@ export default function Clients() {
             <Mail className="w-4 h-4" />
             Email
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="flex-1 gap-2"
             onClick={() => selectedClient.phone && openPhone(selectedClient.phone)}
             disabled={!selectedClient.phone}
@@ -528,11 +541,7 @@ export default function Clients() {
             <Phone className="w-4 h-4" />
             Llamar
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleEditClient(selectedClient)}
-          >
+          <Button variant="ghost" size="icon" onClick={() => handleEditClient(selectedClient)}>
             <Edit className="w-4 h-4" />
           </Button>
         </div>
@@ -551,11 +560,15 @@ export default function Clients() {
           <Skeleton className="h-10 w-32" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-28 rounded-xl" />
+          ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 rounded-xl" />)}
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-32 rounded-xl" />
+            ))}
           </div>
           <Skeleton className="h-96 rounded-xl" />
         </div>
@@ -571,11 +584,9 @@ export default function Clients() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
             Clientes
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Gestiona y administra las relaciones con tus clientes
-          </p>
+          <p className="text-muted-foreground mt-1">Gestiona y administra las relaciones con tus clientes</p>
         </div>
-        <CreateClientDialog 
+        <CreateClientDialog
           trigger={
             <Button className="gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-shadow">
               <Plus className="w-4 h-4" />
@@ -619,24 +630,22 @@ export default function Clients() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
-            placeholder="Buscar por nombre, email o empresa..." 
+          <Input
+            placeholder="Buscar por nombre, email o empresa..."
             className="pl-10 bg-secondary/30 border-border/50 focus:bg-background transition-colors"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)} className="h-9">
             <TabsList className="h-9 p-1 bg-secondary/50">
               <TabsTrigger value="grid" className="h-7 px-3 gap-1.5 data-[state=active]:bg-background">
                 <LayoutGrid className="w-4 h-4" />
-                <span className="hidden sm:inline">Grid</span>
               </TabsTrigger>
               <TabsTrigger value="list" className="h-7 px-3 gap-1.5 data-[state=active]:bg-background">
                 <List className="w-4 h-4" />
-                <span className="hidden sm:inline">Lista</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -651,13 +660,12 @@ export default function Clients() {
           </div>
           <h3 className="text-lg font-semibold mb-2">No hay clientes</h3>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            {searchQuery 
-              ? "No se encontraron clientes con ese criterio de búsqueda" 
-              : "Comienza agregando tu primer cliente para gestionar tus relaciones comerciales"
-            }
+            {searchQuery
+              ? "No se encontraron clientes con ese criterio de búsqueda"
+              : "Comienza agregando tu primer cliente para gestionar tus relaciones comerciales"}
           </p>
           {!searchQuery && (
-            <CreateClientDialog 
+            <CreateClientDialog
               trigger={
                 <Button className="gap-2">
                   <Plus className="w-4 h-4" />
@@ -672,12 +680,12 @@ export default function Clients() {
           {/* Client List/Grid */}
           <div className={cn("space-y-4", selectedClient ? "lg:col-span-2" : "lg:col-span-3")}>
             {viewMode === "grid" ? (
-              <div className={cn(
-                "grid gap-4",
-                selectedClient 
-                  ? "grid-cols-1 md:grid-cols-2" 
-                  : "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
-              )}>
+              <div
+                className={cn(
+                  "grid gap-4",
+                  selectedClient ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-2 xl:grid-cols-3",
+                )}
+              >
                 {filteredClients.map((client) => (
                   <ClientCard key={client.id} client={client} />
                 ))}
@@ -701,11 +709,7 @@ export default function Clients() {
       )}
 
       {/* Dialogs */}
-      <EditClientDialog
-        client={editingClient}
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-      />
+      <EditClientDialog client={editingClient} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
