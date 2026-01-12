@@ -28,7 +28,6 @@ import {
   Pencil,
   Trash2,
   Calendar,
-  User,
   CheckCircle2,
   Clock,
   Circle,
@@ -46,6 +45,12 @@ import { EditTodoDialog } from "@/components/todos/EditTodoDialog";
 import { format, isPast, isToday, isTomorrow } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+// Kanban components
+import { KanbanBoard } from "@/components/kanban/KanbanBoard";
+import { KanbanColumn } from "@/components/kanban/KanbanColumn";
+import { KanbanCard } from "@/components/kanban/KanbanCard";
 
 type ViewMode = "kanban" | "list";
 type TodoStatus = "todo" | "in_progress" | "completed";
@@ -92,7 +97,6 @@ export default function TeamTasks() {
   const updateTodo = useUpdateTodo();
   const deleteTodo = useDeleteTodo();
 
-  // Get unique categories from todos
   const categories = useMemo(() => {
     const cats = todos.map(t => t.category).filter(Boolean) as string[];
     return [...new Set(cats)];
@@ -132,6 +136,17 @@ export default function TeamTasks() {
     if (selectedTodo?.id === todoId) {
       setSelectedTodo(prev => prev ? { ...prev, status: newStatus } : null);
     }
+    toast.success(`Tarea movida a "${statusConfig[newStatus].label}"`);
+  };
+
+  const handleDragEnd = (itemId: string, newStatus: string) => {
+    const validStatuses: TodoStatus[] = ['todo', 'in_progress', 'completed'];
+    if (validStatuses.includes(newStatus as TodoStatus)) {
+      const todo = todos.find(t => t.id === itemId);
+      if (todo && todo.status !== newStatus) {
+        handleStatusChange(itemId, newStatus as TodoStatus);
+      }
+    }
   };
 
   const handleDelete = async (todoId: string) => {
@@ -159,13 +174,13 @@ export default function TeamTasks() {
     return isPast(new Date(dateStr)) && !isToday(new Date(dateStr));
   };
 
-  const TodoCard = ({ todo, compact = false }: { todo: Todo; compact?: boolean }) => {
+  const TodoCardContent = ({ todo, compact = false }: { todo: Todo; compact?: boolean }) => {
     const StatusIcon = statusConfig[todo.status].icon;
     
     return (
       <Card 
         className={cn(
-          "group cursor-pointer transition-all duration-200 hover:shadow-lg border-border/50",
+          "group transition-all duration-200 hover:shadow-lg border-border/50",
           "hover:border-primary/30 hover:-translate-y-0.5",
           selectedTodo?.id === todo.id && "ring-2 ring-primary border-primary/50",
           todo.priority === "high" && "border-l-2 border-l-red-500"
@@ -273,37 +288,6 @@ export default function TeamTasks() {
     );
   };
 
-  const KanbanColumn = ({ status, todos }: { status: TodoStatus; todos: Todo[] }) => {
-    const config = statusConfig[status];
-    const StatusIcon = config.icon;
-
-    return (
-      <div className="flex-1 min-w-[300px] max-w-[400px]">
-        <div className={cn("rounded-xl p-4", config.bgColor)}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <StatusIcon className={cn("h-5 w-5", config.color)} />
-              <h3 className="font-semibold">{config.label}</h3>
-              <Badge variant="secondary" className="ml-1">
-                {todos.length}
-              </Badge>
-            </div>
-          </div>
-          <div className="space-y-3">
-            {todos.map((todo) => (
-              <TodoCard key={todo.id} todo={todo} />
-            ))}
-            {todos.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground text-sm">
-                No hay tareas
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const DetailPanel = () => {
     if (!selectedTodo) return null;
 
@@ -320,7 +304,6 @@ export default function TeamTasks() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {/* Title and Status */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <StatusIcon className={cn("h-5 w-5", config.color)} />
@@ -336,7 +319,6 @@ export default function TeamTasks() {
             </h2>
           </div>
 
-          {/* Description */}
           {selectedTodo.description && (
             <div>
               <h4 className="text-sm font-medium text-muted-foreground mb-2">Descripción</h4>
@@ -344,7 +326,6 @@ export default function TeamTasks() {
             </div>
           )}
 
-          {/* Details Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <span className="text-xs text-muted-foreground">Prioridad</span>
@@ -409,7 +390,6 @@ export default function TeamTasks() {
             </div>
           </div>
 
-          {/* Status Change */}
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Cambiar estado</h4>
             <Select 
@@ -432,7 +412,6 @@ export default function TeamTasks() {
             </Select>
           </div>
 
-          {/* Metadata */}
           <div className="pt-4 border-t border-border">
             <div className="text-xs text-muted-foreground space-y-1">
               <p>Creado: {format(new Date(selectedTodo.created_at), "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}</p>
@@ -441,7 +420,6 @@ export default function TeamTasks() {
           </div>
         </div>
 
-        {/* Actions */}
         <div className="p-4 border-t border-border space-y-2">
           <Button className="w-full" onClick={() => handleEdit(selectedTodo)}>
             <Pencil className="mr-2 h-4 w-4" />
@@ -460,208 +438,239 @@ export default function TeamTasks() {
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-96" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <div className="flex h-full">
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Header */}
-          <div className="p-6 border-b border-border bg-card/30 backdrop-blur-sm">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex-1 overflow-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Tareas del Equipo
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Arrastra las tareas entre columnas para cambiar su estado
+            </p>
+          </div>
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Nueva Tarea
+          </Button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="glass rounded-xl p-4 border border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-primary/10">
+                <ListTodo className="w-5 h-5 text-primary" />
+              </div>
               <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
-                    <ListTodo className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold">Tareas Internas</h1>
-                    <p className="text-muted-foreground text-sm">
-                      Gestiona las tareas del equipo BizTech
-                    </p>
-                  </div>
-                </div>
+                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-xs text-muted-foreground">Total</p>
               </div>
-              <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Nueva Tarea
-              </Button>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-              <Card className="bg-gradient-to-br from-background to-muted/20 border-border/50">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Target className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">{stats.total}</p>
-                      <p className="text-xs text-muted-foreground">Total Tareas</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-background to-blue-500/5 border-border/50">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-blue-500/10">
-                      <Clock className="h-5 w-5 text-blue-500" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">{stats.inProgress}</p>
-                      <p className="text-xs text-muted-foreground">En Progreso</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-background to-green-500/5 border-border/50">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-green-500/10">
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">{stats.completed}</p>
-                      <p className="text-xs text-muted-foreground">Completadas</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-background to-red-500/5 border-border/50">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-red-500/10">
-                      <Flag className="h-5 w-5 text-red-500" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">{stats.highPriority}</p>
-                      <p className="text-xs text-muted-foreground">Alta Prioridad</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
-
-          {/* Filters Bar */}
-          <div className="p-4 border-b border-border bg-card/20 flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[200px] max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar tareas..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 bg-background/50"
-              />
-            </div>
-
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px] bg-background/50">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {Object.entries(statusConfig).map(([status, config]) => (
-                  <SelectItem key={status} value={status}>
-                    {config.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-[140px] bg-background/50">
-                <SelectValue placeholder="Prioridad" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                {Object.entries(priorityConfig).map(([priority, config]) => (
-                  <SelectItem key={priority} value={priority}>
-                    {config.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {categories.length > 0 && (
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[160px] bg-background/50">
-                  <SelectValue placeholder="Categoría" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-
-            <div className="flex items-center gap-1 ml-auto">
-              <Button
-                variant={viewMode === "kanban" ? "secondary" : "ghost"}
-                size="icon"
-                onClick={() => setViewMode("kanban")}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "secondary" : "ghost"}
-                size="icon"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="h-4 w-4" />
-              </Button>
+          <div className="glass rounded-xl p-4 border border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-blue-500/10">
+                <Clock className="w-5 h-5 text-blue-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.inProgress}</p>
+                <p className="text-xs text-muted-foreground">En progreso</p>
+              </div>
             </div>
           </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-auto p-6">
-            {isLoading ? (
-              <div className="flex gap-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex-1 min-w-[300px]">
-                    <Skeleton className="h-[400px] rounded-xl" />
-                  </div>
-                ))}
+          <div className="glass rounded-xl p-4 border border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-green-500/10">
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
               </div>
-            ) : viewMode === "kanban" ? (
-              <div className="flex gap-4 overflow-x-auto pb-4">
-                {(Object.keys(statusConfig) as TodoStatus[]).map((status) => (
-                  <KanbanColumn key={status} status={status} todos={todosByStatus[status]} />
-                ))}
+              <div>
+                <p className="text-2xl font-bold">{stats.completed}</p>
+                <p className="text-xs text-muted-foreground">Completadas</p>
               </div>
-            ) : (
-              <div className="space-y-3 max-w-4xl">
-                {filteredTodos.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Sparkles className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-muted-foreground">No hay tareas</h3>
-                    <p className="text-sm text-muted-foreground/70">
-                      Crea tu primera tarea interna para el equipo
-                    </p>
-                  </div>
-                ) : (
-                  filteredTodos.map((todo) => (
-                    <TodoCard key={todo.id} todo={todo} />
-                  ))
-                )}
+            </div>
+          </div>
+          <div className="glass rounded-xl p-4 border border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-red-500/10">
+                <Flag className="w-5 h-5 text-red-500" />
               </div>
-            )}
+              <div>
+                <p className="text-2xl font-bold">{stats.highPriority}</p>
+                <p className="text-xs text-muted-foreground">Alta prioridad</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Detail Panel */}
-        {selectedTodo && <DetailPanel />}
+        {/* Filters */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder="Buscar tareas..." 
+              className="pl-10 bg-secondary/50"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[140px] bg-secondary/50">
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              {Object.entries(statusConfig).map(([key, config]) => (
+                <SelectItem key={key} value={key}>{config.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+            <SelectTrigger className="w-[140px] bg-secondary/50">
+              <SelectValue placeholder="Prioridad" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              {Object.entries(priorityConfig).map(([key, config]) => (
+                <SelectItem key={key} value={key}>{config.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {categories.length > 0 && (
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-[140px] bg-secondary/50">
+                <SelectValue placeholder="Categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          <div className="flex items-center gap-1 p-1 bg-secondary/50 rounded-lg ml-auto">
+            <Button 
+              variant={viewMode === "kanban" ? "default" : "ghost"} 
+              size="sm" 
+              onClick={() => setViewMode("kanban")}
+              className="h-8 w-8 p-0"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </Button>
+            <Button 
+              variant={viewMode === "list" ? "default" : "ghost"} 
+              size="sm" 
+              onClick={() => setViewMode("list")}
+              className="h-8 w-8 p-0"
+            >
+              <List className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Content */}
+        {filteredTodos.length === 0 ? (
+          <div className="glass rounded-2xl p-12 text-center border border-border/50">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+              <ListTodo className="w-8 h-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">No hay tareas</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              {searchQuery || statusFilter !== "all" || priorityFilter !== "all"
+                ? "No se encontraron tareas con esos filtros"
+                : "Crea tu primera tarea para comenzar a organizar el trabajo del equipo"
+              }
+            </p>
+            {!searchQuery && statusFilter === "all" && priorityFilter === "all" && (
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nueva Tarea
+              </Button>
+            )}
+          </div>
+        ) : viewMode === "kanban" ? (
+          <KanbanBoard
+            items={filteredTodos}
+            onDragEnd={handleDragEnd}
+            renderOverlay={(todo) => <TodoCardContent todo={todo} />}
+          >
+            <div className="flex gap-4 pb-4 overflow-x-auto">
+              {(Object.keys(statusConfig) as TodoStatus[]).map((status) => {
+                const config = statusConfig[status];
+                const StatusIcon = config.icon;
+                return (
+                  <KanbanColumn
+                    key={status}
+                    id={status}
+                    title={config.label}
+                    count={todosByStatus[status].length}
+                    icon={<StatusIcon className="h-4 w-4" />}
+                    iconColor={config.color}
+                    bgColor={config.bgColor}
+                    emptyMessage="Arrastra tareas aquí"
+                  >
+                    {todosByStatus[status].map((todo) => (
+                      <KanbanCard key={todo.id} id={todo.id}>
+                        <TodoCardContent todo={todo} />
+                      </KanbanCard>
+                    ))}
+                  </KanbanColumn>
+                );
+              })}
+            </div>
+          </KanbanBoard>
+        ) : (
+          <div className="space-y-2">
+            {filteredTodos.map((todo) => (
+              <TodoCardContent key={todo.id} todo={todo} compact />
+            ))}
+          </div>
+        )}
       </div>
 
-      <CreateTodoDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
-      <EditTodoDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} todo={todoToEdit} />
-    </>
+      {/* Detail Panel */}
+      {selectedTodo && <DetailPanel />}
+
+      {/* Dialogs */}
+      <CreateTodoDialog 
+        open={isCreateDialogOpen} 
+        onOpenChange={setIsCreateDialogOpen} 
+      />
+      {todoToEdit && (
+        <EditTodoDialog 
+          open={isEditDialogOpen} 
+          onOpenChange={setIsEditDialogOpen}
+          todo={todoToEdit}
+        />
+      )}
+    </div>
   );
 }
