@@ -20,9 +20,9 @@ export function TopBar() {
   const getInitials = (name: string | null, email: string) => {
     if (name) {
       return name
-        .split(' ')
+        .split(" ")
         .map((n) => n[0])
-        .join('')
+        .join("")
         .toUpperCase()
         .slice(0, 2);
     }
@@ -31,20 +31,20 @@ export function TopBar() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/auth');
+    navigate("/auth");
   };
 
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-30">
       <div className="flex items-center justify-between h-full px-6">
-        {/* Search */}
+        {/* Search 
         <div className="relative w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Buscar proyectos, tareas, clientes..."
             className="pl-10 bg-secondary/50 border-border/50 focus:border-primary/50 focus:ring-primary/20"
           />
-        </div>
+        </div>*/}
 
         {/* Actions */}
         <div className="flex items-center gap-4">
@@ -60,13 +60,11 @@ export function TopBar() {
               <Button variant="ghost" className="flex items-center gap-3 px-3">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback className="bg-primary/20 text-primary text-sm font-semibold">
-                    {profile ? getInitials(profile.full_name, profile.email) : 'U'}
+                    {profile ? getInitials(profile.full_name, profile.email) : "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="text-left hidden md:block">
-                  <p className="text-sm font-medium">
-                    {profile?.full_name || profile?.email || 'Usuario'}
-                  </p>
+                  <p className="text-sm font-medium">{profile?.full_name || profile?.email || "Usuario"}</p>
                   <p className="text-xs text-muted-foreground">Equipo</p>
                 </div>
               </Button>
@@ -74,18 +72,13 @@ export function TopBar() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
                 <User className="mr-2 h-4 w-4" />
                 Perfil
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
-                Configuración
-              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>Configuración</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                className="text-destructive focus:text-destructive"
-                onClick={handleSignOut}
-              >
+              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Cerrar Sesión
               </DropdownMenuItem>
