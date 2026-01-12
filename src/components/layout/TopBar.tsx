@@ -37,14 +37,14 @@ export function TopBar() {
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-30">
       <div className="flex items-center justify-between h-full px-6">
-        {/* Search 
+        {/* Search */}
         <div className="relative w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          {/*<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Buscar proyectos, tareas, clientes..."
             className="pl-10 bg-secondary/50 border-border/50 focus:border-primary/50 focus:ring-primary/20"
-          />
-        </div>*/}
+          />*/}
+        </div>
 
         {/* Actions */}
         <div className="flex items-center gap-4">
