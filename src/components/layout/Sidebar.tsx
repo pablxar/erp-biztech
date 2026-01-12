@@ -68,7 +68,7 @@ export function Sidebar() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
 
       {/* Logo Section */}
-      <div className="relative flex items-center h-16 px-5 border-b border-sidebar-border/50">
+      <div className="relative flex items-center justify-center h-16 px-5 border-b border-sidebar-border/50">
         <img src={bizTechLogo} alt="BizTech" className="h-9 w-auto max-w-[140px] object-contain drop-shadow-lg" />
       </div>
 
