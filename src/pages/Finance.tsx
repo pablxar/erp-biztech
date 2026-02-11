@@ -197,7 +197,7 @@ export default function Finance() {
     });
 
     const colors = [
-      "hsl(142, 69%, 58%)", 
+      "hsl(214, 80%, 51%)", 
       "hsl(199, 89%, 48%)", 
       "hsl(38, 92%, 50%)", 
       "hsl(280, 65%, 60%)", 
@@ -584,8 +584,8 @@ export default function Finance() {
               <ComposedChart data={chartData}>
                 <defs>
                   <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(142, 69%, 58%)" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="hsl(142, 69%, 58%)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="hsl(214, 80%, 51%)" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="hsl(214, 80%, 51%)" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="colorGastos" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(0, 72%, 51%)" stopOpacity={0.3} />
@@ -623,7 +623,7 @@ export default function Finance() {
                 <Area 
                   type="monotone" 
                   dataKey="ingresos" 
-                  stroke="hsl(142, 69%, 58%)" 
+                  stroke="hsl(214, 80%, 51%)" 
                   strokeWidth={2} 
                   fillOpacity={1} 
                   fill="url(#colorIngresos)" 

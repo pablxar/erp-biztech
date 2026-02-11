@@ -91,10 +91,10 @@ const statusConfig: Record<
   },
   qualified: {
     label: "Calificados",
-    color: "text-emerald-400",
-    bgColor: "bg-emerald-500/10 border-emerald-500/20",
+    color: "text-success",
+    bgColor: "bg-success/10 border-success/20",
     icon: Star,
-    gradient: "from-emerald-500/20 to-emerald-600/10",
+    gradient: "from-success/20 to-success/10",
   },
   discarded: {
     label: "Descartados",
@@ -384,8 +384,8 @@ export default function Leads() {
         </div>
         <div className="glass rounded-xl p-4 border border-border/50">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-emerald-500/10">
-              <TrendingUp className="w-5 h-5 text-emerald-400" />
+            <div className="p-2.5 rounded-lg bg-success/10">
+              <TrendingUp className="w-5 h-5 text-success" />
             </div>
             <div>
               <p className="text-2xl font-bold">{conversionRate}%</p>

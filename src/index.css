@@ -15,8 +15,8 @@
     --popover: 220 15% 8%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 142 69% 58%;
-    --primary-foreground: 220 15% 5%;
+    --primary: 214 80% 51%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 220 15% 12%;
     --secondary-foreground: 0 0% 98%;
@@ -24,26 +24,26 @@
     --muted: 220 15% 15%;
     --muted-foreground: 220 10% 55%;
 
-    --accent: 142 69% 58%;
-    --accent-foreground: 220 15% 5%;
+    --accent: 214 80% 51%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 220 15% 15%;
     --input: 220 15% 15%;
-    --ring: 142 69% 58%;
+    --ring: 214 80% 51%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 220 18% 4%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 142 69% 58%;
-    --sidebar-primary-foreground: 220 15% 5%;
+    --sidebar-primary: 214 80% 51%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 15% 12%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 220 15% 10%;
-    --sidebar-ring: 142 69% 58%;
+    --sidebar-ring: 214 80% 51%;
 
     /* Custom tokens */
     --success: 142 69% 45%;
@@ -54,15 +54,15 @@
     --info-foreground: 0 0% 98%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(142 69% 58%) 0%, hsl(160 84% 39%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(214 80% 51%) 0%, hsl(214 90% 40%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(220 15% 10%) 0%, hsl(220 15% 7%) 100%);
-    --gradient-glow: radial-gradient(circle at center, hsl(142 69% 58% / 0.15) 0%, transparent 70%);
+    --gradient-glow: radial-gradient(circle at center, hsl(214 80% 51% / 0.15) 0%, transparent 70%);
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
     --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
     --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.4), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
-    --shadow-glow: 0 0 20px hsl(142 69% 58% / 0.3);
+    --shadow-glow: 0 0 20px hsl(214 80% 51% / 0.3);
   }
 
   .dark {
@@ -100,7 +100,7 @@
   }
 
   .glow-text {
-    text-shadow: 0 0 20px hsl(142 69% 58% / 0.5);
+    text-shadow: 0 0 20px hsl(214 80% 51% / 0.5);
   }
 
   .gradient-primary {
@@ -171,10 +171,10 @@
 
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 20px hsl(142 69% 58% / 0.2);
+    box-shadow: 0 0 20px hsl(214 80% 51% / 0.2);
   }
   50% {
-    box-shadow: 0 0 30px hsl(142 69% 58% / 0.4);
+    box-shadow: 0 0 30px hsl(214 80% 51% / 0.4);
   }
 }
 
