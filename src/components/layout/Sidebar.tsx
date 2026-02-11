@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import bizTechLogo from "@/assets/biztech-logo-new.jpg";
+import bizTechLogo from "@/assets/biztech-logo.png";
 import {
   LayoutDashboard,
   FolderKanban,
