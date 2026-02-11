@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { LogOut, ShieldX, Mail } from 'lucide-react';
-import bizTechLogo from '@/assets/biztech-logo-new.jpg';
+import bizTechLogo from '@/assets/biztech_logo.png';
 
 export default function AccessDenied() {
   const { signOut, profile } = useAuth();
