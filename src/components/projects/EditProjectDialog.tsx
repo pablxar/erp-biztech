@@ -28,6 +28,8 @@ import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Project, useUpdateProject, ServiceType } from "@/hooks/useProjects";
 import { useClients } from "@/hooks/useClients";
+import { PricingSection } from "./PricingSection";
+import { PaymentMode, PaymentStatus, PaymentDetails, SERVICE_PRICING, formatCurrency } from "@/lib/servicePricing";
 
 interface EditProjectDialogProps {
   project: Project | null;
@@ -55,6 +57,13 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
 
+  // Pricing state
+  const [paymentMode, setPaymentMode] = useState<PaymentMode | ''>('');
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('pending');
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({});
+  const [referencePrice, setReferencePrice] = useState(0);
+  const [markAsPending, setMarkAsPending] = useState(true);
+
   const { mutate: updateProject, isPending } = useUpdateProject();
   const { data: clients } = useClients();
 
@@ -71,6 +80,11 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
       });
       setStartDate(project.start_date ? new Date(project.start_date) : undefined);
       setEndDate(project.end_date ? new Date(project.end_date) : undefined);
+      setPaymentMode((project.payment_mode as PaymentMode) || '');
+      setPaymentStatus((project.payment_status as PaymentStatus) || 'pending');
+      setPaymentDetails((project.payment_details as PaymentDetails) || {});
+      setReferencePrice(Number(project.reference_price) || 0);
+      setMarkAsPending(project.payment_status === 'pending' || project.payment_status === 'partial');
     }
   }, [project]);
 
@@ -90,11 +104,23 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
         end_date: endDate ? format(endDate, "yyyy-MM-dd") : null,
         budget: formData.budget ? parseFloat(formData.budget) : 0,
         progress: formData.progress,
+        payment_status: markAsPending ? paymentStatus : 'paid',
+        payment_mode: paymentMode || null,
+        reference_price: referencePrice || 0,
+        payment_details: Object.keys(paymentDetails).length > 0 ? paymentDetails : {},
       },
       {
         onSuccess: () => onOpenChange(false),
       }
     );
+  };
+
+  const handleServiceTypeChange = (value: ServiceType) => {
+    setFormData({ ...formData, service_type: value });
+    const config = SERVICE_PRICING[value];
+    if (config) {
+      setPaymentMode(config.paymentMode);
+    }
   };
 
   if (!project) return null;
@@ -134,11 +160,12 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
               {serviceTypes.map((type) => {
                 const Icon = type.icon;
                 const isSelected = formData.service_type === type.value;
+                const pricing = SERVICE_PRICING[type.value as ServiceType];
                 return (
                   <button
                     key={type.value}
                     type="button"
-                    onClick={() => setFormData({ ...formData, service_type: type.value as ServiceType })}
+                    onClick={() => handleServiceTypeChange(type.value as ServiceType)}
                     className={cn(
                       "flex items-start gap-3 p-3 rounded-lg border text-left transition-all",
                       isSelected 
@@ -155,12 +182,41 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                     <div>
                       <p className={cn("text-sm font-medium", isSelected && "text-primary")}>{type.label}</p>
                       <p className="text-xs text-muted-foreground">{type.description}</p>
+                      {pricing && (
+                        <p className="text-xs font-medium text-primary/80 mt-1">
+                          {pricing.paymentMode === 'percentage' 
+                            ? '% por resultado' 
+                            : pricing.paymentMode === 'per_unit'
+                              ? `${formatCurrency(pricing.basePrice)}/video`
+                              : pricing.hasSubtype 
+                                ? `Desde ${formatCurrency(pricing.basePrice)}`
+                                : formatCurrency(pricing.basePrice)
+                          }
+                        </p>
+                      )}
                     </div>
                   </button>
                 );
               })}
             </div>
           </div>
+
+          {/* Pricing Section */}
+          <PricingSection
+            serviceType={formData.service_type}
+            budget={formData.budget}
+            onBudgetChange={(v) => setFormData({ ...formData, budget: v })}
+            paymentMode={paymentMode}
+            onPaymentModeChange={setPaymentMode}
+            paymentStatus={paymentStatus}
+            onPaymentStatusChange={setPaymentStatus}
+            paymentDetails={paymentDetails}
+            onPaymentDetailsChange={setPaymentDetails}
+            referencePrice={referencePrice}
+            onReferencePriceChange={setReferencePrice}
+            markAsPending={markAsPending}
+            onMarkAsPendingChange={setMarkAsPending}
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -258,30 +314,16 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-budget">Presupuesto ($)</Label>
-              <Input
-                id="edit-budget"
-                type="number"
-                step="0.01"
-                value={formData.budget}
-                onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                placeholder="0.00"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit-progress">Progreso (%)</Label>
-              <Input
-                id="edit-progress"
-                type="number"
-                min="0"
-                max="100"
-                value={formData.progress}
-                onChange={(e) => setFormData({ ...formData, progress: parseInt(e.target.value) || 0 })}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="edit-progress">Progreso (%)</Label>
+            <Input
+              id="edit-progress"
+              type="number"
+              min="0"
+              max="100"
+              value={formData.progress}
+              onChange={(e) => setFormData({ ...formData, progress: parseInt(e.target.value) || 0 })}
+            />
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

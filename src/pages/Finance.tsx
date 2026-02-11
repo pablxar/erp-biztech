@@ -288,14 +288,23 @@ export default function Finance() {
     
     const pending = invoices.filter(inv => inv.status === 'pending' || inv.status === 'overdue');
     const urgent = pending.filter(inv => inv.status === 'overdue').length;
+
+    // Add projects marked as pending payment
+    const pendingProjects = (projects || []).filter(
+      p => p.payment_status === 'pending' || p.payment_status === 'partial'
+    );
+    const projectsTotal = pendingProjects.reduce(
+      (sum, p) => sum + (Number(p.budget) || Number(p.reference_price) || 0), 0
+    );
     
     return {
-      total: pending.reduce((sum, inv) => sum + Number(inv.amount), 0),
-      count: pending.length,
+      total: pending.reduce((sum, inv) => sum + Number(inv.amount), 0) + projectsTotal,
+      count: pending.length + pendingProjects.length,
       urgent,
       items: pending.slice(0, 5),
+      pendingProjects,
     };
-  }, [invoices]);
+  }, [invoices, projects]);
 
   // Recent transactions filtered
   const filteredTransactions = useMemo(() => {
@@ -546,7 +555,7 @@ export default function Finance() {
           <p className="text-2xl lg:text-3xl font-bold">${pendingInvoices.total.toLocaleString()}</p>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="w-3.5 h-3.5" />
-            <span>{pendingInvoices.count} facturas pendientes</span>
+            <span>{pendingInvoices.count} pendientes (facturas + proyectos)</span>
           </div>
         </div>
       </div>

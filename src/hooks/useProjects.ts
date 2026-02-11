@@ -19,6 +19,10 @@ export interface Project {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  payment_status: string | null;
+  payment_mode: string | null;
+  reference_price: number | null;
+  payment_details: Record<string, any> | null;
   clients?: {
     id: string;
     name: string;
@@ -35,6 +39,10 @@ export interface CreateProjectInput {
   start_date?: string;
   end_date?: string;
   budget?: number;
+  payment_status?: string;
+  payment_mode?: string;
+  reference_price?: number;
+  payment_details?: Record<string, any>;
 }
 
 export function useProjects() {
