@@ -88,8 +88,8 @@ export default function Dashboard() {
               change={monthlyIncome > 0 ? "Este mes" : "Sin ingresos aún"}
               changeType={monthlyIncome > 0 ? "positive" : "neutral"}
               icon={DollarSign}
-              gradient="from-emerald-500/20 to-emerald-500/5"
-              iconGradient="from-emerald-500 to-emerald-400"
+              gradient="from-primary/20 to-primary/5"
+              iconGradient="from-primary to-blue-400"
             />
             <StatsCard
               title="Proyectos Activos"

@@ -66,7 +66,7 @@ const StatsCard = ({
 }) => {
   const colorClasses = {
     primary: "bg-primary/10 text-primary",
-    success: "bg-emerald-500/10 text-emerald-500",
+    success: "bg-success/10 text-success",
     warning: "bg-amber-500/10 text-amber-500",
     destructive: "bg-destructive/10 text-destructive",
   };
@@ -519,7 +519,7 @@ export default function CalendarPage() {
                               "cursor-grab active:cursor-grabbing hover:opacity-90 transition-opacity",
                               "flex items-center gap-1 group",
                               event.project_id 
-                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
+                                ? "bg-success/20 text-success border border-success/30" 
                                 : "bg-primary/20 text-primary border border-primary/30",
                               draggedEvent?.id === event.id && "opacity-50"
                             )}
@@ -601,7 +601,7 @@ export default function CalendarPage() {
                                 className={cn(
                                   "text-xs px-2 py-1 rounded truncate mb-1",
                                   event.project_id 
-                                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
+                                    ? "bg-success/20 text-success border border-success/30" 
                                     : "bg-primary/20 text-primary border border-primary/30",
                                   "hover:opacity-80 cursor-pointer"
                                 )}
@@ -654,7 +654,7 @@ export default function CalendarPage() {
                             className={cn(
                               "p-3 rounded-lg cursor-pointer transition-colors",
                               event.project_id 
-                                ? "bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30" 
+                                ? "bg-success/20 border border-success/30 hover:bg-success/30" 
                                 : "bg-primary/20 border border-primary/30 hover:bg-primary/30"
                             )}
                           >
@@ -738,17 +738,17 @@ export default function CalendarPage() {
                         "p-3 rounded-lg transition-all cursor-pointer group",
                         "hover:translate-x-1",
                         event.project_id 
-                          ? "bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40" 
+                          ? "bg-success/10 border border-success/20 hover:border-success/40" 
                           : "bg-secondary/30 hover:bg-secondary/50 border border-transparent"
                       )}
                     >
                       <div className="flex items-start gap-3">
                         <div className={cn(
                           "p-2 rounded-lg flex-shrink-0",
-                          event.project_id ? "bg-emerald-500/20" : "bg-primary/10"
+                          event.project_id ? "bg-success/20" : "bg-primary/10"
                         )}>
                           {event.project_id ? (
-                            <Target className="w-4 h-4 text-emerald-400" />
+                            <Target className="w-4 h-4 text-success" />
                           ) : (
                             <CalendarIcon className="w-4 h-4 text-primary" />
                           )}

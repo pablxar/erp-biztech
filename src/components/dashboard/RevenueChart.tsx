@@ -86,11 +86,11 @@ export function RevenueChart() {
           
           {/* Stats Summary */}
           <div className="flex flex-wrap gap-4">
-            <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-primary/10 border border-primary/20">
+              <div className="w-2 h-2 rounded-full bg-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">Ingresos</p>
-                <p className="text-sm font-semibold text-emerald-400">${totalIncome.toLocaleString()}</p>
+                <p className="text-sm font-semibold text-primary">${totalIncome.toLocaleString()}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20">
@@ -122,8 +122,8 @@ export function RevenueChart() {
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(142, 69%, 58%)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="hsl(142, 69%, 58%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(214, 80%, 51%)" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="hsl(214, 80%, 51%)" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorGastos" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(0, 72%, 51%)" stopOpacity={0.4} />
@@ -164,7 +164,7 @@ export function RevenueChart() {
               <Area
                 type="monotone"
                 dataKey="ingresos"
-                stroke="hsl(142, 69%, 58%)"
+                stroke="hsl(214, 80%, 51%)"
                 strokeWidth={3}
                 fillOpacity={1}
                 fill="url(#colorIngresos)"

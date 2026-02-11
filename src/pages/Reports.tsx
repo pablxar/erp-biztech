@@ -47,7 +47,7 @@ const revenueByMonth = [
 ];
 
 const projectsByStatus = [
-  { name: "Completados", value: 8, color: "hsl(142, 69%, 58%)" },
+  { name: "Completados", value: 8, color: "hsl(214, 80%, 51%)" },
   { name: "En Progreso", value: 5, color: "hsl(199, 89%, 48%)" },
   { name: "En Revisión", value: 2, color: "hsl(38, 92%, 50%)" },
   { name: "Pendientes", value: 3, color: "hsl(220, 15%, 40%)" },
@@ -61,7 +61,7 @@ const teamPerformance = [
 ];
 
 const clientRetention = [
-  { name: "Retención", value: 85, fill: "hsl(142, 69%, 58%)" },
+  { name: "Retención", value: 85, fill: "hsl(214, 80%, 51%)" },
 ];
 
 const kpis = [
@@ -145,8 +145,8 @@ export default function Reports() {
               <AreaChart data={revenueByMonth}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(142, 69%, 58%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(142, 69%, 58%)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="hsl(214, 80%, 51%)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(214, 80%, 51%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="month" stroke="hsl(220, 10%, 55%)" fontSize={12} tickLine={false} axisLine={false} />
@@ -155,7 +155,7 @@ export default function Reports() {
                   contentStyle={{ backgroundColor: "hsl(220, 15%, 10%)", border: "1px solid hsl(220, 15%, 15%)", borderRadius: "8px", color: "white" }}
                   formatter={(v: number) => [`$${v.toLocaleString()}`, "Ingresos"]}
                 />
-                <Area type="monotone" dataKey="revenue" stroke="hsl(142, 69%, 58%)" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
+                <Area type="monotone" dataKey="revenue" stroke="hsl(214, 80%, 51%)" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>

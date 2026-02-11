@@ -26,8 +26,8 @@ const statusConfig = {
   },
   completed: { 
     label: "Completado", 
-    className: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
-    dot: "bg-emerald-500"
+    className: "bg-primary/10 text-primary border-primary/30",
+    dot: "bg-primary"
   },
 };
 
@@ -120,7 +120,7 @@ export function RecentProjects() {
                       <span className="text-muted-foreground">Progreso</span>
                       <span className={cn(
                         "font-semibold",
-                        progress >= 80 ? "text-emerald-400" : progress >= 50 ? "text-primary" : "text-muted-foreground"
+                        progress >= 80 ? "text-primary" : progress >= 50 ? "text-info" : "text-muted-foreground"
                       )}>
                         {progress}%
                       </span>
@@ -129,9 +129,9 @@ export function RecentProjects() {
                       <div 
                         className={cn(
                           "absolute inset-y-0 left-0 rounded-full transition-all duration-500",
-                          progress >= 80 ? "bg-gradient-to-r from-emerald-500 to-emerald-400" : 
-                          progress >= 50 ? "bg-gradient-to-r from-primary to-primary/80" : 
-                          "bg-gradient-to-r from-blue-500 to-blue-400"
+                          progress >= 80 ? "bg-gradient-to-r from-primary to-primary/80" : 
+                          progress >= 50 ? "bg-gradient-to-r from-info to-info/80" : 
+                          "bg-gradient-to-r from-muted-foreground to-muted-foreground/80"
                         )}
                         style={{ width: `${progress}%` }}
                       />

@@ -41,8 +41,8 @@ export function StatsCard({
           {change && (
             <div className={cn(
               "flex items-center gap-1 text-sm font-medium",
-              changeType === "positive" && "text-emerald-400",
-              changeType === "negative" && "text-red-400",
+              changeType === "positive" && "text-success",
+              changeType === "negative" && "text-destructive",
               changeType === "neutral" && "text-muted-foreground"
             )}>
               <ChangeIcon className="w-4 h-4" />
