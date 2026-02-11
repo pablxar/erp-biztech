@@ -609,11 +609,11 @@ export default function Finance() {
                 />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: "hsl(220, 15%, 8%)", 
-                    border: "1px solid hsl(220, 15%, 15%)", 
+                    backgroundColor: "hsl(0, 0%, 100%)", 
+                    border: "1px solid hsl(220, 13%, 91%)", 
                     borderRadius: "12px", 
-                    color: "white",
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.3)"
+                    color: "hsl(220, 15%, 15%)",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.1)"
                   }} 
                   formatter={(v: number, name: string) => [
                     `$${v.toLocaleString()}`, 
@@ -693,10 +693,10 @@ export default function Finance() {
                     </Pie>
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: "hsl(220, 15%, 8%)", 
-                        border: "1px solid hsl(220, 15%, 15%)", 
+                        backgroundColor: "white", 
+                        border: "1px solid hsl(220, 13%, 91%)", 
                         borderRadius: "12px", 
-                        color: "white" 
+                        color: "hsl(220, 15%, 15%)" 
                       }} 
                       formatter={(v: number, name: string, props: any) => [
                         `${v}% ($${props.payload.amount.toLocaleString()})`, 
