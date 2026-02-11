@@ -152,7 +152,7 @@ export default function Reports() {
                 <XAxis dataKey="month" stroke="hsl(220, 10%, 55%)" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="hsl(220, 10%, 55%)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v / 1000}k`} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "hsl(220, 15%, 10%)", border: "1px solid hsl(220, 15%, 15%)", borderRadius: "8px", color: "white" }}
+                  contentStyle={{ backgroundColor: "white", border: "1px solid hsl(220, 13%, 91%)", borderRadius: "8px", color: "hsl(220, 15%, 15%)" }}
                   formatter={(v: number) => [`$${v.toLocaleString()}`, "Ingresos"]}
                 />
                 <Area type="monotone" dataKey="revenue" stroke="hsl(214, 80%, 51%)" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
@@ -172,7 +172,7 @@ export default function Reports() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: "hsl(220, 15%, 10%)", border: "1px solid hsl(220, 15%, 15%)", borderRadius: "8px", color: "white" }} />
+                <Tooltip contentStyle={{ backgroundColor: "white", border: "1px solid hsl(220, 13%, 91%)", borderRadius: "8px", color: "hsl(220, 15%, 15%)" }} />
               </RechartsPie>
             </ResponsiveContainer>
           </div>

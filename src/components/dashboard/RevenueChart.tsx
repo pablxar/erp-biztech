@@ -148,14 +148,14 @@ export function RevenueChart() {
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "hsl(220, 15%, 10%)",
-                  border: "1px solid hsl(220, 15%, 20%)",
+                  backgroundColor: "hsl(0, 0%, 100%)",
+                  border: "1px solid hsl(220, 13%, 91%)",
                   borderRadius: "12px",
-                  color: "white",
+                  color: "hsl(220, 15%, 15%)",
                   padding: "12px 16px",
-                  boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+                  boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
                 }}
-                labelStyle={{ color: "hsl(220, 10%, 55%)", marginBottom: "8px" }}
+                labelStyle={{ color: "hsl(220, 10%, 45%)", marginBottom: "8px" }}
                 formatter={(value: number, name: string) => [
                   `$${value.toLocaleString()}`,
                   name === 'ingresos' ? 'Ingresos' : 'Gastos'

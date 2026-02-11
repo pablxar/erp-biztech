@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import bizTechLogo from '@/assets/biztech-logo.png';
+import bizTechLogo from '@/assets/biztech-logo-new.jpg';
 import { Loader2, Mail, Lock, User } from 'lucide-react';
 import { z } from 'zod';
 
