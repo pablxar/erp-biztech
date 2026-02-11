@@ -54,6 +54,7 @@ import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
 import { EditProjectDialog } from "@/components/projects/EditProjectDialog";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { PAYMENT_STATUS_CONFIG, PaymentStatus } from "@/lib/servicePricing";
 
 const statusConfig = {
   active: { label: "Activo", color: "bg-primary/20 text-primary border-primary/30" },
@@ -521,6 +522,11 @@ function ProjectCard({ project, onView, onEdit, onDelete }: ProjectCardProps) {
           <Badge className={cn("text-xs border", statusConfig[project.status].color)}>
             {statusConfig[project.status].label}
           </Badge>
+          {project.payment_status && PAYMENT_STATUS_CONFIG[project.payment_status as PaymentStatus] && (
+            <Badge className={cn("text-xs border", PAYMENT_STATUS_CONFIG[project.payment_status as PaymentStatus].color)}>
+              {PAYMENT_STATUS_CONFIG[project.payment_status as PaymentStatus].label}
+            </Badge>
+          )}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>

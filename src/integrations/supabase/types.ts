@@ -349,7 +349,11 @@ export type Database = {
           end_date: string | null
           id: string
           name: string
+          payment_details: Json | null
+          payment_mode: string | null
+          payment_status: string | null
           progress: number | null
+          reference_price: number | null
           service_type: Database["public"]["Enums"]["service_type"] | null
           start_date: string | null
           status: Database["public"]["Enums"]["project_status"]
@@ -364,7 +368,11 @@ export type Database = {
           end_date?: string | null
           id?: string
           name: string
+          payment_details?: Json | null
+          payment_mode?: string | null
+          payment_status?: string | null
           progress?: number | null
+          reference_price?: number | null
           service_type?: Database["public"]["Enums"]["service_type"] | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -379,7 +387,11 @@ export type Database = {
           end_date?: string | null
           id?: string
           name?: string
+          payment_details?: Json | null
+          payment_mode?: string | null
+          payment_status?: string | null
           progress?: number | null
+          reference_price?: number | null
           service_type?: Database["public"]["Enums"]["service_type"] | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]

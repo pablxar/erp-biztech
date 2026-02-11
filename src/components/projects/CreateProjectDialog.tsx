@@ -29,6 +29,8 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { Plus, Loader2, CalendarIcon, Code2, Megaphone, Video, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PricingSection } from './PricingSection';
+import { PaymentMode, PaymentStatus, PaymentDetails, SERVICE_PRICING, formatCurrency } from '@/lib/servicePricing';
 
 interface Props {
   trigger?: React.ReactNode;
@@ -53,9 +55,27 @@ export function CreateProjectDialog({ trigger }: Props) {
   });
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
+  
+  // Pricing state
+  const [paymentMode, setPaymentMode] = useState<PaymentMode | ''>('');
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('pending');
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({});
+  const [referencePrice, setReferencePrice] = useState(0);
+  const [markAsPending, setMarkAsPending] = useState(true);
 
   const { mutate: createProject, isPending } = useCreateProject();
   const { data: clients } = useClients();
+
+  const resetForm = () => {
+    setFormData({ name: '', description: '', client_id: '', status: 'pending', service_type: '', budget: '' });
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setPaymentMode('');
+    setPaymentStatus('pending');
+    setPaymentDetails({});
+    setReferencePrice(0);
+    setMarkAsPending(true);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,23 +89,27 @@ export function CreateProjectDialog({ trigger }: Props) {
         start_date: startDate ? format(startDate, 'yyyy-MM-dd') : undefined,
         end_date: endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
         budget: formData.budget ? parseFloat(formData.budget) : undefined,
+        payment_status: markAsPending ? 'pending' : 'paid',
+        payment_mode: paymentMode || undefined,
+        reference_price: referencePrice || undefined,
+        payment_details: Object.keys(paymentDetails).length > 0 ? paymentDetails : undefined,
       },
       {
         onSuccess: () => {
           setOpen(false);
-          setFormData({
-            name: '',
-            description: '',
-            client_id: '',
-            status: 'pending',
-            service_type: '',
-            budget: '',
-          });
-          setStartDate(undefined);
-          setEndDate(undefined);
+          resetForm();
         },
       }
     );
+  };
+
+  const handleServiceTypeChange = (value: ServiceType) => {
+    setFormData({ ...formData, service_type: value });
+    const config = SERVICE_PRICING[value];
+    if (config) {
+      setPaymentMode(config.paymentMode);
+      setPaymentDetails({});
+    }
   };
 
   return (
@@ -131,11 +155,12 @@ export function CreateProjectDialog({ trigger }: Props) {
               {serviceTypes.map((type) => {
                 const Icon = type.icon;
                 const isSelected = formData.service_type === type.value;
+                const pricing = SERVICE_PRICING[type.value as ServiceType];
                 return (
                   <button
                     key={type.value}
                     type="button"
-                    onClick={() => setFormData({ ...formData, service_type: type.value as ServiceType })}
+                    onClick={() => handleServiceTypeChange(type.value as ServiceType)}
                     className={cn(
                       "flex items-start gap-3 p-3 rounded-lg border text-left transition-all",
                       isSelected 
@@ -152,12 +177,41 @@ export function CreateProjectDialog({ trigger }: Props) {
                     <div>
                       <p className={cn("text-sm font-medium", isSelected && "text-primary")}>{type.label}</p>
                       <p className="text-xs text-muted-foreground">{type.description}</p>
+                      {pricing && (
+                        <p className="text-xs font-medium text-primary/80 mt-1">
+                          {pricing.paymentMode === 'percentage' 
+                            ? '% por resultado' 
+                            : pricing.paymentMode === 'per_unit'
+                              ? `${formatCurrency(pricing.basePrice)}/video`
+                              : pricing.hasSubtype 
+                                ? `Desde ${formatCurrency(pricing.basePrice)}`
+                                : formatCurrency(pricing.basePrice)
+                          }
+                        </p>
+                      )}
                     </div>
                   </button>
                 );
               })}
             </div>
           </div>
+
+          {/* Pricing Section */}
+          <PricingSection
+            serviceType={formData.service_type}
+            budget={formData.budget}
+            onBudgetChange={(v) => setFormData({ ...formData, budget: v })}
+            paymentMode={paymentMode}
+            onPaymentModeChange={setPaymentMode}
+            paymentStatus={paymentStatus}
+            onPaymentStatusChange={setPaymentStatus}
+            paymentDetails={paymentDetails}
+            onPaymentDetailsChange={setPaymentDetails}
+            referencePrice={referencePrice}
+            onReferencePriceChange={setReferencePrice}
+            markAsPending={markAsPending}
+            onMarkAsPendingChange={setMarkAsPending}
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -253,18 +307,6 @@ export function CreateProjectDialog({ trigger }: Props) {
                 </PopoverContent>
               </Popover>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="budget">Presupuesto ($)</Label>
-            <Input
-              id="budget"
-              type="number"
-              step="0.01"
-              value={formData.budget}
-              onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-              placeholder="0.00"
-            />
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
