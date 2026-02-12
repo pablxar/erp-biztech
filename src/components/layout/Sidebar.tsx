@@ -24,7 +24,6 @@ const navItems = [
   { icon: ListTodo, label: "Tareas Internas", path: "/team-tasks" },
   { icon: Calendar, label: "Calendario", path: "/calendar" },
   { icon: DollarSign, label: "Finanzas", path: "/finance" },
-  { icon: BarChart3, label: "Reportes", path: "/reports" },
   { icon: Sparkles, label: "IA Asistente", path: "/ai-assistant" },
 ];
 
