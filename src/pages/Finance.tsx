@@ -294,7 +294,7 @@ export default function Finance() {
       p => p.payment_status === 'pending' || p.payment_status === 'partial'
     );
     const projectsTotal = pendingProjects.reduce(
-      (sum, p) => sum + (Number(p.budget) || Number(p.reference_price) || 0), 0
+      (sum, p) => sum + (Number(p.reference_price) || Number(p.budget) || 0), 0
     );
     
     return {
@@ -886,7 +886,7 @@ export default function Finance() {
             <div>
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Target className="w-5 h-5 text-primary" />
-                Control de Presupuestos
+                Control de Proyectos
               </h3>
               <p className="text-sm text-muted-foreground">Seguimiento por proyecto</p>
             </div>
