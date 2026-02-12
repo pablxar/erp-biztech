@@ -89,7 +89,7 @@ export function CreateProjectDialog({ trigger }: Props) {
         start_date: startDate ? format(startDate, 'yyyy-MM-dd') : undefined,
         end_date: endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
         budget: formData.budget ? parseFloat(formData.budget) : undefined,
-        payment_status: (markAsPending && referencePrice > 0) ? 'pending' : 'paid',
+        payment_status: (markAsPending && parseFloat(formData.budget) > 0) ? 'pending' : 'paid',
         payment_mode: paymentMode || undefined,
         reference_price: referencePrice || undefined,
         payment_details: Object.keys(paymentDetails).length > 0 ? paymentDetails : undefined,
