@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -82,6 +83,7 @@ export default function Finance() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "quarter" | "year">("month");
   const [activeView, setActiveView] = useState<"overview" | "transactions" | "invoices" | "budgets">("overview");
+  const [showReceivables, setShowReceivables] = useState(false);
   
   const { data: transactions, isLoading: transactionsLoading } = useTransactions();
   const { data: stats, isLoading: statsLoading } = useFinancialStats();
@@ -539,8 +541,11 @@ export default function Finance() {
           </div>
         </div>
 
-        {/* Pending Invoices */}
-        <div className="glass rounded-xl p-5 animate-fade-in group hover:border-warning/30 transition-all">
+        {/* Pending Invoices - Clickable */}
+        <div 
+          className="glass rounded-xl p-5 animate-fade-in group hover:border-warning/30 transition-all cursor-pointer"
+          onClick={() => setShowReceivables(true)}
+        >
           <div className="flex items-start justify-between mb-3">
             <div className="p-2.5 rounded-lg bg-warning/10 group-hover:bg-warning/20 transition-colors">
               <Receipt className="w-5 h-5 text-warning" />
@@ -555,7 +560,7 @@ export default function Finance() {
           <p className="text-2xl lg:text-3xl font-bold">${pendingInvoices.total.toLocaleString()}</p>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="w-3.5 h-3.5" />
-            <span>{pendingInvoices.count} pendientes (facturas + proyectos)</span>
+            <span>{pendingInvoices.count} pendientes • Click para desglosar</span>
           </div>
         </div>
       </div>
@@ -992,6 +997,103 @@ export default function Finance() {
           </div>
         </div>
       )}
+
+      {/* Receivables Breakdown Dialog */}
+      <Dialog open={showReceivables} onOpenChange={setShowReceivables}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-warning" />
+              Desglose de Cuentas por Cobrar
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Summary */}
+            <div className="flex items-center justify-between p-4 rounded-xl bg-warning/5 border border-warning/20">
+              <span className="text-sm font-medium">Total Por Cobrar</span>
+              <span className="text-2xl font-bold">${pendingInvoices.total.toLocaleString()}</span>
+            </div>
+
+            {/* Invoices Section */}
+            {pendingInvoices.items.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground uppercase tracking-wider">
+                  <CreditCard className="w-4 h-4" />
+                  Facturas Pendientes ({pendingInvoices.items.length})
+                </h3>
+                <div className="space-y-2">
+                  {pendingInvoices.items.map((inv) => {
+                    const config = statusConfig[inv.status as keyof typeof statusConfig] || statusConfig.pending;
+                    return (
+                      <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg border bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm">{inv.invoice_number}</span>
+                            <Badge variant="outline" className={cn("text-xs", config.color)}>
+                              {config.label}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {inv.client?.name || 'Sin cliente'}
+                            {inv.due_date && ` • Vence: ${format(new Date(inv.due_date), "d MMM yyyy", { locale: es })}`}
+                          </p>
+                        </div>
+                        <span className="font-semibold text-sm">${Number(inv.amount).toLocaleString()}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Projects Section */}
+            {pendingInvoices.pendingProjects && pendingInvoices.pendingProjects.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground uppercase tracking-wider">
+                  <Target className="w-4 h-4" />
+                  Proyectos Por Cobrar ({pendingInvoices.pendingProjects.length})
+                </h3>
+                <div className="space-y-2">
+                  {pendingInvoices.pendingProjects.map((project) => {
+                    const amount = Number(project.reference_price) || Number(project.budget) || 0;
+                    return (
+                      <div key={project.id} className="flex items-center justify-between p-3 rounded-lg border bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm">{project.name}</span>
+                            <Badge variant="outline" className={cn(
+                              "text-xs",
+                              project.payment_status === 'partial' 
+                                ? "bg-warning/20 text-warning border-warning/30" 
+                                : "bg-primary/20 text-primary border-primary/30"
+                            )}>
+                              {project.payment_status === 'partial' ? 'Parcial' : 'Pendiente'}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {project.clients?.name || 'Sin cliente'}
+                            {project.service_type && ` • ${project.service_type.replace('_', ' ')}`}
+                          </p>
+                        </div>
+                        <span className="font-semibold text-sm">${amount.toLocaleString()}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {pendingInvoices.count === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <CheckCircle2 className="w-10 h-10 mx-auto mb-2 text-success" />
+                <p className="font-medium">Todo al día</p>
+                <p className="text-sm">No hay cuentas pendientes por cobrar</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
