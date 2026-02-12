@@ -291,13 +291,13 @@ export default function Finance() {
     const pending = invoices.filter(inv => inv.status === 'pending' || inv.status === 'overdue');
     const urgent = pending.filter(inv => inv.status === 'overdue').length;
 
-    // Only include projects that have a real agreed price (reference_price > 0)
+    // Only include projects with an agreed price (budget > 0) and pending payment
     const pendingProjects = (projects || []).filter(
       p => (p.payment_status === 'pending' || p.payment_status === 'partial') 
-        && Number(p.reference_price) > 0
+        && Number(p.budget) > 0
     );
     const projectsTotal = pendingProjects.reduce(
-      (sum, p) => sum + Number(p.reference_price), 0
+      (sum, p) => sum + Number(p.budget), 0
     );
     
     return {
@@ -1057,7 +1057,7 @@ export default function Finance() {
                 </h3>
                 <div className="space-y-2">
                   {pendingInvoices.pendingProjects.map((project) => {
-                    const amount = Number(project.reference_price);
+                    const amount = Number(project.budget);
                     return (
                       <div key={project.id} className="flex items-center justify-between p-3 rounded-lg border bg-secondary/30 hover:bg-secondary/50 transition-colors">
                         <div className="min-w-0 flex-1">
