@@ -61,7 +61,7 @@ export function CreateProjectDialog({ trigger }: Props) {
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('pending');
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({});
   const [referencePrice, setReferencePrice] = useState(0);
-  const [markAsPending, setMarkAsPending] = useState(true);
+  const [markAsPending, setMarkAsPending] = useState(false);
 
   const { mutate: createProject, isPending } = useCreateProject();
   const { data: clients } = useClients();
@@ -74,7 +74,7 @@ export function CreateProjectDialog({ trigger }: Props) {
     setPaymentStatus('pending');
     setPaymentDetails({});
     setReferencePrice(0);
-    setMarkAsPending(true);
+    setMarkAsPending(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -89,7 +89,7 @@ export function CreateProjectDialog({ trigger }: Props) {
         start_date: startDate ? format(startDate, 'yyyy-MM-dd') : undefined,
         end_date: endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
         budget: formData.budget ? parseFloat(formData.budget) : undefined,
-        payment_status: markAsPending ? 'pending' : 'paid',
+        payment_status: (markAsPending && referencePrice > 0) ? 'pending' : 'paid',
         payment_mode: paymentMode || undefined,
         reference_price: referencePrice || undefined,
         payment_details: Object.keys(paymentDetails).length > 0 ? paymentDetails : undefined,
