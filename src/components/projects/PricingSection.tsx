@@ -78,9 +78,9 @@ export function PricingSection({
   if (!serviceType || !config) {
     return (
       <div className="space-y-2">
-        <Label htmlFor="budget">Presupuesto ($)</Label>
+        <Label htmlFor="agreed-price">Precio Acordado ($)</Label>
         <Input
-          id="budget"
+          id="agreed-price"
           type="number"
           step="0.01"
           value={budget}
@@ -210,7 +210,7 @@ export function PricingSection({
         )}
         <div className="space-y-1.5">
           <Label className="text-xs">
-            {config.paymentMode === 'percentage' ? 'Monto Estimado (opcional)' : 'Monto Final ($)'}
+            {config.paymentMode === 'percentage' ? 'Monto Estimado (opcional)' : 'Precio Acordado ($)'}
           </Label>
           <Input
             type="number"

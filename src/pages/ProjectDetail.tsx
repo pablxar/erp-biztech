@@ -327,7 +327,7 @@ export default function ProjectDetail() {
             <div className="p-4 rounded-lg bg-secondary/50 border border-border/30">
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
                 <DollarSign className="w-4 h-4" />
-                <span className="text-xs font-medium uppercase tracking-wider">Presupuesto</span>
+                <span className="text-xs font-medium uppercase tracking-wider">Precio Acordado</span>
               </div>
               <p className="text-lg font-semibold">${Number(project.budget || 0).toLocaleString()}</p>
             </div>
