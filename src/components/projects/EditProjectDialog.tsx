@@ -122,7 +122,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
             if (newPaymentStatus === 'paid' && oldPaymentStatus !== 'paid') {
               // Full payment: register full amount (minus any partial already registered)
               const previousPartial = oldPaymentStatus === 'partial' 
-                ? Number(paymentDetails.partialAmount || 0) 
+                ? Number((paymentDetails as any).partialAmount || 0) 
                 : 0;
               const incomeAmount = agreedPrice - previousPartial;
               if (incomeAmount > 0) {
