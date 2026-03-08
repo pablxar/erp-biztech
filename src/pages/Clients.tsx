@@ -534,27 +534,37 @@ export default function Clients() {
         </div>
 
         {/* Actions */}
-        <div className="p-4 border-t border-border/50 flex gap-2">
+        <div className="p-4 border-t border-border/50 space-y-2">
           <Button
-            className="flex-1 gap-2"
-            onClick={() => selectedClient.email && openEmail(selectedClient.email)}
-            disabled={!selectedClient.email}
-          >
-            <Mail className="w-4 h-4" />
-            Email
-          </Button>
-          <Button
+            className="w-full gap-2"
             variant="outline"
-            className="flex-1 gap-2"
-            onClick={() => selectedClient.phone && openPhone(selectedClient.phone)}
-            disabled={!selectedClient.phone}
+            onClick={() => navigate(`/clients/${selectedClient.id}/onboarding`)}
           >
-            <Phone className="w-4 h-4" />
-            Llamar
+            <Sparkles className="w-4 h-4" />
+            Onboarding con IA
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleEditClient(selectedClient)}>
-            <Edit className="w-4 h-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              className="flex-1 gap-2"
+              onClick={() => selectedClient.email && openEmail(selectedClient.email)}
+              disabled={!selectedClient.email}
+            >
+              <Mail className="w-4 h-4" />
+              Email
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 gap-2"
+              onClick={() => selectedClient.phone && openPhone(selectedClient.phone)}
+              disabled={!selectedClient.phone}
+            >
+              <Phone className="w-4 h-4" />
+              Llamar
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => handleEditClient(selectedClient)}>
+              <Edit className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     );
