@@ -49,7 +49,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useProject, useDeleteProject, Project } from "@/hooks/useProjects";
+import { useProject, useDeleteProject, useUpdateProject, Project } from "@/hooks/useProjects";
 import { useTasks, useUpdateTask, Task } from "@/hooks/useTasks";
 import { useTransactions } from "@/hooks/useTransactions";
 import { CreateTaskDialog } from "@/components/projects/CreateTaskDialog";
