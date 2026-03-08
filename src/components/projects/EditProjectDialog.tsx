@@ -28,6 +28,7 @@ import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Project, useUpdateProject, ServiceType } from "@/hooks/useProjects";
 import { useClients } from "@/hooks/useClients";
+import { useCreateTransaction } from "@/hooks/useTransactions";
 import { PricingSection } from "./PricingSection";
 import { PaymentMode, PaymentStatus, PaymentDetails, SERVICE_PRICING, formatCurrency } from "@/lib/servicePricing";
 
