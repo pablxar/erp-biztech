@@ -224,23 +224,50 @@ export function PricingSection({
 
       {/* Payment status selector (for edit mode) */}
       {paymentStatus && (
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Estado de Pago</Label>
-          <Select
-            value={paymentStatus}
-            onValueChange={(v) => onPaymentStatusChange(v as PaymentStatus)}
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(PAYMENT_STATUS_CONFIG).map(([key, cfg]) => (
-                <SelectItem key={key} value={key}>
-                  {cfg.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="space-y-2">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Estado de Pago</Label>
+            <Select
+              value={paymentStatus}
+              onValueChange={(v) => onPaymentStatusChange(v as PaymentStatus)}
+            >
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(PAYMENT_STATUS_CONFIG).map(([key, cfg]) => (
+                  <SelectItem key={key} value={key}>
+                    {cfg.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Partial amount input */}
+          {paymentStatus === 'partial' && (
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Monto Abonado ($)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={paymentDetails.partialAmount ?? ''}
+                onChange={(e) =>
+                  onPaymentDetailsChange({
+                    ...paymentDetails,
+                    partialAmount: parseFloat(e.target.value) || 0,
+                  })
+                }
+                placeholder="Monto del abono"
+              />
+              {budget && paymentDetails.partialAmount ? (
+                <p className="text-xs text-muted-foreground">
+                  Restante: {formatCurrency(parseFloat(budget) - (paymentDetails.partialAmount || 0))}
+                </p>
+              ) : null}
+            </div>
+          )}
         </div>
       )}
 

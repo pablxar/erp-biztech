@@ -28,6 +28,7 @@ import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Project, useUpdateProject, ServiceType } from "@/hooks/useProjects";
 import { useClients } from "@/hooks/useClients";
+import { useCreateTransaction } from "@/hooks/useTransactions";
 import { PricingSection } from "./PricingSection";
 import { PaymentMode, PaymentStatus, PaymentDetails, SERVICE_PRICING, formatCurrency } from "@/lib/servicePricing";
 
@@ -65,6 +66,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
   const [markAsPending, setMarkAsPending] = useState(true);
 
   const { mutate: updateProject, isPending } = useUpdateProject();
+  const { mutate: createTransaction } = useCreateTransaction();
   const { data: clients } = useClients();
 
   useEffect(() => {
@@ -92,6 +94,10 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
     e.preventDefault();
     if (!project) return;
 
+    const newPaymentStatus = markAsPending ? paymentStatus : 'paid';
+    const oldPaymentStatus = project.payment_status;
+    const agreedPrice = formData.budget ? parseFloat(formData.budget) : 0;
+
     updateProject(
       {
         id: project.id,
@@ -102,15 +108,52 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
         service_type: formData.service_type || null,
         start_date: startDate ? format(startDate, "yyyy-MM-dd") : null,
         end_date: endDate ? format(endDate, "yyyy-MM-dd") : null,
-        budget: formData.budget ? parseFloat(formData.budget) : 0,
+        budget: agreedPrice,
         progress: formData.progress,
-        payment_status: markAsPending ? paymentStatus : 'paid',
+        payment_status: newPaymentStatus,
         payment_mode: paymentMode || null,
         reference_price: referencePrice || 0,
         payment_details: Object.keys(paymentDetails).length > 0 ? paymentDetails : {},
       },
       {
-        onSuccess: () => onOpenChange(false),
+        onSuccess: () => {
+          // Auto-register income when payment status changes to paid or partial
+          if (agreedPrice > 0 && oldPaymentStatus !== newPaymentStatus) {
+            if (newPaymentStatus === 'paid' && oldPaymentStatus !== 'paid') {
+              // Full payment: register full amount (minus any partial already registered)
+              const previousPartial = oldPaymentStatus === 'partial' 
+                ? Number(paymentDetails.partialAmount || 0) 
+                : 0;
+              const incomeAmount = agreedPrice - previousPartial;
+              if (incomeAmount > 0) {
+                createTransaction({
+                  description: `Cobro proyecto: ${formData.name}${previousPartial > 0 ? ' (saldo restante)' : ''}`,
+                  amount: incomeAmount,
+                  type: 'income',
+                  category: 'Proyectos',
+                  project_id: project.id,
+                  client_id: formData.client_id || undefined,
+                  date: format(new Date(), 'yyyy-MM-dd'),
+                });
+              }
+            } else if (newPaymentStatus === 'partial' && oldPaymentStatus !== 'partial' && oldPaymentStatus !== 'paid') {
+              // Partial payment: register partial amount
+              const partialAmount = Number(paymentDetails.partialAmount || 0);
+              if (partialAmount > 0) {
+                createTransaction({
+                  description: `Abono proyecto: ${formData.name}`,
+                  amount: partialAmount,
+                  type: 'income',
+                  category: 'Proyectos',
+                  project_id: project.id,
+                  client_id: formData.client_id || undefined,
+                  date: format(new Date(), 'yyyy-MM-dd'),
+                });
+              }
+            }
+          }
+          onOpenChange(false);
+        },
       }
     );
   };
