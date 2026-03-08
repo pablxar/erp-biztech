@@ -259,6 +259,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
             onReferencePriceChange={setReferencePrice}
             markAsPending={markAsPending}
             onMarkAsPendingChange={setMarkAsPending}
+            hidePaymentStatus
           />
 
           <div className="grid grid-cols-2 gap-4">

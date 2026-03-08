@@ -38,6 +38,7 @@ interface PricingSectionProps {
   onReferencePriceChange: (value: number) => void;
   markAsPending: boolean;
   onMarkAsPendingChange: (value: boolean) => void;
+  hidePaymentStatus?: boolean;
 }
 
 export function PricingSection({
@@ -54,6 +55,7 @@ export function PricingSection({
   onReferencePriceChange,
   markAsPending,
   onMarkAsPendingChange,
+  hidePaymentStatus,
 }: PricingSectionProps) {
   const config = serviceType ? SERVICE_PRICING[serviceType as ServiceType] : null;
 
@@ -223,7 +225,7 @@ export function PricingSection({
       </div>
 
       {/* Payment status selector (for edit mode) */}
-      {paymentStatus && (
+      {paymentStatus && !hidePaymentStatus && (
         <div className="space-y-2">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Estado de Pago</Label>
