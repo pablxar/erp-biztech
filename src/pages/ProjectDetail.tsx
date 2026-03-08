@@ -1,4 +1,4 @@
-import { useState, DragEvent } from "react";
+import { useState, useMemo, DragEvent } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,14 +43,21 @@ import {
   Building,
   Mail,
   Phone,
+  Banknote,
+  ArrowUpRight,
+  Receipt,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProject, useDeleteProject, Project } from "@/hooks/useProjects";
 import { useTasks, useUpdateTask, Task } from "@/hooks/useTasks";
+import { useTransactions } from "@/hooks/useTransactions";
 import { CreateTaskDialog } from "@/components/projects/CreateTaskDialog";
 import { EditProjectDialog } from "@/components/projects/EditProjectDialog";
 import { EditTaskDialog } from "@/components/projects/EditTaskDialog";
+import { RegisterPaymentDialog } from "@/components/projects/RegisterPaymentDialog";
 import { TaskAssigneesDisplay } from "@/components/projects/TaskAssigneesDisplay";
+import { formatCurrency, PAYMENT_STATUS_CONFIG } from "@/lib/servicePricing";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
@@ -125,8 +132,24 @@ export default function ProjectDetail() {
   
   const { data: project, isLoading: loadingProject } = useProject(id || "");
   const { data: tasks, isLoading: loadingTasks } = useTasks(id);
+  const { data: allTransactions } = useTransactions();
   const { mutate: updateTask } = useUpdateTask();
   const deleteProject = useDeleteProject();
+
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+
+  // Project payment transactions
+  const projectPayments = useMemo(() => {
+    if (!allTransactions || !id) return [];
+    return allTransactions.filter(
+      (t) => t.project_id === id && t.type === "income"
+    );
+  }, [allTransactions, id]);
+
+  const totalPaid = useMemo(
+    () => projectPayments.reduce((sum, t) => sum + Number(t.amount), 0),
+    [projectPayments]
+  );
 
   const getTasksByStatus = (status: TaskStatus) =>
     tasks?.filter((t) => t.status === status) || [];
@@ -327,9 +350,15 @@ export default function ProjectDetail() {
             <div className="p-4 rounded-lg bg-secondary/50 border border-border/30">
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
                 <DollarSign className="w-4 h-4" />
-                <span className="text-xs font-medium uppercase tracking-wider">Precio Acordado</span>
+                <span className="text-xs font-medium uppercase tracking-wider">Cobros</span>
               </div>
-              <p className="text-lg font-semibold">${Number(project.budget || 0).toLocaleString()}</p>
+              <p className="text-lg font-semibold">
+                {formatCurrency(totalPaid)}
+                <span className="text-muted-foreground font-normal text-sm"> / {formatCurrency(Number(project.budget || 0))}</span>
+              </p>
+              {Number(project.budget) > 0 && (
+                <Progress value={(totalPaid / Number(project.budget)) * 100} className="h-1.5 mt-2" />
+              )}
             </div>
             
             <div className="p-4 rounded-lg bg-secondary/50 border border-border/30">
@@ -351,6 +380,15 @@ export default function ProjectDetail() {
         <div className="flex items-center justify-between">
           <TabsList className="bg-secondary/50">
             <TabsTrigger value="tasks">Tareas</TabsTrigger>
+            <TabsTrigger value="payments" className="gap-1.5">
+              <Banknote className="w-3.5 h-3.5" />
+              Pagos
+              {projectPayments.length > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                  {projectPayments.length}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="info">Información</TabsTrigger>
           </TabsList>
           
@@ -500,6 +538,119 @@ export default function ProjectDetail() {
           )}
         </TabsContent>
 
+        {/* Payments Tab */}
+        <TabsContent value="payments" className="mt-4 space-y-6">
+          {/* Payment summary + action */}
+          <div className="glass rounded-xl p-6 border border-border/50">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <Receipt className="w-5 h-5 text-primary" />
+                  Estado de Cobro
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Gestiona los cobros de este proyecto
+                </p>
+              </div>
+              {project.payment_status !== 'paid' && Number(project.budget) > 0 && (
+                <Button
+                  onClick={() => setIsPaymentDialogOpen(true)}
+                  className="gap-2"
+                >
+                  <Banknote className="w-4 h-4" />
+                  Registrar Cobro
+                </Button>
+              )}
+            </div>
+
+            {/* Visual progress */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge className={cn("border", PAYMENT_STATUS_CONFIG[project.payment_status as keyof typeof PAYMENT_STATUS_CONFIG]?.color || "bg-muted text-muted-foreground")}>
+                    {PAYMENT_STATUS_CONFIG[project.payment_status as keyof typeof PAYMENT_STATUS_CONFIG]?.label || "Sin estado"}
+                  </Badge>
+                </div>
+                <span className="text-sm font-medium">
+                  {Number(project.budget) > 0 
+                    ? `${Math.round((totalPaid / Number(project.budget)) * 100)}%` 
+                    : "0%"
+                  }
+                </span>
+              </div>
+              <Progress
+                value={Number(project.budget) > 0 ? (totalPaid / Number(project.budget)) * 100 : 0}
+                className="h-3"
+              />
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-3 rounded-lg bg-secondary/50">
+                  <p className="text-xs text-muted-foreground mb-1">Precio Acordado</p>
+                  <p className="font-bold text-lg">{formatCurrency(Number(project.budget || 0))}</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-success/5 border border-success/20">
+                  <p className="text-xs text-success mb-1">Cobrado</p>
+                  <p className="font-bold text-lg text-success">{formatCurrency(totalPaid)}</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-warning/5 border border-warning/20">
+                  <p className="text-xs text-warning mb-1">Pendiente</p>
+                  <p className="font-bold text-lg text-warning">
+                    {formatCurrency(Math.max(0, Number(project.budget || 0) - totalPaid))}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment history */}
+          <div className="glass rounded-xl border border-border/50 overflow-hidden">
+            <div className="p-4 border-b border-border/50 bg-secondary/30">
+              <h3 className="font-semibold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-primary" />
+                Historial de Pagos
+              </h3>
+            </div>
+            {projectPayments.length > 0 ? (
+              <div className="divide-y divide-border/30">
+                {projectPayments.map((payment) => (
+                  <div
+                    key={payment.id}
+                    className="flex items-center gap-4 p-4 hover:bg-secondary/20 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center shrink-0">
+                      <ArrowUpRight className="w-5 h-5 text-success" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{payment.description}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(payment.date), "d 'de' MMMM, yyyy", { locale: es })}
+                      </p>
+                    </div>
+                    <span className="font-bold text-success whitespace-nowrap">
+                      +{formatCurrency(Number(payment.amount))}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-muted-foreground">
+                <Banknote className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                <p className="font-medium mb-1">Sin pagos registrados</p>
+                <p className="text-sm">Los cobros aparecerán aquí cuando se registren</p>
+                {project.payment_status !== 'paid' && Number(project.budget) > 0 && (
+                  <Button
+                    variant="outline"
+                    className="mt-4 gap-2"
+                    onClick={() => setIsPaymentDialogOpen(true)}
+                  >
+                    <Banknote className="w-4 h-4" />
+                    Registrar primer cobro
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
         {/* Info Tab */}
         <TabsContent value="info" className="mt-4">
           <div className="grid md:grid-cols-2 gap-6">
@@ -580,6 +731,15 @@ export default function ProjectDetail() {
           project={project}
           open={isEditProjectOpen}
           onOpenChange={setIsEditProjectOpen}
+        />
+      )}
+
+      {project && (
+        <RegisterPaymentDialog
+          project={project}
+          open={isPaymentDialogOpen}
+          onOpenChange={setIsPaymentDialogOpen}
+          previousPayments={totalPaid}
         />
       )}
 
