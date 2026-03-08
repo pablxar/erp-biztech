@@ -28,7 +28,6 @@ import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Project, useUpdateProject, ServiceType } from "@/hooks/useProjects";
 import { useClients } from "@/hooks/useClients";
-import { useCreateTransaction } from "@/hooks/useTransactions";
 import { PricingSection } from "./PricingSection";
 import { PaymentMode, PaymentStatus, PaymentDetails, SERVICE_PRICING, formatCurrency } from "@/lib/servicePricing";
 
@@ -66,7 +65,6 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
   const [markAsPending, setMarkAsPending] = useState(true);
 
   const { mutate: updateProject, isPending } = useUpdateProject();
-  const { mutate: createTransaction } = useCreateTransaction();
   const { data: clients } = useClients();
 
   useEffect(() => {
@@ -94,8 +92,6 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
     e.preventDefault();
     if (!project) return;
 
-    const newPaymentStatus = markAsPending ? paymentStatus : 'paid';
-    const oldPaymentStatus = project.payment_status;
     const agreedPrice = formData.budget ? parseFloat(formData.budget) : 0;
 
     updateProject(
@@ -110,48 +106,12 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
         end_date: endDate ? format(endDate, "yyyy-MM-dd") : null,
         budget: agreedPrice,
         progress: formData.progress,
-        payment_status: newPaymentStatus,
         payment_mode: paymentMode || null,
         reference_price: referencePrice || 0,
         payment_details: Object.keys(paymentDetails).length > 0 ? paymentDetails : {},
       },
       {
         onSuccess: () => {
-          // Auto-register income when payment status changes to paid or partial
-          if (agreedPrice > 0 && oldPaymentStatus !== newPaymentStatus) {
-            if (newPaymentStatus === 'paid' && oldPaymentStatus !== 'paid') {
-              // Full payment: register full amount (minus any partial already registered)
-              const previousPartial = oldPaymentStatus === 'partial' 
-                ? Number(paymentDetails.partialAmount || 0) 
-                : 0;
-              const incomeAmount = agreedPrice - previousPartial;
-              if (incomeAmount > 0) {
-                createTransaction({
-                  description: `Cobro proyecto: ${formData.name}${previousPartial > 0 ? ' (saldo restante)' : ''}`,
-                  amount: incomeAmount,
-                  type: 'income',
-                  category: 'Proyectos',
-                  project_id: project.id,
-                  client_id: formData.client_id || undefined,
-                  date: format(new Date(), 'yyyy-MM-dd'),
-                });
-              }
-            } else if (newPaymentStatus === 'partial' && oldPaymentStatus !== 'partial' && oldPaymentStatus !== 'paid') {
-              // Partial payment: register partial amount
-              const partialAmount = Number(paymentDetails.partialAmount || 0);
-              if (partialAmount > 0) {
-                createTransaction({
-                  description: `Abono proyecto: ${formData.name}`,
-                  amount: partialAmount,
-                  type: 'income',
-                  category: 'Proyectos',
-                  project_id: project.id,
-                  client_id: formData.client_id || undefined,
-                  date: format(new Date(), 'yyyy-MM-dd'),
-                });
-              }
-            }
-          }
           onOpenChange(false);
         },
       }
@@ -244,7 +204,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
             </div>
           </div>
 
-          {/* Pricing Section */}
+          {/* Pricing Section - no payment status editing, cobros go through Payments tab */}
           <PricingSection
             serviceType={formData.service_type}
             budget={formData.budget}
@@ -370,6 +330,11 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
             />
           </div>
 
+          <div className="p-3 rounded-lg bg-info/5 border border-info/20 text-xs text-info flex items-center gap-2">
+            <DollarSignIcon className="w-3.5 h-3.5 shrink-0" />
+            Para registrar cobros, usa la pestaña "Pagos" en el detalle del proyecto.
+          </div>
+
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
@@ -382,5 +347,13 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function DollarSignIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <line x1="12" x2="12" y1="2" y2="22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
   );
 }
