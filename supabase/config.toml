@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.receive-leads]
 verify_jwt = false
+
+[functions.create-meet-event]
+verify_jwt = false
+
+[functions.send-event-invite]
+verify_jwt = false
