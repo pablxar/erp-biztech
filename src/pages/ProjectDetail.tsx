@@ -885,3 +885,62 @@ function TaskCard({ task, onDragStart, onDragEnd, onClick, isDragging }: TaskCar
     </div>
   );
 }
+
+function ProgressSlider({ project }: { project: Project }) {
+  const [localProgress, setLocalProgress] = useState(project.progress || 0);
+  const [isDragging, setIsDragging] = useState(false);
+  const { mutate: updateProject } = useUpdateProject();
+
+  const handleCommit = useCallback((value: number) => {
+    setIsDragging(false);
+    if (value !== (project.progress || 0)) {
+      updateProject({ id: project.id, progress: value });
+    }
+  }, [project.id, project.progress, updateProject]);
+
+  // Sync with server data when not dragging
+  const displayProgress = isDragging ? localProgress : (project.progress || 0);
+
+  return (
+    <div className="p-4 rounded-lg bg-secondary/50 border border-border/30">
+      <div className="flex items-center justify-between text-muted-foreground mb-3">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" />
+          <span className="text-xs font-medium uppercase tracking-wider">Progreso</span>
+        </div>
+        <span className="text-2xl font-bold text-foreground">{displayProgress}%</span>
+      </div>
+      <div
+        className="relative group cursor-pointer"
+        onMouseDown={() => setIsDragging(true)}
+        onTouchStart={() => setIsDragging(true)}
+      >
+        <div className="relative h-3 w-full rounded-full bg-muted overflow-hidden">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-primary transition-all duration-150"
+            style={{ width: `${displayProgress}%` }}
+          />
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={displayProgress}
+          onChange={(e) => {
+            setIsDragging(true);
+            setLocalProgress(Number(e.target.value));
+          }}
+          onMouseUp={(e) => handleCommit(Number((e.target as HTMLInputElement).value))}
+          onTouchEnd={(e) => handleCommit(Number((e.target as HTMLInputElement).value))}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+      </div>
+      <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+        <span>0%</span>
+        <span>50%</span>
+        <span>100%</span>
+      </div>
+    </div>
+  );
+}
