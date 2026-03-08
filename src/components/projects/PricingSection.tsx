@@ -55,6 +55,7 @@ export function PricingSection({
   onReferencePriceChange,
   markAsPending,
   onMarkAsPendingChange,
+  hidePaymentStatus,
 }: PricingSectionProps) {
   const config = serviceType ? SERVICE_PRICING[serviceType as ServiceType] : null;
 
