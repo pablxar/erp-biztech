@@ -63,6 +63,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 type ViewMode = "grid" | "list";
 
 export default function Clients() {
+  const navigate = useNavigate();
   const { data: clients, isLoading } = useClients();
   const { data: projects } = useProjects();
   const { data: transactions } = useTransactions();
