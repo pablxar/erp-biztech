@@ -29,6 +29,7 @@ import {
   Globe,
   FileText,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import {
   DropdownMenu,
