@@ -350,9 +350,15 @@ export default function ProjectDetail() {
             <div className="p-4 rounded-lg bg-secondary/50 border border-border/30">
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
                 <DollarSign className="w-4 h-4" />
-                <span className="text-xs font-medium uppercase tracking-wider">Precio Acordado</span>
+                <span className="text-xs font-medium uppercase tracking-wider">Cobros</span>
               </div>
-              <p className="text-lg font-semibold">${Number(project.budget || 0).toLocaleString()}</p>
+              <p className="text-lg font-semibold">
+                {formatCurrency(totalPaid)}
+                <span className="text-muted-foreground font-normal text-sm"> / {formatCurrency(Number(project.budget || 0))}</span>
+              </p>
+              {Number(project.budget) > 0 && (
+                <Progress value={(totalPaid / Number(project.budget)) * 100} className="h-1.5 mt-2" />
+              )}
             </div>
             
             <div className="p-4 rounded-lg bg-secondary/50 border border-border/30">
