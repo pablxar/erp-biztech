@@ -4,6 +4,7 @@ import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { TasksList } from "@/components/dashboard/TasksList";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { GoalsSummary } from "@/components/dashboard/GoalsSummary";
 import {
   DollarSign,
   FolderKanban,
