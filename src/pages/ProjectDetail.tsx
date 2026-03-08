@@ -1,4 +1,4 @@
-import { useState, useMemo, DragEvent } from "react";
+import { useState, useMemo, useCallback, DragEvent } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
