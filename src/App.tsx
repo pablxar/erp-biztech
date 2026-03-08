@@ -95,6 +95,7 @@ function AppRoutes() {
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/leads" element={<Leads />} />
         <Route path="/clients" element={<Clients />} />
+        <Route path="/clients/:clientId/onboarding" element={<ClientOnboarding />} />
         <Route path="/team-tasks" element={<TeamTasks />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/ai-assistant" element={<AIAssistant />} />
