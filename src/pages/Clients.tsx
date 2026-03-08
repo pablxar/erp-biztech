@@ -387,6 +387,10 @@ export default function Clients() {
                   Llamar
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem onClick={() => navigate(`/clients/${client.id}/onboarding`)}>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Onboarding IA
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => handleDeleteClick(client)}
