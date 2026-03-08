@@ -251,38 +251,6 @@ export default function Finance() {
     }));
   }, [transactions]);
 
-  // Budget tracking with health indicators
-  const budgetTracking = useMemo(() => {
-    if (!projects || !transactions) return [];
-    
-    return projects
-      .filter(p => p.budget && p.budget > 0)
-      .map(project => {
-        const spent = transactions
-          .filter(t => t.project_id === project.id && t.type === 'expense')
-          .reduce((sum, t) => sum + Number(t.amount), 0);
-        
-        const earned = transactions
-          .filter(t => t.project_id === project.id && t.type === 'income')
-          .reduce((sum, t) => sum + Number(t.amount), 0);
-        
-        const percentage = (spent / project.budget) * 100;
-        const health = percentage > 90 ? 'critical' : percentage > 70 ? 'warning' : 'healthy';
-        
-        return {
-          id: project.id,
-          name: project.name,
-          budget: project.budget,
-          spent,
-          earned,
-          remaining: project.budget - spent,
-          percentage,
-          health,
-          status: project.status,
-        };
-      })
-      .slice(0, 6);
-  }, [projects, transactions]);
 
   // Pending invoices with urgency
   const pendingInvoices = useMemo(() => {
