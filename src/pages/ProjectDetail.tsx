@@ -380,6 +380,15 @@ export default function ProjectDetail() {
         <div className="flex items-center justify-between">
           <TabsList className="bg-secondary/50">
             <TabsTrigger value="tasks">Tareas</TabsTrigger>
+            <TabsTrigger value="payments" className="gap-1.5">
+              <Banknote className="w-3.5 h-3.5" />
+              Pagos
+              {projectPayments.length > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                  {projectPayments.length}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="info">Información</TabsTrigger>
           </TabsList>
           
