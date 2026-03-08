@@ -34,7 +34,7 @@ export function useCreateGoal() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (goal: { title: string; description?: string; due_date?: string; priority?: string }) => {
+    mutationFn: async (goal: { title: string; description?: string; due_date?: string; priority?: "high" | "medium" | "low" }) => {
       const { data, error } = await supabase
         .from("goals")
         .insert([{ ...goal, created_by: user?.id }])
