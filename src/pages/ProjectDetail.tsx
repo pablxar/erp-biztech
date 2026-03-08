@@ -734,6 +734,15 @@ export default function ProjectDetail() {
         />
       )}
 
+      {project && (
+        <RegisterPaymentDialog
+          project={project}
+          open={isPaymentDialogOpen}
+          onOpenChange={setIsPaymentDialogOpen}
+          previousPayments={totalPaid}
+        />
+      )}
+
       {editingTask && (
         <EditTaskDialog
           task={editingTask}
