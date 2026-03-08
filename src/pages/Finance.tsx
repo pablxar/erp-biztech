@@ -251,38 +251,6 @@ export default function Finance() {
     }));
   }, [transactions]);
 
-  // Budget tracking with health indicators
-  const budgetTracking = useMemo(() => {
-    if (!projects || !transactions) return [];
-    
-    return projects
-      .filter(p => p.budget && p.budget > 0)
-      .map(project => {
-        const spent = transactions
-          .filter(t => t.project_id === project.id && t.type === 'expense')
-          .reduce((sum, t) => sum + Number(t.amount), 0);
-        
-        const earned = transactions
-          .filter(t => t.project_id === project.id && t.type === 'income')
-          .reduce((sum, t) => sum + Number(t.amount), 0);
-        
-        const percentage = (spent / project.budget) * 100;
-        const health = percentage > 90 ? 'critical' : percentage > 70 ? 'warning' : 'healthy';
-        
-        return {
-          id: project.id,
-          name: project.name,
-          budget: project.budget,
-          spent,
-          earned,
-          remaining: project.budget - spent,
-          percentage,
-          health,
-          status: project.status,
-        };
-      })
-      .slice(0, 6);
-  }, [projects, transactions]);
 
   // Pending invoices with urgency
   const pendingInvoices = useMemo(() => {
@@ -885,82 +853,6 @@ export default function Finance() {
         </div>
       </div>
 
-      {/* Budget Tracking */}
-      {budgetTracking.length > 0 && (
-        <div className="glass rounded-xl p-6 animate-slide-up">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Target className="w-5 h-5 text-primary" />
-                Control de Proyectos
-              </h3>
-              <p className="text-sm text-muted-foreground">Seguimiento por proyecto</p>
-            </div>
-            <Button variant="ghost" size="sm" className="text-xs gap-1.5">
-              Ver todos <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {budgetTracking.map((budget) => (
-              <div 
-                key={budget.id} 
-                className={cn(
-                  "p-4 rounded-xl border transition-all hover:scale-[1.02]",
-                  budget.health === 'critical' && "bg-destructive/5 border-destructive/20",
-                  budget.health === 'warning' && "bg-warning/5 border-warning/20",
-                  budget.health === 'healthy' && "bg-secondary/30 border-border/50 hover:border-primary/30",
-                )}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium truncate">{budget.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {budget.status === 'active' ? 'En progreso' : budget.status}
-                    </p>
-                  </div>
-                  <Badge 
-                    variant="outline" 
-                    className={cn(
-                      "text-[10px] px-1.5 shrink-0",
-                      budget.health === 'critical' && "bg-destructive/10 text-destructive border-destructive/30",
-                      budget.health === 'warning' && "bg-warning/10 text-warning border-warning/30",
-                      budget.health === 'healthy' && "bg-success/10 text-success border-success/30",
-                    )}
-                  >
-                    {budget.percentage.toFixed(0)}%
-                  </Badge>
-                </div>
-                
-                <Progress 
-                  value={Math.min(budget.percentage, 100)} 
-                  className={cn(
-                    "h-2 mb-3",
-                    budget.health === 'critical' && "[&>div]:bg-destructive",
-                    budget.health === 'warning' && "[&>div]:bg-warning",
-                  )}
-                />
-                
-                <div className="flex justify-between text-xs">
-                  <div>
-                    <p className="text-muted-foreground">Gastado</p>
-                    <p className="font-semibold">${budget.spent.toLocaleString()}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-muted-foreground">Restante</p>
-                    <p className={cn(
-                      "font-semibold",
-                      budget.remaining < 0 ? "text-destructive" : budget.health === 'warning' ? "text-warning" : "text-success"
-                    )}>
-                      ${budget.remaining.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Analytics Cards */}
       {analytics && (
