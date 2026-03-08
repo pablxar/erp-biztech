@@ -135,6 +135,8 @@ export default function Leads() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null);
+  const [convertingLead, setConvertingLead] = useState<Lead | null>(null);
+  const [isConvertDialogOpen, setIsConvertDialogOpen] = useState(false);
 
   const filteredLeads =
     leads?.filter((lead) => {
