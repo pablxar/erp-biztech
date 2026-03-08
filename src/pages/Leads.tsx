@@ -193,6 +193,11 @@ export default function Leads() {
   };
 
   const handleStatusChange = (lead: Lead, newStatus: LeadStatus) => {
+    if (newStatus === "converted") {
+      setConvertingLead(lead);
+      setIsConvertDialogOpen(true);
+      return;
+    }
     updateLead.mutate(
       { id: lead.id, status: newStatus },
       {
