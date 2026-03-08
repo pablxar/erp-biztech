@@ -55,6 +55,7 @@ import { useLeads, useDeleteLead, useUpdateLead, Lead, LeadStatus } from "@/hook
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import { CreateLeadDialog } from "@/components/leads/CreateLeadDialog";
 import { EditLeadDialog } from "@/components/leads/EditLeadDialog";
+import { ConvertLeadDialog } from "@/components/leads/ConvertLeadDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
