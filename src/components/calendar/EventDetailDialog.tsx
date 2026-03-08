@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { CalendarIcon, Trash2, Clock, Loader2, Video, ExternalLink, Mail, CheckCircle2, RefreshCw } from "lucide-react";
+import { CalendarIcon, Trash2, Clock, Loader2, Video, ExternalLink, Mail, CheckCircle2, RefreshCw, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
