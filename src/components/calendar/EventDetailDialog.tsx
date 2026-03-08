@@ -1,20 +1,11 @@
 import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +17,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { CalendarIcon, Trash2, Clock, Loader2, Video, ExternalLink, Mail, CheckCircle2, RefreshCw, MessageCircle } from "lucide-react";
+import {
+  CalendarIcon,
+  Trash2,
+  Clock,
+  Loader2,
+  Video,
+  ExternalLink,
+  Mail,
+  CheckCircle2,
+  RefreshCw,
+  MessageCircle,
+} from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -53,7 +55,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
   const [date, setDate] = useState<Date>(new Date());
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
-  
+
   const updateEvent = useUpdateEvent();
   const deleteEvent = useDeleteEvent();
   const sendInvite = useSendEventInvite();
@@ -76,11 +78,11 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
     }
 
     const startDateTime = new Date(date);
-    const [startHour, startMin] = startTime.split(':').map(Number);
+    const [startHour, startMin] = startTime.split(":").map(Number);
     startDateTime.setHours(startHour, startMin, 0, 0);
 
     const endDateTime = new Date(date);
-    const [endHour, endMin] = endTime.split(':').map(Number);
+    const [endHour, endMin] = endTime.split(":").map(Number);
     endDateTime.setHours(endHour, endMin, 0, 0);
 
     try {
@@ -100,7 +102,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
 
   const handleDelete = async () => {
     if (!event) return;
-    
+
     try {
       await deleteEvent.mutateAsync(event.id);
       toast.success("Evento eliminado");
@@ -142,7 +144,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
             Detalle del Evento
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-5 mt-2">
           {/* Type & Status Badges */}
           <div className="flex flex-wrap items-center gap-2">
@@ -185,7 +187,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
               {/* WhatsApp Button */}
               <button
                 onClick={() => {
-                  const BIZTECH_WA_NUMBER = "56912345678"; // TODO: Reemplazar con número real del grupo
+                  const BIZTECH_WA_NUMBER = "56943998413"; // TODO: Reemplazar con número real del grupo
                   const eventDate = new Date(event.start_time);
                   const formattedDate = format(eventDate, "EEEE d 'de' MMMM", { locale: es });
                   const formattedTime = format(eventDate, "HH:mm");
@@ -233,13 +235,9 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
           {/* Title */}
           <div className="space-y-2">
             <Label>Título</Label>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Nombre del evento"
-            />
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Nombre del evento" />
           </div>
-          
+
           {/* Description */}
           <div className="space-y-2">
             <Label>Descripción</Label>
@@ -272,7 +270,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
               </PopoverContent>
             </Popover>
           </div>
-          
+
           {/* Time Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -280,22 +278,14 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
                 <Clock className="w-4 h-4" />
                 Hora inicio
               </Label>
-              <Input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-              />
+              <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 Hora fin
               </Label>
-              <Input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              />
+              <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
             </div>
           </div>
 
@@ -317,9 +307,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>
-                    Eliminar
-                  </AlertDialogAction>
+                  <AlertDialogAction onClick={handleDelete}>Eliminar</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
