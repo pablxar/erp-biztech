@@ -4,6 +4,7 @@ import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { TasksList } from "@/components/dashboard/TasksList";
 import { UpcomingEvents } from "@/components/dashboard/UpcomingEvents";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { GoalsSummary } from "@/components/dashboard/GoalsSummary";
 import {
   DollarSign,
   FolderKanban,
@@ -133,9 +134,10 @@ export default function Dashboard() {
       </div>
 
       {/* Lower Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <RecentProjects />
         <TasksList />
+        <GoalsSummary />
       </div>
     </div>
   );
