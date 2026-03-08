@@ -12,6 +12,7 @@ import {
   Sparkles,
   UserPlus,
   ListTodo,
+  Target,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNewLeadsCount } from "@/hooks/useLeads";
