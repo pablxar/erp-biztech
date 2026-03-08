@@ -97,6 +97,7 @@ function AppRoutes() {
         <Route path="/team-tasks" element={<TeamTasks />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/ai-assistant" element={<AIAssistant />} />
+        <Route path="/goals" element={<Goals />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
 

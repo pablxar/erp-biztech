@@ -13,7 +13,7 @@ export function CreateGoalDialog() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [priority, setPriority] = useState("medium");
+  const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
   const createGoal = useCreateGoal();
 
   const handleSubmit = () => {
