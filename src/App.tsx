@@ -17,6 +17,7 @@ import Reports from "./pages/Reports";
 import AIAssistant from "./pages/AIAssistant";
 import TeamTasks from "./pages/TeamTasks";
 import Goals from "./pages/Goals";
+import ClientOnboarding from "./pages/ClientOnboarding";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import AccessDenied from "./pages/AccessDenied";
