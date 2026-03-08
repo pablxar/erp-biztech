@@ -26,12 +26,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { CalendarIcon, Trash2, Clock, Loader2 } from "lucide-react";
+import { CalendarIcon, Trash2, Clock, Loader2, Video, ExternalLink, Mail, CheckCircle2, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { Event, useUpdateEvent, useDeleteEvent } from "@/hooks/useEvents";
+import { Event, useUpdateEvent, useDeleteEvent, useSendEventInvite, EventType } from "@/hooks/useEvents";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+
+const eventTypeConfig: Record<EventType, { label: string; color: string; icon: string }> = {
+  meeting: { label: "Reunión", color: "bg-blue-500/20 text-blue-400 border-blue-500/30", icon: "🎥" },
+  task: { label: "Tarea", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30", icon: "✅" },
+  deadline: { label: "Deadline", color: "bg-red-500/20 text-red-400 border-red-500/30", icon: "🚩" },
+  reminder: { label: "Recordatorio", color: "bg-amber-500/20 text-amber-400 border-amber-500/30", icon: "🔔" },
+};
 
 interface EventDetailDialogProps {
   event: Event | null;
@@ -48,6 +56,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
   
   const updateEvent = useUpdateEvent();
   const deleteEvent = useDeleteEvent();
+  const sendInvite = useSendEventInvite();
 
   useEffect(() => {
     if (event) {
@@ -101,16 +110,103 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
     }
   };
 
+  const handleResendInvite = async () => {
+    if (!event || !event.attendee_email) return;
+
+    try {
+      await sendInvite.mutateAsync({
+        event_id: event.id,
+        title: event.title,
+        description: event.description || undefined,
+        start_time: event.start_time,
+        end_time: event.end_time,
+        meeting_url: event.meeting_url || undefined,
+        attendee_email: event.attendee_email,
+      });
+      toast.success("Invitación reenviada");
+    } catch (error) {
+      toast.error("Error al reenviar invitación");
+    }
+  };
+
   if (!event) return null;
+
+  const typeConfig = eventTypeConfig[event.event_type as EventType] || eventTypeConfig.meeting;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Editar Evento</DialogTitle>
+          <DialogTitle className="flex items-center gap-3">
+            <span className="text-xl">{typeConfig.icon}</span>
+            Detalle del Evento
+          </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4 mt-4">
+        <div className="space-y-5 mt-2">
+          {/* Type & Status Badges */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className={cn("border", typeConfig.color)}>
+              {typeConfig.label}
+            </Badge>
+            {event.meeting_url && (
+              <Badge variant="outline" className="border-blue-500/30 text-blue-400 bg-blue-500/10">
+                <Video className="w-3 h-3 mr-1" />
+                Meet
+              </Badge>
+            )}
+            {event.email_sent && (
+              <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 bg-emerald-500/10">
+                <CheckCircle2 className="w-3 h-3 mr-1" />
+                Invitación enviada
+              </Badge>
+            )}
+          </div>
+
+          {/* Meeting URL Button */}
+          {event.meeting_url && (
+            <a
+              href={event.meeting_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 transition-colors group"
+            >
+              <div className="p-2.5 rounded-lg bg-blue-500/20">
+                <Video className="w-5 h-5 text-blue-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">Unirse a la Reunión</p>
+                <p className="text-xs text-muted-foreground truncate">{event.meeting_url}</p>
+              </div>
+              <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
+            </a>
+          )}
+
+          {/* Attendee Info */}
+          {event.attendee_email && (
+            <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border/50">
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm">{event.attendee_email}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleResendInvite}
+                disabled={sendInvite.isPending}
+                className="gap-1 text-xs"
+              >
+                {sendInvite.isPending ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-3 h-3" />
+                )}
+                Reenviar
+              </Button>
+            </div>
+          )}
+
+          {/* Title */}
           <div className="space-y-2">
             <Label>Título</Label>
             <Input
@@ -120,6 +216,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
             />
           </div>
           
+          {/* Description */}
           <div className="space-y-2">
             <Label>Descripción</Label>
             <Textarea
@@ -130,16 +227,12 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
             />
           </div>
 
+          {/* Date */}
           <div className="space-y-2">
             <Label>Fecha</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                  )}
-                >
+                <Button variant="outline" className="w-full justify-start text-left font-normal">
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {format(date, "PPP", { locale: es })}
                 </Button>
@@ -156,6 +249,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
             </Popover>
           </div>
           
+          {/* Time Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
@@ -181,6 +275,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
             </div>
           </div>
 
+          {/* Actions */}
           <div className="flex justify-between pt-4">
             <AlertDialog>
               <AlertDialogTrigger asChild>
