@@ -1,85 +1,94 @@
 
 
-## Plan: Documento de Onboarding con IA para Clientes
+# Plan: Precios Referenciales por Servicio y Logica de Cobro en Proyectos
 
-### Resumen
-Crear un sistema completo de onboarding por cliente que permita subir un PDF de transcripción o audio de reunión, procesarlo con IA para extraer información clave, llenar automáticamente un formulario de onboarding estandarizado, y generar una propuesta con precios basados en proyectos anteriores.
+## Resumen
 
-### 1. Base de datos
+Al seleccionar un tipo de servicio en el modal de crear/editar proyecto, se mostrara automaticamente un precio referencial. El campo "Presupuesto" se reemplaza por una seccion de pricing que permite ver el precio base, editarlo, seleccionar modalidad de pago y marcar el proyecto como "Por Pagar". Los proyectos marcados como pendientes de pago se reflejaran en la seccion "Por Cobrar" de Finanzas.
 
-**Tabla `client_onboarding`:**
-- `id` (uuid, PK), `client_id` (uuid, FK → clients), `status` (text: 'draft'/'processing'/'completed'), `created_by` (uuid), `created_at`, `updated_at`
-- Campos del documento onboarding:
-  - `company_description` (text) — Descripción del negocio
-  - `business_goals` (text) — Objetivos del cliente
-  - `target_audience` (text) — Público objetivo
-  - `current_challenges` (text) — Problemas actuales
-  - `requested_services` (jsonb) — Servicios solicitados
-  - `timeline` (text) — Plazos deseados
-  - `budget_range` (text) — Rango de presupuesto
-  - `competitors` (text) — Competencia
-  - `brand_guidelines` (text) — Lineamientos de marca
-  - `additional_notes` (text) — Notas adicionales
-  - `ai_proposal` (text) — Propuesta generada por IA
-  - `ai_summary` (text) — Resumen ejecutivo generado por IA
-  - `source_file_url` (text) — URL del archivo subido
-  - `source_file_type` (text) — 'pdf' o 'audio'
-- RLS: `is_team_member(auth.uid())`
+## Precios Referenciales por Servicio
 
-**Storage bucket `onboarding-files`:** Para subir PDFs y audios.
+| Servicio | Precio Base | Modalidad |
+|---|---|---|
+| Desarrollo de Software | $300,000 | Monto fijo (editable) |
+| Web Development - Landing Page | $200,000 | Monto fijo (editable) |
+| Web Development - E-commerce | $400,000 | Monto fijo (editable) |
+| Marketing Digital | % por resultado | Growth Partner (porcentaje editable) |
+| Audiovisual | $5,000/video | Por unidad (cantidad editable) |
 
-### 2. Edge Function `process-onboarding`
+Para Web Development se agregara un sub-selector (Landing Page vs E-commerce) que cambia el precio base.
 
-- Recibe el archivo subido (PDF o audio)
-- Para PDF: extrae texto del contenido
-- Para audio: usa transcripción (se puede delegar a la IA con el contenido)
-- Envía el texto extraído + datos de proyectos anteriores del sistema a Lovable AI (`google/gemini-2.5-flash`)
-- La IA devuelve un JSON estructurado con los campos del onboarding llenos, ideas organizadas y una propuesta de cobro basada en historial
-- Tool calling para extraer output estructurado
+## Cambios en Base de Datos
 
-### 3. Componentes UI
-
-**`src/pages/ClientOnboarding.tsx`** — Página principal accesible desde el detalle del cliente:
-- **Paso 1 - Subir archivo**: Drag & drop zone para PDF o audio, indicador de procesamiento con IA
-- **Paso 2 - Revisión y edición**: Formulario con todos los campos pre-llenados por IA, editables por el usuario. Secciones colapsables
-- **Paso 3 - Propuesta**: Propuesta generada por IA con desglose de servicios y precios sugeridos (basados en `SERVICE_PRICING` + historial de proyectos del cliente). Posibilidad de ajustar antes de guardar
-- **Paso 4 - Confirmación**: Resumen final, opción de crear proyecto directamente desde el onboarding
-
-**`src/components/onboarding/OnboardingUploader.tsx`** — Zona de subida con progress
-**`src/components/onboarding/OnboardingForm.tsx`** — Formulario editable con campos pre-llenados
-**`src/components/onboarding/OnboardingProposal.tsx`** — Vista de propuesta con pricing
-
-### 4. Hook `src/hooks/useOnboarding.ts`
-- CRUD para `client_onboarding`
-- Mutation para subir archivo y disparar procesamiento AI
-- Query para obtener onboardings de un cliente
-
-### 5. Integración con Clientes
-- Botón "Onboarding" en el panel de detalle del cliente (Clients page) y como acción en el dropdown
-- Ruta `/clients/:clientId/onboarding` o modal/página dedicada
-
-### 6. Flujo completo
+Se agregaran 4 columnas a la tabla `projects`:
 
 ```text
-Subir PDF/Audio → Storage bucket → Edge Function procesa con IA
-       ↓
-IA extrae: descripción, objetivos, servicios, retos, público
-       ↓
-IA consulta proyectos anteriores similares → propone precios
-       ↓
-Formulario pre-llenado → Usuario revisa/edita → Guarda
-       ↓
-Opción: Crear proyecto directamente con datos del onboarding
++-----------------------+----------+-----------------------------+
+| Columna               | Tipo     | Descripcion                 |
++-----------------------+----------+-----------------------------+
+| payment_status        | text     | 'pending' | 'partial' |     |
+|                       |          | 'paid' (default: 'pending') |
+| payment_mode          | text     | 'fixed' | 'percentage' |    |
+|                       |          | 'per_unit'                  |
+| reference_price       | numeric  | Precio referencial base     |
+| payment_details       | jsonb    | Detalles extra: porcentaje, |
+|                       |          | cantidad de videos, etc.    |
++-----------------------+----------+-----------------------------+
 ```
 
-### 7. Navegación
-- Agregar ruta `/clients/:clientId/onboarding` en App.tsx
-- Botón en panel de detalle de cliente para acceder
+Tambien se creara una politica RLS consistente con las existentes (team members can manage).
 
-### Detalles técnicos
-- El edge function usa `google/gemini-2.5-flash` con tool calling para extraer JSON estructurado
-- El archivo se sube a storage bucket `onboarding-files` con path `{client_id}/{timestamp}_{filename}`
-- Para PDFs se extrae texto plano; para audio se envía como contexto indicando que es una transcripción
-- La propuesta de precios usa los datos de `SERVICE_PRICING` + historial real de `projects` y `transactions` del cliente
-- El formulario es 100% editable post-IA, el usuario siempre tiene control final
+## Cambios en el Frontend
+
+### 1. Constantes de precios (nuevo archivo `src/lib/servicePricing.ts`)
+- Mapa de precios referenciales por tipo de servicio
+- Funciones helper para calcular el monto segun modalidad
+
+### 2. CreateProjectDialog.tsx
+- Al seleccionar un servicio, mostrar el precio referencial debajo de cada tarjeta de servicio
+- Reemplazar el campo "Presupuesto ($)" por una seccion de pricing:
+  - Precio referencial (pre-llenado, editable)
+  - Selector de modalidad de pago (Monto Fijo / Porcentaje / Por Unidad)
+  - Para Audiovisual: campo de cantidad de videos (calculo automatico)
+  - Para Marketing Digital: campo de porcentaje
+  - Para Web Development: sub-selector Landing/E-commerce
+  - Checkbox "Marcar como Por Pagar"
+
+### 3. EditProjectDialog.tsx
+- Misma logica de pricing que en Create
+- Mostrar estado de pago actual y permitir cambiarlo
+
+### 4. useProjects.ts
+- Agregar los nuevos campos al tipo `Project` y `CreateProjectInput`
+- Incluirlos en las mutaciones de crear/actualizar
+
+### 5. Finance.tsx - Seccion "Por Cobrar"
+- Modificar la tarjeta "Por Cobrar" para incluir proyectos con `payment_status = 'pending'`
+- Sumar el `reference_price` (o budget) de proyectos pendientes de pago a las facturas pendientes
+- Agregar una seccion/lista de "Proyectos por cobrar" que muestre los proyectos marcados como pendientes
+
+### 6. Projects.tsx
+- Mostrar badge de estado de pago en las tarjetas de proyecto (Por Pagar / Pagado / Parcial)
+
+## Detalles Tecnicos
+
+### Migracion SQL
+```text
+ALTER TABLE projects ADD COLUMN payment_status text DEFAULT 'pending';
+ALTER TABLE projects ADD COLUMN payment_mode text;
+ALTER TABLE projects ADD COLUMN reference_price numeric DEFAULT 0;
+ALTER TABLE projects ADD COLUMN payment_details jsonb DEFAULT '{}';
+```
+
+### Estructura de payment_details (jsonb)
+- Para audiovisual: `{ "video_count": 3, "price_per_video": 5000 }`
+- Para marketing: `{ "percentage": 15, "description": "Growth Partner" }`
+- Para web (landing): `{ "web_subtype": "landing_page" }`
+- Para web (ecommerce): `{ "web_subtype": "ecommerce" }`
+
+### Flujo de datos
+1. Usuario selecciona servicio --> precio referencial se muestra y se pre-llena
+2. Usuario puede editar el precio final --> se guarda en `budget` (monto final) y `reference_price` (precio base)
+3. Al marcar "Por Pagar" --> `payment_status = 'pending'`
+4. En Finanzas, se consultan proyectos con `payment_status IN ('pending', 'partial')` y se suman a "Por Cobrar"
 

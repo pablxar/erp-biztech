@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,7 @@ import {
   Globe,
   FileText,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -61,6 +63,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 type ViewMode = "grid" | "list";
 
 export default function Clients() {
+  const navigate = useNavigate();
   const { data: clients, isLoading } = useClients();
   const { data: projects } = useProjects();
   const { data: transactions } = useTransactions();
@@ -263,6 +266,10 @@ export default function Clients() {
                   Llamar
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem onClick={() => navigate(`/clients/${client.id}/onboarding`)}>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Onboarding IA
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => handleDeleteClick(client)}
@@ -380,6 +387,10 @@ export default function Clients() {
                   Llamar
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem onClick={() => navigate(`/clients/${client.id}/onboarding`)}>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Onboarding IA
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => handleDeleteClick(client)}
@@ -523,27 +534,37 @@ export default function Clients() {
         </div>
 
         {/* Actions */}
-        <div className="p-4 border-t border-border/50 flex gap-2">
+        <div className="p-4 border-t border-border/50 space-y-2">
           <Button
-            className="flex-1 gap-2"
-            onClick={() => selectedClient.email && openEmail(selectedClient.email)}
-            disabled={!selectedClient.email}
-          >
-            <Mail className="w-4 h-4" />
-            Email
-          </Button>
-          <Button
+            className="w-full gap-2"
             variant="outline"
-            className="flex-1 gap-2"
-            onClick={() => selectedClient.phone && openPhone(selectedClient.phone)}
-            disabled={!selectedClient.phone}
+            onClick={() => navigate(`/clients/${selectedClient.id}/onboarding`)}
           >
-            <Phone className="w-4 h-4" />
-            Llamar
+            <Sparkles className="w-4 h-4" />
+            Onboarding con IA
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleEditClient(selectedClient)}>
-            <Edit className="w-4 h-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              className="flex-1 gap-2"
+              onClick={() => selectedClient.email && openEmail(selectedClient.email)}
+              disabled={!selectedClient.email}
+            >
+              <Mail className="w-4 h-4" />
+              Email
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 gap-2"
+              onClick={() => selectedClient.phone && openPhone(selectedClient.phone)}
+              disabled={!selectedClient.phone}
+            >
+              <Phone className="w-4 h-4" />
+              Llamar
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => handleEditClient(selectedClient)}>
+              <Edit className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     );
