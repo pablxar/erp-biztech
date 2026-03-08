@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Biztech ERP <onboarding@resend.dev>",
+        from: "Biztech ERP <noreply@reu.biztech.cl>",
         to: [attendee_email],
         subject: `📅 Invitación: ${title}`,
         html: htmlContent,
