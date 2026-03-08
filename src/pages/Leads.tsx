@@ -603,6 +603,12 @@ export default function Leads() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ConvertLeadDialog
+        lead={convertingLead}
+        open={isConvertDialogOpen}
+        onOpenChange={setIsConvertDialogOpen}
+      />
     </div>
   );
 }
