@@ -1,4 +1,4 @@
-import { useState, DragEvent } from "react";
+import { useState, useMemo, DragEvent } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,14 +43,21 @@ import {
   Building,
   Mail,
   Phone,
+  Banknote,
+  ArrowUpRight,
+  Receipt,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProject, useDeleteProject, Project } from "@/hooks/useProjects";
 import { useTasks, useUpdateTask, Task } from "@/hooks/useTasks";
+import { useTransactions } from "@/hooks/useTransactions";
 import { CreateTaskDialog } from "@/components/projects/CreateTaskDialog";
 import { EditProjectDialog } from "@/components/projects/EditProjectDialog";
 import { EditTaskDialog } from "@/components/projects/EditTaskDialog";
+import { RegisterPaymentDialog } from "@/components/projects/RegisterPaymentDialog";
 import { TaskAssigneesDisplay } from "@/components/projects/TaskAssigneesDisplay";
+import { formatCurrency, PAYMENT_STATUS_CONFIG } from "@/lib/servicePricing";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
