@@ -132,8 +132,24 @@ export default function ProjectDetail() {
   
   const { data: project, isLoading: loadingProject } = useProject(id || "");
   const { data: tasks, isLoading: loadingTasks } = useTasks(id);
+  const { data: allTransactions } = useTransactions();
   const { mutate: updateTask } = useUpdateTask();
   const deleteProject = useDeleteProject();
+
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+
+  // Project payment transactions
+  const projectPayments = useMemo(() => {
+    if (!allTransactions || !id) return [];
+    return allTransactions.filter(
+      (t) => t.project_id === id && t.type === "income"
+    );
+  }, [allTransactions, id]);
+
+  const totalPaid = useMemo(
+    () => projectPayments.reduce((sum, t) => sum + Number(t.amount), 0),
+    [projectPayments]
+  );
 
   const getTasksByStatus = (status: TaskStatus) =>
     tasks?.filter((t) => t.status === status) || [];
