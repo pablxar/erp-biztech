@@ -66,6 +66,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
   const [markAsPending, setMarkAsPending] = useState(true);
 
   const { mutate: updateProject, isPending } = useUpdateProject();
+  const { mutate: createTransaction } = useCreateTransaction();
   const { data: clients } = useClients();
 
   useEffect(() => {
