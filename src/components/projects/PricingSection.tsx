@@ -38,6 +38,7 @@ interface PricingSectionProps {
   onReferencePriceChange: (value: number) => void;
   markAsPending: boolean;
   onMarkAsPendingChange: (value: boolean) => void;
+  hidePaymentStatus?: boolean;
 }
 
 export function PricingSection({
