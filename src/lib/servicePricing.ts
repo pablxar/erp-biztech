@@ -11,6 +11,7 @@ export interface PaymentDetails {
   percentage?: number;
   description?: string;
   web_subtype?: WebSubtype;
+  partialAmount?: number;
 }
 
 export interface ServicePricingConfig {
