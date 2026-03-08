@@ -648,7 +648,8 @@ export default function ProjectDetail() {
                       const runningTotal = projectPayments
                         .slice(0, index + 1)
                         .reduce((sum, p) => sum + Number(p.amount), 0);
-                      const progressAtPoint = agreedPrice > 0 ? (runningTotal / agreedPrice) * 100 : 0;
+                      const budgetTotal = Number(project.budget) || 0;
+                      const progressAtPoint = budgetTotal > 0 ? (runningTotal / budgetTotal) * 100 : 0;
                       
                       return (
                         <div
