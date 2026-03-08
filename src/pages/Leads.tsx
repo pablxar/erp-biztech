@@ -55,6 +55,7 @@ import { useLeads, useDeleteLead, useUpdateLead, Lead, LeadStatus } from "@/hook
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import { CreateLeadDialog } from "@/components/leads/CreateLeadDialog";
 import { EditLeadDialog } from "@/components/leads/EditLeadDialog";
+import { ConvertLeadDialog } from "@/components/leads/ConvertLeadDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -134,6 +135,8 @@ export default function Leads() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null);
+  const [convertingLead, setConvertingLead] = useState<Lead | null>(null);
+  const [isConvertDialogOpen, setIsConvertDialogOpen] = useState(false);
 
   const filteredLeads =
     leads?.filter((lead) => {
@@ -190,6 +193,11 @@ export default function Leads() {
   };
 
   const handleStatusChange = (lead: Lead, newStatus: LeadStatus) => {
+    if (newStatus === "converted") {
+      setConvertingLead(lead);
+      setIsConvertDialogOpen(true);
+      return;
+    }
     updateLead.mutate(
       { id: lead.id, status: newStatus },
       {
@@ -595,6 +603,12 @@ export default function Leads() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ConvertLeadDialog
+        lead={convertingLead}
+        open={isConvertDialogOpen}
+        onOpenChange={setIsConvertDialogOpen}
+      />
     </div>
   );
 }

@@ -137,6 +137,8 @@ export function useUpdateLead() {
       notes?: string;
       assigned_to?: string | null;
       meeting_scheduled_at?: string | null;
+      converted_at?: string | null;
+      contacted_at?: string | null;
     }) => {
       const { data, error } = await supabase
         .from("leads")
