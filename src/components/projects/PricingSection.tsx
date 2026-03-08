@@ -66,14 +66,28 @@ export function PricingSection({
     }
   }, [serviceType]);
 
-  // Auto-calculate reference price when service/details change
+  // Track previous service type to detect actual changes
+  const [prevServiceType, setPrevServiceType] = useState(serviceType);
+  const [prevWebSubtype, setPrevWebSubtype] = useState(paymentDetails?.web_subtype);
+  const [prevVideoCount, setPrevVideoCount] = useState(paymentDetails?.video_count);
+
+  // Auto-calculate reference price when service/details change — only update budget on actual user changes
   useEffect(() => {
     if (serviceType) {
       const price = getDefaultPriceForService(serviceType as ServiceType, paymentDetails);
       onReferencePriceChange(price);
-      if (config?.paymentMode !== 'percentage') {
+      
+      const serviceChanged = serviceType !== prevServiceType;
+      const subtypeChanged = paymentDetails?.web_subtype !== prevWebSubtype;
+      const videoCountChanged = paymentDetails?.video_count !== prevVideoCount;
+      
+      if ((serviceChanged || subtypeChanged || videoCountChanged) && config?.paymentMode !== 'percentage') {
         onBudgetChange(price.toString());
       }
+      
+      setPrevServiceType(serviceType);
+      setPrevWebSubtype(paymentDetails?.web_subtype);
+      setPrevVideoCount(paymentDetails?.video_count);
     }
   }, [serviceType, paymentDetails?.web_subtype, paymentDetails?.video_count]);
 
