@@ -540,60 +540,82 @@ export default function ProjectDetail() {
 
         {/* Payments Tab */}
         <TabsContent value="payments" className="mt-4 space-y-6">
-          {/* Payment summary + action */}
-          <div className="glass rounded-xl p-6 border border-border/50">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                  <Receipt className="w-5 h-5 text-primary" />
-                  Estado de Cobro
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Gestiona los cobros de este proyecto
-                </p>
-              </div>
-              {project.payment_status !== 'paid' && Number(project.budget) > 0 && (
-                <Button
-                  onClick={() => setIsPaymentDialogOpen(true)}
-                  className="gap-2"
-                >
-                  <Banknote className="w-4 h-4" />
-                  Registrar Cobro
-                </Button>
-              )}
-            </div>
+          {/* Payment Hero Card */}
+          <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-gradient-to-br from-primary/5 via-background to-success/5">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,hsl(var(--primary)/0.08),transparent_50%)]" />
+            <div className="relative p-6 sm:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+                <div className="space-y-4 flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
+                      <Receipt className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Estado de Cobro</h3>
+                      <Badge className={cn("border mt-1", PAYMENT_STATUS_CONFIG[project.payment_status as keyof typeof PAYMENT_STATUS_CONFIG]?.color || "bg-muted text-muted-foreground")}>
+                        {PAYMENT_STATUS_CONFIG[project.payment_status as keyof typeof PAYMENT_STATUS_CONFIG]?.label || "Sin estado"}
+                      </Badge>
+                    </div>
+                  </div>
 
-            {/* Visual progress */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge className={cn("border", PAYMENT_STATUS_CONFIG[project.payment_status as keyof typeof PAYMENT_STATUS_CONFIG]?.color || "bg-muted text-muted-foreground")}>
-                    {PAYMENT_STATUS_CONFIG[project.payment_status as keyof typeof PAYMENT_STATUS_CONFIG]?.label || "Sin estado"}
-                  </Badge>
+                  {/* Progress bar with labels */}
+                  <div className="space-y-3">
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Cobrado</p>
+                        <p className="text-3xl font-bold text-success">{formatCurrency(totalPaid)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground mb-0.5">Total</p>
+                        <p className="text-lg font-semibold text-foreground">{formatCurrency(Number(project.budget || 0))}</p>
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <Progress
+                        value={Number(project.budget) > 0 ? (totalPaid / Number(project.budget)) * 100 : 0}
+                        className="h-4 rounded-full"
+                      />
+                      {Number(project.budget) > 0 && (
+                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-primary-foreground mix-blend-difference">
+                          {Math.round((totalPaid / Number(project.budget)) * 100)}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <span className="text-sm font-medium">
-                  {Number(project.budget) > 0 
-                    ? `${Math.round((totalPaid / Number(project.budget)) * 100)}%` 
-                    : "0%"
-                  }
-                </span>
+
+                {/* Action button */}
+                {project.payment_status !== 'paid' && Number(project.budget) > 0 && (
+                  <Button
+                    size="lg"
+                    onClick={() => setIsPaymentDialogOpen(true)}
+                    className="gap-2 shadow-lg shrink-0 h-12 px-6"
+                  >
+                    <Banknote className="w-5 h-5" />
+                    Registrar Cobro
+                  </Button>
+                )}
+                {project.payment_status === 'paid' && (
+                  <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-success/10 border border-success/20 text-success shrink-0">
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span className="font-semibold text-sm">Cobro Completo</span>
+                  </div>
+                )}
               </div>
-              <Progress
-                value={Number(project.budget) > 0 ? (totalPaid / Number(project.budget)) * 100 : 0}
-                className="h-3"
-              />
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-3 rounded-lg bg-secondary/50">
-                  <p className="text-xs text-muted-foreground mb-1">Precio Acordado</p>
-                  <p className="font-bold text-lg">{formatCurrency(Number(project.budget || 0))}</p>
+
+              {/* Summary metrics */}
+              <div className="grid grid-cols-3 gap-3 mt-6">
+                <div className="p-3 rounded-xl bg-background/80 border border-border/30 backdrop-blur-sm text-center">
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Precio Acordado</p>
+                  <p className="font-bold text-base">{formatCurrency(Number(project.budget || 0))}</p>
                 </div>
-                <div className="text-center p-3 rounded-lg bg-success/5 border border-success/20">
-                  <p className="text-xs text-success mb-1">Cobrado</p>
-                  <p className="font-bold text-lg text-success">{formatCurrency(totalPaid)}</p>
+                <div className="p-3 rounded-xl bg-success/5 border border-success/20 text-center">
+                  <p className="text-[10px] font-medium text-success uppercase tracking-wider mb-1">Cobrado</p>
+                  <p className="font-bold text-base text-success">{formatCurrency(totalPaid)}</p>
                 </div>
-                <div className="text-center p-3 rounded-lg bg-warning/5 border border-warning/20">
-                  <p className="text-xs text-warning mb-1">Pendiente</p>
-                  <p className="font-bold text-lg text-warning">
+                <div className="p-3 rounded-xl bg-warning/5 border border-warning/20 text-center">
+                  <p className="text-[10px] font-medium text-warning uppercase tracking-wider mb-1">Pendiente</p>
+                  <p className="font-bold text-base text-warning">
                     {formatCurrency(Math.max(0, Number(project.budget || 0) - totalPaid))}
                   </p>
                 </div>
@@ -601,45 +623,90 @@ export default function ProjectDetail() {
             </div>
           </div>
 
-          {/* Payment history */}
-          <div className="glass rounded-xl border border-border/50 overflow-hidden">
-            <div className="p-4 border-b border-border/50 bg-secondary/30">
+          {/* Payment Timeline */}
+          <div className="rounded-2xl border border-border/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-border/50 bg-secondary/30 flex items-center justify-between">
               <h3 className="font-semibold flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-primary" />
-                Historial de Pagos
+                Historial de Cobros
               </h3>
+              {projectPayments.length > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  {projectPayments.length} {projectPayments.length === 1 ? 'cobro' : 'cobros'}
+                </Badge>
+              )}
             </div>
             {projectPayments.length > 0 ? (
-              <div className="divide-y divide-border/30">
-                {projectPayments.map((payment) => (
-                  <div
-                    key={payment.id}
-                    className="flex items-center gap-4 p-4 hover:bg-secondary/20 transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center shrink-0">
-                      <ArrowUpRight className="w-5 h-5 text-success" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{payment.description}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(payment.date), "d 'de' MMMM, yyyy", { locale: es })}
-                      </p>
-                    </div>
-                    <span className="font-bold text-success whitespace-nowrap">
-                      +{formatCurrency(Number(payment.amount))}
-                    </span>
+              <div className="p-4">
+                <div className="relative">
+                  {/* Timeline line */}
+                  <div className="absolute left-5 top-3 bottom-3 w-px bg-border" />
+                  
+                  <div className="space-y-1">
+                    {projectPayments.map((payment, index) => {
+                      const isLast = index === projectPayments.length - 1;
+                      const runningTotal = projectPayments
+                        .slice(0, index + 1)
+                        .reduce((sum, p) => sum + Number(p.amount), 0);
+                      const progressAtPoint = agreedPrice > 0 ? (runningTotal / agreedPrice) * 100 : 0;
+                      
+                      return (
+                        <div
+                          key={payment.id}
+                          className="relative flex items-start gap-4 p-3 rounded-xl hover:bg-secondary/30 transition-colors group"
+                        >
+                          {/* Timeline dot */}
+                          <div className={cn(
+                            "relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors",
+                            isLast 
+                              ? "bg-success/10 border-success" 
+                              : "bg-background border-border group-hover:border-primary"
+                          )}>
+                            <ArrowUpRight className={cn(
+                              "w-4 h-4",
+                              isLast ? "text-success" : "text-muted-foreground group-hover:text-primary"
+                            )} />
+                          </div>
+                          
+                          <div className="flex-1 min-w-0 pt-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <p className="font-medium text-sm">{payment.description}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  {format(new Date(payment.date), "d 'de' MMMM, yyyy", { locale: es })}
+                                </p>
+                              </div>
+                              <span className="font-bold text-success whitespace-nowrap text-sm">
+                                +{formatCurrency(Number(payment.amount))}
+                              </span>
+                            </div>
+                            {/* Mini progress at this point */}
+                            <div className="flex items-center gap-2 mt-2">
+                              <Progress value={progressAtPoint} className="h-1 flex-1" />
+                              <span className="text-[10px] font-medium text-muted-foreground w-8 text-right">
+                                {Math.round(progressAtPoint)}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
+                </div>
               </div>
             ) : (
-              <div className="p-8 text-center text-muted-foreground">
-                <Banknote className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="font-medium mb-1">Sin pagos registrados</p>
-                <p className="text-sm">Los cobros aparecerán aquí cuando se registren</p>
+              <div className="p-10 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-secondary/50 flex items-center justify-center mx-auto mb-4">
+                  <Banknote className="w-8 h-8 text-muted-foreground/30" />
+                </div>
+                <p className="font-semibold mb-1">Sin cobros registrados</p>
+                <p className="text-sm text-muted-foreground mb-5">
+                  Los cobros aparecerán aquí cuando se registren
+                </p>
                 {project.payment_status !== 'paid' && Number(project.budget) > 0 && (
                   <Button
                     variant="outline"
-                    className="mt-4 gap-2"
+                    className="gap-2"
                     onClick={() => setIsPaymentDialogOpen(true)}
                   >
                     <Banknote className="w-4 h-4" />
