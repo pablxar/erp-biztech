@@ -16,6 +16,7 @@ import Leads from "./pages/Leads";
 import Reports from "./pages/Reports";
 import AIAssistant from "./pages/AIAssistant";
 import TeamTasks from "./pages/TeamTasks";
+import Goals from "./pages/Goals";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import AccessDenied from "./pages/AccessDenied";
@@ -96,6 +97,7 @@ function AppRoutes() {
         <Route path="/team-tasks" element={<TeamTasks />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/ai-assistant" element={<AIAssistant />} />
+        <Route path="/goals" element={<Goals />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
 

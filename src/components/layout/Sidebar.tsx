@@ -12,6 +12,7 @@ import {
   Sparkles,
   UserPlus,
   ListTodo,
+  Target,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNewLeadsCount } from "@/hooks/useLeads";
@@ -25,6 +26,7 @@ const navItems = [
   { icon: Calendar, label: "Calendario", path: "/calendar" },
   { icon: DollarSign, label: "Finanzas", path: "/finance" },
   { icon: Sparkles, label: "IA Asistente", path: "/ai-assistant" },
+  { icon: Target, label: "Metas & Ideas", path: "/goals" },
 ];
 
 export function Sidebar() {
