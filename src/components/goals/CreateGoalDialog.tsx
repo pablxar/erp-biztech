@@ -60,7 +60,7 @@ export function CreateGoalDialog() {
             </div>
             <div className="space-y-2">
               <Label>Prioridad</Label>
-              <Select value={priority} onValueChange={setPriority}>
+              <Select value={priority} onValueChange={(v) => setPriority(v as "high" | "medium" | "low")}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="high">Alta</SelectItem>
