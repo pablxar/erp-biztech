@@ -225,7 +225,7 @@ export function PricingSection({
       </div>
 
       {/* Payment status selector (for edit mode) */}
-      {paymentStatus && (
+      {paymentStatus && !hidePaymentStatus && (
         <div className="space-y-2">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Estado de Pago</Label>
