@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +24,8 @@ import {
   Sparkles,
   Check,
   Zap,
+  ExternalLink,
+  PartyPopper,
 } from "lucide-react";
 import { Lead } from "@/hooks/useLeads";
 import { useCreateClient } from "@/hooks/useClients";
@@ -37,12 +40,15 @@ interface ConvertLeadDialogProps {
 }
 
 export function ConvertLeadDialog({ lead, open, onOpenChange }: ConvertLeadDialogProps) {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
+  const [convertedClientId, setConvertedClientId] = useState<string | null>(null);
+  const [convertedClientName, setConvertedClientName] = useState("");
 
   const createClient = useCreateClient();
   const updateLead = useUpdateLead();
@@ -55,6 +61,8 @@ export function ConvertLeadDialog({ lead, open, onOpenChange }: ConvertLeadDialo
       setPhone(lead.phone || "");
       setAddress("");
       setNotes(lead.notes || "");
+      setConvertedClientId(null);
+      setConvertedClientName("");
     }
   }, [lead]);
 
@@ -87,7 +95,9 @@ export function ConvertLeadDialog({ lead, open, onOpenChange }: ConvertLeadDialo
         notes: notes.trim() || undefined,
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
+          setConvertedClientId(data.id);
+          setConvertedClientName(data.name);
           updateLead.mutate(
             {
               id: lead.id,
@@ -97,11 +107,9 @@ export function ConvertLeadDialog({ lead, open, onOpenChange }: ConvertLeadDialo
             {
               onSuccess: () => {
                 toast.success("🎉 Lead convertido y cliente creado exitosamente");
-                onOpenChange(false);
               },
               onError: () => {
                 toast.error("Cliente creado pero hubo un error al actualizar el lead");
-                onOpenChange(false);
               },
             }
           );
@@ -113,7 +121,52 @@ export function ConvertLeadDialog({ lead, open, onOpenChange }: ConvertLeadDialo
     );
   };
 
+  const handleGoToClient = () => {
+    onOpenChange(false);
+    navigate("/clients");
+  };
+
   const isSubmitting = createClient.isPending || updateLead.isPending;
+
+  // Success state
+  if (convertedClientId) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md p-0 overflow-hidden">
+          <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-emerald-500/15 via-primary/10 to-transparent px-6 pt-8 pb-6 text-center">
+            <div className="absolute top-0 left-1/2 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2" />
+            <div className="relative space-y-4">
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                <PartyPopper className="w-8 h-8 text-emerald-400" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-foreground">¡Cliente creado!</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  <span className="font-medium text-foreground">{convertedClientName}</span> ahora es un cliente activo
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="px-6 pb-6 flex flex-col gap-3">
+            <Button
+              onClick={handleGoToClient}
+              className="w-full gap-2 bg-gradient-to-r from-emerald-600 to-primary hover:from-emerald-700 hover:to-primary/90"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Ver cliente
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="w-full"
+            >
+              Cerrar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
