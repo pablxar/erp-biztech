@@ -55,6 +55,83 @@ export type Database = {
           },
         ]
       }
+      client_onboarding: {
+        Row: {
+          additional_notes: string | null
+          ai_proposal: string | null
+          ai_summary: string | null
+          brand_guidelines: string | null
+          budget_range: string | null
+          business_goals: string | null
+          client_id: string
+          company_description: string | null
+          competitors: string | null
+          created_at: string
+          created_by: string | null
+          current_challenges: string | null
+          id: string
+          requested_services: Json | null
+          source_file_type: string | null
+          source_file_url: string | null
+          status: string
+          target_audience: string | null
+          timeline: string | null
+          updated_at: string
+        }
+        Insert: {
+          additional_notes?: string | null
+          ai_proposal?: string | null
+          ai_summary?: string | null
+          brand_guidelines?: string | null
+          budget_range?: string | null
+          business_goals?: string | null
+          client_id: string
+          company_description?: string | null
+          competitors?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_challenges?: string | null
+          id?: string
+          requested_services?: Json | null
+          source_file_type?: string | null
+          source_file_url?: string | null
+          status?: string
+          target_audience?: string | null
+          timeline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          additional_notes?: string | null
+          ai_proposal?: string | null
+          ai_summary?: string | null
+          brand_guidelines?: string | null
+          budget_range?: string | null
+          business_goals?: string | null
+          client_id?: string
+          company_description?: string | null
+          competitors?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_challenges?: string | null
+          id?: string
+          requested_services?: Json | null
+          source_file_type?: string | null
+          source_file_url?: string | null
+          status?: string
+          target_audience?: string | null
+          timeline?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_onboarding_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: string | null
