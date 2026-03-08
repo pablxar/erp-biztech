@@ -323,16 +323,7 @@ export default function ProjectDetail() {
 
           {/* Right: Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 lg:w-64">
-            <div className="p-4 rounded-lg bg-secondary/50 border border-border/30">
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span className="text-xs font-medium uppercase tracking-wider">Progreso</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl font-bold">{project.progress || 0}%</span>
-                <Progress value={project.progress || 0} className="h-2 flex-1" />
-              </div>
-            </div>
+            <ProgressSlider project={project} />
             
             <div className="p-4 rounded-lg bg-secondary/50 border border-border/30">
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
