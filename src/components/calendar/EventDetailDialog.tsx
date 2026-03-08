@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { CalendarIcon, Trash2, Clock, Loader2, Video, ExternalLink, Mail, CheckCircle2, RefreshCw } from "lucide-react";
+import { CalendarIcon, Trash2, Clock, Loader2, Video, ExternalLink, Mail, CheckCircle2, RefreshCw, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -165,21 +165,45 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
 
           {/* Meeting URL Button */}
           {event.meeting_url && (
-            <a
-              href={event.meeting_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 transition-colors group"
-            >
-              <div className="p-2.5 rounded-lg bg-blue-500/20">
-                <Video className="w-5 h-5 text-blue-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm">Unirse a la Reunión</p>
-                <p className="text-xs text-muted-foreground truncate">{event.meeting_url}</p>
-              </div>
-              <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
-            </a>
+            <div className="space-y-2">
+              <a
+                href={event.meeting_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 transition-colors group"
+              >
+                <div className="p-2.5 rounded-lg bg-blue-500/20">
+                  <Video className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm">Unirse a la Reunión</p>
+                  <p className="text-xs text-muted-foreground truncate">{event.meeting_url}</p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-blue-400 transition-colors" />
+              </a>
+
+              {/* WhatsApp Button */}
+              <button
+                onClick={() => {
+                  const BIZTECH_WA_NUMBER = "56912345678"; // TODO: Reemplazar con número real del grupo
+                  const eventDate = new Date(event.start_time);
+                  const formattedDate = format(eventDate, "EEEE d 'de' MMMM", { locale: es });
+                  const formattedTime = format(eventDate, "HH:mm");
+                  const message = `🎥 *${event.title}*\n📅 ${formattedDate}\n🕐 ${formattedTime} hrs\n\n🔗 Link: ${event.meeting_url}`;
+                  window.open(`https://wa.me/${BIZTECH_WA_NUMBER}?text=${encodeURIComponent(message)}`, "_blank");
+                }}
+                className="flex items-center gap-3 p-4 rounded-xl bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 transition-colors group w-full text-left"
+              >
+                <div className="p-2.5 rounded-lg bg-green-500/20">
+                  <MessageCircle className="w-5 h-5 text-green-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm">Enviar por WhatsApp</p>
+                  <p className="text-xs text-muted-foreground">Compartir link al grupo de Biztech</p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-green-400 transition-colors" />
+              </button>
+            </div>
           )}
 
           {/* Attendee Info */}
