@@ -171,41 +171,66 @@ export type Database = {
       events: {
         Row: {
           all_day: boolean | null
+          attendee_email: string | null
+          client_id: string | null
           created_at: string
           created_by: string | null
           description: string | null
+          email_sent: boolean
           end_time: string
+          event_type: string
+          google_event_id: string | null
           id: string
           lead_id: string | null
+          meeting_url: string | null
           project_id: string | null
           start_time: string
           title: string
         }
         Insert: {
           all_day?: boolean | null
+          attendee_email?: string | null
+          client_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
+          email_sent?: boolean
           end_time: string
+          event_type?: string
+          google_event_id?: string | null
           id?: string
           lead_id?: string | null
+          meeting_url?: string | null
           project_id?: string | null
           start_time: string
           title: string
         }
         Update: {
           all_day?: boolean | null
+          attendee_email?: string | null
+          client_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
+          email_sent?: boolean
           end_time?: string
+          event_type?: string
+          google_event_id?: string | null
           id?: string
           lead_id?: string | null
+          meeting_url?: string | null
           project_id?: string | null
           start_time?: string
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "events_lead_id_fkey"
             columns: ["lead_id"]
