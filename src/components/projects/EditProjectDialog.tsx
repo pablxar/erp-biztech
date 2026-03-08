@@ -138,7 +138,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
               }
             } else if (newPaymentStatus === 'partial' && oldPaymentStatus !== 'partial' && oldPaymentStatus !== 'paid') {
               // Partial payment: register partial amount
-              const partialAmount = Number(paymentDetails.partialAmount || 0);
+              const partialAmount = Number((paymentDetails as any).partialAmount || 0);
               if (partialAmount > 0) {
                 createTransaction({
                   description: `Abono proyecto: ${formData.name}`,
