@@ -446,24 +446,24 @@ export default function Finance() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         {/* Total Income */}
         <div className="glass rounded-xl p-3 lg:p-5 animate-fade-in group hover:border-primary/30 transition-all">
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2.5 rounded-lg bg-success/10 group-hover:bg-success/20 transition-colors">
-              <TrendingUp className="w-5 h-5 text-success" />
+          <div className="flex items-start justify-between mb-2 lg:mb-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-success/10 group-hover:bg-success/20 transition-colors">
+              <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-success" />
             </div>
             {analytics && analytics.incomeGrowth !== 0 && (
               <Badge variant="outline" className={cn(
-                "text-xs border",
+                "text-[10px] lg:text-xs border hidden sm:flex",
                 analytics.incomeGrowth > 0 ? "bg-success/10 text-success border-success/30" : "bg-destructive/10 text-destructive border-destructive/30"
               )}>
                 {analytics.incomeGrowth > 0 ? "+" : ""}{analytics.incomeGrowth.toFixed(1)}%
               </Badge>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mb-1">Ingresos Totales</p>
-          <p className="text-2xl lg:text-3xl font-bold">${stats?.totalIncome.toLocaleString() || 0}</p>
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <ArrowUpRight className="w-3.5 h-3.5 text-success" />
-            <span>Este mes: ${analytics?.currentIncome.toLocaleString() || 0}</span>
+          <p className="text-[10px] lg:text-xs text-muted-foreground mb-0.5 lg:mb-1">Ingresos</p>
+          <p className="text-lg sm:text-xl lg:text-3xl font-bold truncate">${stats?.totalIncome.toLocaleString() || 0}</p>
+          <div className="mt-1.5 lg:mt-2 flex items-center gap-1 text-[10px] lg:text-xs text-muted-foreground hidden sm:flex">
+            <ArrowUpRight className="w-3 h-3 text-success" />
+            <span>Mes: ${analytics?.currentIncome.toLocaleString() || 0}</span>
           </div>
         </div>
 
