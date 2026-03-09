@@ -535,10 +535,10 @@ export default function Finance() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
         {/* Main Revenue Chart */}
-        <div className="xl:col-span-2 glass rounded-xl p-6 animate-slide-up">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="xl:col-span-2 glass rounded-xl p-4 lg:p-6 animate-slide-up">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 lg:gap-4 mb-4 lg:mb-6">
             <div>
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Activity className="w-5 h-5 text-primary" />

@@ -471,21 +471,21 @@ export default function CalendarPage() {
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, day)}
                       className={cn(
-                        "min-h-[100px] p-2 rounded-lg transition-all cursor-pointer border border-transparent",
+                        "min-h-[60px] lg:min-h-[100px] p-1 lg:p-2 rounded-md lg:rounded-lg transition-all cursor-pointer border border-transparent",
                         "hover:bg-secondary/50",
                         isSelected && "bg-secondary border-primary/30",
-                        isToday && "ring-2 ring-primary",
+                        isToday && "ring-1 lg:ring-2 ring-primary",
                         isDropTarget && "bg-primary/20 ring-2 ring-primary ring-dashed",
                         !isCurrentMonth && "opacity-40"
                       )}
                     >
                       <span className={cn(
-                        "text-sm font-medium inline-flex items-center justify-center w-7 h-7 rounded-full",
+                        "text-[10px] lg:text-sm font-medium inline-flex items-center justify-center w-5 h-5 lg:w-7 lg:h-7 rounded-full",
                         isToday && "bg-primary text-primary-foreground"
                       )}>
                         {format(day, "d")}
                       </span>
-                      <div className="space-y-1 mt-1">
+                      <div className="space-y-0.5 lg:space-y-1 mt-0.5 lg:mt-1">
                         {dayEvents.slice(0, 2).map((event) => {
                           const colors = getEventColorClasses(event);
                           return (
