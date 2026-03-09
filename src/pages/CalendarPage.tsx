@@ -449,14 +449,14 @@ export default function CalendarPage() {
           {/* Month View */}
           {viewMode === "month" && (
             <>
-              <div className="grid grid-cols-7 gap-1 mb-2">
+              <div className="grid grid-cols-7 gap-0.5 lg:gap-1 mb-2">
                 {daysOfWeek.map((day) => (
-                  <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">{day}</div>
+                  <div key={day} className="text-center text-[10px] lg:text-sm font-medium text-muted-foreground py-1 lg:py-2">{day}</div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-0.5 lg:gap-1">
                 {calendarDays.map((day, index) => {
-                  if (!day) return <div key={`empty-${index}`} className="min-h-[100px]" />;
+                  if (!day) return <div key={`empty-${index}`} className="min-h-[60px] lg:min-h-[100px]" />;
                   const dayEvents = getEventsForDay(day);
                   const isToday = isDateToday(day);
                   const isSelected = isSameDay(day, selectedDate);
