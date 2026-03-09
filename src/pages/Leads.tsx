@@ -356,48 +356,48 @@ export default function Leads() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass rounded-xl p-4 border border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-primary/10">
-              <Users className="w-5 h-5 text-primary" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-primary/10">
+              <Users className="w-4 h-4 lg:w-5 lg:h-5 text-primary" />
             </div>
-            <div>
-              <p className="text-2xl font-bold">{totalLeads}</p>
-              <p className="text-xs text-muted-foreground">Total Leads</p>
-            </div>
-          </div>
-        </div>
-        <div className="glass rounded-xl p-4 border border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-blue-500/10">
-              <Sparkles className="w-5 h-5 text-blue-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{newLeads}</p>
-              <p className="text-xs text-muted-foreground">Nuevos</p>
+            <div className="min-w-0">
+              <p className="text-lg lg:text-2xl font-bold">{totalLeads}</p>
+              <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Total Leads</p>
             </div>
           </div>
         </div>
-        <div className="glass rounded-xl p-4 border border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-violet-500/10">
-              <Zap className="w-5 h-5 text-violet-400" />
+        <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-blue-500/10">
+              <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-blue-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold">{convertedLeads}</p>
-              <p className="text-xs text-muted-foreground">Convertidos</p>
+            <div className="min-w-0">
+              <p className="text-lg lg:text-2xl font-bold">{newLeads}</p>
+              <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Nuevos</p>
             </div>
           </div>
         </div>
-        <div className="glass rounded-xl p-4 border border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-success/10">
-              <TrendingUp className="w-5 h-5 text-success" />
+        <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-violet-500/10">
+              <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-violet-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold">{conversionRate}%</p>
-              <p className="text-xs text-muted-foreground">Conversión</p>
+            <div className="min-w-0">
+              <p className="text-lg lg:text-2xl font-bold">{convertedLeads}</p>
+              <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Convertidos</p>
+            </div>
+          </div>
+        </div>
+        <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-success/10">
+              <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-success" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-lg lg:text-2xl font-bold">{conversionRate}%</p>
+              <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Conversión</p>
             </div>
           </div>
         </div>
