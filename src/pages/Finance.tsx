@@ -512,24 +512,24 @@ export default function Finance() {
 
         {/* Pending Invoices - Clickable */}
         <div 
-          className="glass rounded-xl p-5 animate-fade-in group hover:border-warning/30 transition-all cursor-pointer"
+          className="glass rounded-xl p-3 lg:p-5 animate-fade-in group hover:border-warning/30 transition-all cursor-pointer"
           onClick={() => setShowReceivables(true)}
         >
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2.5 rounded-lg bg-warning/10 group-hover:bg-warning/20 transition-colors">
-              <Receipt className="w-5 h-5 text-warning" />
+          <div className="flex items-start justify-between mb-2 lg:mb-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-warning/10 group-hover:bg-warning/20 transition-colors">
+              <Receipt className="w-4 h-4 lg:w-5 lg:h-5 text-warning" />
             </div>
             {pendingInvoices.urgent > 0 && (
-              <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30 text-xs animate-pulse">
+              <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30 text-[10px] lg:text-xs animate-pulse">
                 {pendingInvoices.urgent} vencidas
               </Badge>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mb-1">Por Cobrar</p>
-          <p className="text-2xl lg:text-3xl font-bold">${pendingInvoices.total.toLocaleString()}</p>
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{pendingInvoices.count} pendientes • Click para desglosar</span>
+          <p className="text-[10px] lg:text-xs text-muted-foreground mb-0.5 lg:mb-1">Por Cobrar</p>
+          <p className="text-lg sm:text-xl lg:text-3xl font-bold truncate">${pendingInvoices.total.toLocaleString()}</p>
+          <div className="mt-1.5 lg:mt-2 flex items-center gap-1 text-[10px] lg:text-xs text-muted-foreground hidden sm:flex">
+            <Clock className="w-3 h-3" />
+            <span>{pendingInvoices.count} pendientes</span>
           </div>
         </div>
       </div>
