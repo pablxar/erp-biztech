@@ -368,19 +368,19 @@ export default function ProjectDetail() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex items-center justify-between">
-          <TabsList className="bg-secondary/50">
-            <TabsTrigger value="tasks">Tareas</TabsTrigger>
-            <TabsTrigger value="payments" className="gap-1.5">
-              <Banknote className="w-3.5 h-3.5" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <TabsList className="bg-secondary/50 w-full sm:w-auto">
+            <TabsTrigger value="tasks" className="text-xs lg:text-sm flex-1 sm:flex-none">Tareas</TabsTrigger>
+            <TabsTrigger value="payments" className="gap-1 text-xs lg:text-sm flex-1 sm:flex-none">
+              <Banknote className="w-3 h-3 lg:w-3.5 lg:h-3.5" />
               Pagos
               {projectPayments.length > 0 && (
-                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                <Badge variant="secondary" className="ml-1 h-4 lg:h-5 px-1 lg:px-1.5 text-[10px] lg:text-xs">
                   {projectPayments.length}
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="info">Información</TabsTrigger>
+            <TabsTrigger value="info" className="text-xs lg:text-sm flex-1 sm:flex-none">Info</TabsTrigger>
           </TabsList>
           
           {activeTab === "tasks" && (
@@ -390,17 +390,17 @@ export default function ProjectDetail() {
                   variant={view === "kanban" ? "default" : "ghost"} 
                   size="sm" 
                   onClick={() => setView("kanban")}
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 lg:h-8 lg:w-8 p-0"
                 >
-                  <LayoutGrid className="w-4 h-4" />
+                  <LayoutGrid className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
                 </Button>
                 <Button 
                   variant={view === "list" ? "default" : "ghost"} 
                   size="sm" 
                   onClick={() => setView("list")}
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 lg:h-8 lg:w-8 p-0"
                 >
-                  <List className="w-4 h-4" />
+                  <List className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
                 </Button>
               </div>
               <CreateTaskDialog projectId={project.id} />
