@@ -461,20 +461,20 @@ export default function TeamTasks() {
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">
-      <div className="flex-1 overflow-auto p-6 space-y-6">
+      <div className="flex-1 overflow-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Tareas del Equipo
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Arrastra las tareas entre columnas para cambiar su estado
+            <p className="text-muted-foreground mt-1 text-xs lg:text-sm hidden sm:block">
+              Arrastra tareas entre columnas
             </p>
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2 text-sm" size="sm">
             <Plus className="h-4 w-4" />
-            Nueva Tarea
+            <span className="hidden sm:inline">Nueva</span> Tarea
           </Button>
         </div>
 
