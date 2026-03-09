@@ -527,19 +527,19 @@ export default function TeamTasks() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+        <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+          <div className="relative flex-1 min-w-[140px] max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
-              placeholder="Buscar tareas..." 
-              className="pl-10 bg-secondary/50"
+              placeholder="Buscar..." 
+              className="pl-10 bg-secondary/50 h-8 lg:h-9 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[140px] bg-secondary/50">
+            <SelectTrigger className="w-[100px] lg:w-[140px] bg-secondary/50 h-8 lg:h-9 text-xs lg:text-sm">
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
@@ -551,7 +551,7 @@ export default function TeamTasks() {
           </Select>
 
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-            <SelectTrigger className="w-[140px] bg-secondary/50">
+            <SelectTrigger className="w-[100px] lg:w-[140px] bg-secondary/50 h-8 lg:h-9 text-xs lg:text-sm hidden sm:flex">
               <SelectValue placeholder="Prioridad" />
             </SelectTrigger>
             <SelectContent>
@@ -562,36 +562,22 @@ export default function TeamTasks() {
             </SelectContent>
           </Select>
 
-          {categories.length > 0 && (
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-[140px] bg-secondary/50">
-                <SelectValue placeholder="Categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-
           <div className="flex items-center gap-1 p-1 bg-secondary/50 rounded-lg ml-auto">
             <Button 
               variant={viewMode === "kanban" ? "default" : "ghost"} 
               size="sm" 
               onClick={() => setViewMode("kanban")}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 lg:h-8 lg:w-8 p-0"
             >
-              <LayoutGrid className="w-4 h-4" />
+              <LayoutGrid className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
             </Button>
             <Button 
               variant={viewMode === "list" ? "default" : "ghost"} 
               size="sm" 
               onClick={() => setViewMode("list")}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 lg:h-8 lg:w-8 p-0"
             >
-              <List className="w-4 h-4" />
+              <List className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
             </Button>
           </div>
         </div>
