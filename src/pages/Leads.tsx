@@ -343,14 +343,14 @@ export default function Leads() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 lg:space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
             Pipeline de Leads
           </h1>
-          <p className="text-muted-foreground mt-1">Arrastra los leads entre columnas para cambiar su estado</p>
+          <p className="text-muted-foreground mt-1 text-xs lg:text-sm hidden sm:block">Arrastra leads entre columnas para cambiar estado</p>
         </div>
         <CreateLeadDialog />
       </div>
