@@ -491,21 +491,21 @@ export default function Finance() {
         </div>
 
         {/* Net Margin */}
-        <div className="glass rounded-xl p-5 animate-fade-in group hover:border-primary/30 transition-all">
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-              <PiggyBank className="w-5 h-5 text-primary" />
+        <div className="glass rounded-xl p-3 lg:p-5 animate-fade-in group hover:border-primary/30 transition-all">
+          <div className="flex items-start justify-between mb-2 lg:mb-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <PiggyBank className="w-4 h-4 lg:w-5 lg:h-5 text-primary" />
             </div>
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-[10px] lg:text-xs">
               {stats?.marginPercentage.toFixed(1) || 0}%
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground mb-1">Margen Neto</p>
-          <p className="text-2xl lg:text-3xl font-bold">${stats?.netMargin.toLocaleString() || 0}</p>
-          <div className="mt-2">
+          <p className="text-[10px] lg:text-xs text-muted-foreground mb-0.5 lg:mb-1">Margen</p>
+          <p className="text-lg sm:text-xl lg:text-3xl font-bold truncate">${stats?.netMargin.toLocaleString() || 0}</p>
+          <div className="mt-1.5 lg:mt-2">
             <Progress 
               value={Math.min(stats?.marginPercentage || 0, 100)} 
-              className="h-1.5"
+              className="h-1 lg:h-1.5"
             />
           </div>
         </div>
