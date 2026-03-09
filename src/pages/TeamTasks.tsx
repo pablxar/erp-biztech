@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -295,7 +296,7 @@ export default function TeamTasks() {
     const StatusIcon = config.icon;
 
     return (
-      <div className="w-[400px] border-l border-border bg-card/50 backdrop-blur-sm flex flex-col">
+      <div className="fixed inset-0 z-50 lg:relative lg:inset-auto lg:w-[400px] lg:border-l lg:border-border bg-card/95 lg:bg-card/50 backdrop-blur-sm flex flex-col">
         <div className="p-4 border-b border-border flex items-center justify-between">
           <h3 className="font-semibold">Detalle de Tarea</h3>
           <Button variant="ghost" size="icon" onClick={() => setSelectedTodo(null)}>
@@ -461,85 +462,85 @@ export default function TeamTasks() {
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">
-      <div className="flex-1 overflow-auto p-6 space-y-6">
+      <div className="flex-1 overflow-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Tareas del Equipo
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Arrastra las tareas entre columnas para cambiar su estado
+            <p className="text-muted-foreground mt-1 text-xs lg:text-sm hidden sm:block">
+              Arrastra tareas entre columnas
             </p>
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2 text-sm" size="sm">
             <Plus className="h-4 w-4" />
-            Nueva Tarea
+            <span className="hidden sm:inline">Nueva</span> Tarea
           </Button>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="glass rounded-xl p-4 border border-border/50">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-primary/10">
-                <ListTodo className="w-5 h-5 text-primary" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 lg:p-2.5 rounded-lg bg-primary/10">
+                <ListTodo className="w-4 h-4 lg:w-5 lg:h-5 text-primary" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.total}</p>
-                <p className="text-xs text-muted-foreground">Total</p>
-              </div>
-            </div>
-          </div>
-          <div className="glass rounded-xl p-4 border border-border/50">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-blue-500/10">
-                <Clock className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.inProgress}</p>
-                <p className="text-xs text-muted-foreground">En progreso</p>
+              <div className="min-w-0">
+                <p className="text-lg lg:text-2xl font-bold">{stats.total}</p>
+                <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Total</p>
               </div>
             </div>
           </div>
-          <div className="glass rounded-xl p-4 border border-border/50">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-green-500/10">
-                <CheckCircle2 className="w-5 h-5 text-green-500" />
+          <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 lg:p-2.5 rounded-lg bg-blue-500/10">
+                <Clock className="w-4 h-4 lg:w-5 lg:h-5 text-blue-500" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.completed}</p>
-                <p className="text-xs text-muted-foreground">Completadas</p>
+              <div className="min-w-0">
+                <p className="text-lg lg:text-2xl font-bold">{stats.inProgress}</p>
+                <p className="text-[10px] lg:text-xs text-muted-foreground truncate">En progreso</p>
               </div>
             </div>
           </div>
-          <div className="glass rounded-xl p-4 border border-border/50">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-red-500/10">
-                <Flag className="w-5 h-5 text-red-500" />
+          <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 lg:p-2.5 rounded-lg bg-green-500/10">
+                <CheckCircle2 className="w-4 h-4 lg:w-5 lg:h-5 text-green-500" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.highPriority}</p>
-                <p className="text-xs text-muted-foreground">Alta prioridad</p>
+              <div className="min-w-0">
+                <p className="text-lg lg:text-2xl font-bold">{stats.completed}</p>
+                <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Completadas</p>
+              </div>
+            </div>
+          </div>
+          <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 lg:p-2.5 rounded-lg bg-red-500/10">
+                <Flag className="w-4 h-4 lg:w-5 lg:h-5 text-red-500" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-lg lg:text-2xl font-bold">{stats.highPriority}</p>
+                <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Alta prioridad</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+        <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+          <div className="relative flex-1 min-w-[140px] max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
-              placeholder="Buscar tareas..." 
-              className="pl-10 bg-secondary/50"
+              placeholder="Buscar..." 
+              className="pl-10 bg-secondary/50 h-8 lg:h-9 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[140px] bg-secondary/50">
+            <SelectTrigger className="w-[100px] lg:w-[140px] bg-secondary/50 h-8 lg:h-9 text-xs lg:text-sm">
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
@@ -551,7 +552,7 @@ export default function TeamTasks() {
           </Select>
 
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-            <SelectTrigger className="w-[140px] bg-secondary/50">
+            <SelectTrigger className="w-[100px] lg:w-[140px] bg-secondary/50 h-8 lg:h-9 text-xs lg:text-sm hidden sm:flex">
               <SelectValue placeholder="Prioridad" />
             </SelectTrigger>
             <SelectContent>
@@ -562,55 +563,40 @@ export default function TeamTasks() {
             </SelectContent>
           </Select>
 
-          {categories.length > 0 && (
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-[140px] bg-secondary/50">
-                <SelectValue placeholder="Categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-
           <div className="flex items-center gap-1 p-1 bg-secondary/50 rounded-lg ml-auto">
             <Button 
               variant={viewMode === "kanban" ? "default" : "ghost"} 
               size="sm" 
               onClick={() => setViewMode("kanban")}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 lg:h-8 lg:w-8 p-0"
             >
-              <LayoutGrid className="w-4 h-4" />
+              <LayoutGrid className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
             </Button>
             <Button 
               variant={viewMode === "list" ? "default" : "ghost"} 
               size="sm" 
               onClick={() => setViewMode("list")}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 lg:h-8 lg:w-8 p-0"
             >
-              <List className="w-4 h-4" />
+              <List className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
             </Button>
           </div>
         </div>
 
         {/* Content */}
         {filteredTodos.length === 0 ? (
-          <div className="glass rounded-2xl p-12 text-center border border-border/50">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-              <ListTodo className="w-8 h-8 text-primary" />
+          <div className="glass rounded-xl lg:rounded-2xl p-8 lg:p-12 text-center border border-border/50">
+            <div className="w-12 h-12 lg:w-16 lg:h-16 mx-auto rounded-xl lg:rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+              <ListTodo className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">No hay tareas</h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            <h3 className="text-lg lg:text-xl font-semibold mb-2">No hay tareas</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
               {searchQuery || statusFilter !== "all" || priorityFilter !== "all"
-                ? "No se encontraron tareas con esos filtros"
-                : "Crea tu primera tarea para comenzar a organizar el trabajo del equipo"
-              }
+                ? "No se encontraron tareas"
+                : "Crea tu primera tarea para organizar el trabajo"}
             </p>
             {!searchQuery && statusFilter === "all" && priorityFilter === "all" && (
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
                 <Plus className="mr-2 h-4 w-4" />
                 Nueva Tarea
               </Button>
@@ -622,30 +608,33 @@ export default function TeamTasks() {
             onDragEnd={handleDragEnd}
             renderOverlay={(todo) => <TodoCardContent todo={todo} />}
           >
-            <div className="flex gap-4 pb-4 overflow-x-auto">
-              {(Object.keys(statusConfig) as TodoStatus[]).map((status) => {
-                const config = statusConfig[status];
-                const StatusIcon = config.icon;
-                return (
-                  <KanbanColumn
-                    key={status}
-                    id={status}
-                    title={config.label}
-                    count={todosByStatus[status].length}
-                    icon={<StatusIcon className="h-4 w-4" />}
-                    iconColor={config.color}
-                    bgColor={config.bgColor}
-                    emptyMessage="Arrastra tareas aquí"
-                  >
-                    {todosByStatus[status].map((todo) => (
-                      <KanbanCard key={todo.id} id={todo.id}>
-                        <TodoCardContent todo={todo} />
-                      </KanbanCard>
-                    ))}
-                  </KanbanColumn>
-                );
-              })}
-            </div>
+            <ScrollArea className="w-full pb-4">
+              <div className="flex gap-3 lg:gap-4 min-w-max">
+                {(Object.keys(statusConfig) as TodoStatus[]).map((status) => {
+                  const config = statusConfig[status];
+                  const StatusIcon = config.icon;
+                  return (
+                    <KanbanColumn
+                      key={status}
+                      id={status}
+                      title={config.label}
+                      count={todosByStatus[status].length}
+                      icon={<StatusIcon className="h-4 w-4" />}
+                      iconColor={config.color}
+                      bgColor={config.bgColor}
+                      emptyMessage="Arrastra tareas aquí"
+                    >
+                      {todosByStatus[status].map((todo) => (
+                        <KanbanCard key={todo.id} id={todo.id}>
+                          <TodoCardContent todo={todo} />
+                        </KanbanCard>
+                      ))}
+                    </KanbanColumn>
+                  );
+                })}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </KanbanBoard>
         ) : (
           <div className="space-y-2">
