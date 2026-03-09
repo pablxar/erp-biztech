@@ -271,20 +271,20 @@ export default function ProjectDetail() {
       </div>
 
       {/* Project Header */}
-      <div className="glass rounded-xl p-6 border border-border/50">
-        <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+      <div className="glass rounded-xl p-4 lg:p-6 border border-border/50">
+        <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
           {/* Left: Project Info */}
-          <div className="flex-1">
-            <div className="flex items-start gap-4 mb-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start gap-3 lg:gap-4 mb-3 lg:mb-4">
               {ServiceIcon && (
-                <div className={cn("w-14 h-14 rounded-xl flex items-center justify-center shrink-0", serviceConfig?.bgColor)}>
-                  <ServiceIcon className={cn("w-7 h-7", serviceConfig?.color)} />
+                <div className={cn("w-10 h-10 lg:w-14 lg:h-14 rounded-lg lg:rounded-xl flex items-center justify-center shrink-0", serviceConfig?.bgColor)}>
+                  <ServiceIcon className={cn("w-5 h-5 lg:w-7 lg:h-7", serviceConfig?.color)} />
                 </div>
               )}
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <h1 className="text-2xl font-bold">{project.name}</h1>
-                  <Badge className={cn("border", statusConfig[project.status].color)}>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <h1 className="text-xl lg:text-2xl font-bold truncate">{project.name}</h1>
+                  <Badge className={cn("border text-xs", statusConfig[project.status].color)}>
                     {statusConfig[project.status].label}
                   </Badge>
                 </div>
