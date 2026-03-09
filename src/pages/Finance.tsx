@@ -366,38 +366,38 @@ export default function Finance() {
   }
 
   return (
-    <div className="space-y-6 p-1">
+    <div className="space-y-4 lg:space-y-6 p-0 lg:p-1">
       {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
-              <DollarSign className="w-6 h-6 text-primary" />
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="p-2 lg:p-2.5 rounded-lg lg:rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
+              <DollarSign className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold">Centro Financiero</h1>
-              <p className="text-muted-foreground text-sm">
-                Análisis en tiempo real • {format(new Date(), "EEEE, d 'de' MMMM", { locale: es })}
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Centro Financiero</h1>
+              <p className="text-muted-foreground text-xs lg:text-sm hidden sm:block">
+                Análisis en tiempo real • {format(new Date(), "d 'de' MMMM", { locale: es })}
               </p>
             </div>
           </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[200px] lg:w-64">
+        <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+          <div className="relative flex-1 min-w-[140px] lg:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar transacciones..."
+              placeholder="Buscar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-secondary/50 border-border/50"
+              className="pl-9 bg-secondary/50 border-border/50 h-8 lg:h-9 text-sm"
             />
           </div>
-          <Button variant="outline" size="icon" className="shrink-0">
-            <Filter className="w-4 h-4" />
+          <Button variant="outline" size="icon" className="shrink-0 h-8 w-8 lg:h-9 lg:w-9">
+            <Filter className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
           </Button>
-          <Button variant="outline" className="gap-2 shrink-0">
-            <Download className="w-4 h-4" />
+          <Button variant="outline" className="gap-1.5 shrink-0 h-8 lg:h-9 text-xs lg:text-sm px-2.5 lg:px-3">
+            <Download className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
             <span className="hidden sm:inline">Exportar</span>
           </Button>
           <CreateTransactionDialog />
