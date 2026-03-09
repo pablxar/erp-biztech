@@ -479,48 +479,48 @@ export default function TeamTasks() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="glass rounded-xl p-4 border border-border/50">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-primary/10">
-                <ListTodo className="w-5 h-5 text-primary" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 lg:p-2.5 rounded-lg bg-primary/10">
+                <ListTodo className="w-4 h-4 lg:w-5 lg:h-5 text-primary" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.total}</p>
-                <p className="text-xs text-muted-foreground">Total</p>
-              </div>
-            </div>
-          </div>
-          <div className="glass rounded-xl p-4 border border-border/50">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-blue-500/10">
-                <Clock className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.inProgress}</p>
-                <p className="text-xs text-muted-foreground">En progreso</p>
+              <div className="min-w-0">
+                <p className="text-lg lg:text-2xl font-bold">{stats.total}</p>
+                <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Total</p>
               </div>
             </div>
           </div>
-          <div className="glass rounded-xl p-4 border border-border/50">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-green-500/10">
-                <CheckCircle2 className="w-5 h-5 text-green-500" />
+          <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 lg:p-2.5 rounded-lg bg-blue-500/10">
+                <Clock className="w-4 h-4 lg:w-5 lg:h-5 text-blue-500" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.completed}</p>
-                <p className="text-xs text-muted-foreground">Completadas</p>
+              <div className="min-w-0">
+                <p className="text-lg lg:text-2xl font-bold">{stats.inProgress}</p>
+                <p className="text-[10px] lg:text-xs text-muted-foreground truncate">En progreso</p>
               </div>
             </div>
           </div>
-          <div className="glass rounded-xl p-4 border border-border/50">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-red-500/10">
-                <Flag className="w-5 h-5 text-red-500" />
+          <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 lg:p-2.5 rounded-lg bg-green-500/10">
+                <CheckCircle2 className="w-4 h-4 lg:w-5 lg:h-5 text-green-500" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.highPriority}</p>
-                <p className="text-xs text-muted-foreground">Alta prioridad</p>
+              <div className="min-w-0">
+                <p className="text-lg lg:text-2xl font-bold">{stats.completed}</p>
+                <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Completadas</p>
+              </div>
+            </div>
+          </div>
+          <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 lg:p-2.5 rounded-lg bg-red-500/10">
+                <Flag className="w-4 h-4 lg:w-5 lg:h-5 text-red-500" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-lg lg:text-2xl font-bold">{stats.highPriority}</p>
+                <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Alta prioridad</p>
               </div>
             </div>
           </div>
