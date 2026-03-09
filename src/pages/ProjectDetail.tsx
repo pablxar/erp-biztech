@@ -234,36 +234,36 @@ export default function ProjectDetail() {
   const ServiceIcon = serviceConfig?.icon;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Breadcrumb & Actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/projects")}>
-            <ArrowLeft className="w-5 h-5" />
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 lg:gap-3 min-w-0">
+          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => navigate("/projects")}>
+            <ArrowLeft className="w-4 h-4 lg:w-5 lg:h-5" />
           </Button>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to="/projects" className="hover:text-foreground transition-colors">
+          <div className="flex items-center gap-1.5 lg:gap-2 text-xs lg:text-sm text-muted-foreground min-w-0">
+            <Link to="/projects" className="hover:text-foreground transition-colors hidden sm:inline">
               Proyectos
             </Link>
-            <span>/</span>
-            <span className="text-foreground font-medium">{project.name}</span>
+            <span className="hidden sm:inline">/</span>
+            <span className="text-foreground font-medium truncate">{project.name}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setIsEditProjectOpen(true)}>
-            <Edit className="w-4 h-4 mr-2" />
-            Editar
+        <div className="flex items-center gap-1.5 lg:gap-2 flex-shrink-0">
+          <Button variant="outline" size="sm" className="text-xs lg:text-sm h-8 gap-1.5" onClick={() => setIsEditProjectOpen(true)}>
+            <Edit className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Editar</span>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setDeleteProjectOpen(true)} className="text-destructive focus:text-destructive">
                 <Trash2 className="w-4 h-4 mr-2" />
-                Eliminar proyecto
+                Eliminar
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
