@@ -469,8 +469,8 @@ export default function Leads() {
           onDragEnd={handleDragEnd}
           renderOverlay={(lead) => <LeadCardContent lead={lead} />}
         >
-          <ScrollArea className="w-full">
-            <div className="flex gap-4 pb-4 min-w-max">
+          <ScrollArea className="w-full pb-4">
+            <div className="flex gap-3 lg:gap-4 min-w-max px-0.5">
               {statusOrder.map((status) => {
                 const config = statusConfig[status];
                 const StatusIcon = config.icon;
