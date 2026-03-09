@@ -404,24 +404,24 @@ export default function Leads() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex flex-1 gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="flex flex-1 gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar leads..."
-              className="pl-10 bg-background/50"
+              placeholder="Buscar..."
+              className="pl-10 bg-background/50 h-8 lg:h-9 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as LeadStatus | "all")}>
-            <SelectTrigger className="w-44 bg-background/50">
-              <Filter className="w-4 h-4 mr-2" />
+            <SelectTrigger className="w-32 lg:w-44 bg-background/50 h-8 lg:h-9 text-xs lg:text-sm">
+              <Filter className="w-3.5 h-3.5 mr-1.5" />
               <SelectValue placeholder="Filtrar" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               {statusOrder.map((status) => (
                 <SelectItem key={status} value={status}>
                   {statusConfig[status].label}
@@ -435,17 +435,17 @@ export default function Leads() {
             variant={viewMode === "kanban" ? "secondary" : "ghost"}
             size="sm"
             onClick={() => setViewMode("kanban")}
-            className="gap-2"
+            className="gap-1.5 h-7 lg:h-8"
           >
-            <LayoutGrid className="w-4 h-4" />
+            <LayoutGrid className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
           </Button>
           <Button
             variant={viewMode === "list" ? "secondary" : "ghost"}
             size="sm"
             onClick={() => setViewMode("list")}
-            className="gap-2"
+            className="gap-1.5 h-7 lg:h-8"
           >
-            <List className="w-4 h-4" />
+            <List className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
           </Button>
         </div>
       </div>
