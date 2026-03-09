@@ -209,12 +209,12 @@ export default function Projects() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Proyectos</h1>
-          <p className="text-muted-foreground mt-1">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Proyectos</h1>
+          <p className="text-muted-foreground mt-1 text-sm hidden sm:block">
             Gestiona todos los proyectos de tus clientes
           </p>
         </div>
@@ -222,40 +222,40 @@ export default function Projects() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="glass rounded-xl p-4 border border-border/50">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Total</p>
-          <p className="text-2xl font-bold mt-1">{stats.total}</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
+        <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+          <p className="text-[10px] lg:text-xs text-muted-foreground uppercase tracking-wider">Total</p>
+          <p className="text-xl lg:text-2xl font-bold mt-1">{stats.total}</p>
         </div>
-        <div className="glass rounded-xl p-4 border border-primary/20">
-          <p className="text-xs text-primary uppercase tracking-wider">Activos</p>
-          <p className="text-2xl font-bold mt-1 text-primary">{stats.active}</p>
+        <div className="glass rounded-xl p-3 lg:p-4 border border-primary/20">
+          <p className="text-[10px] lg:text-xs text-primary uppercase tracking-wider">Activos</p>
+          <p className="text-xl lg:text-2xl font-bold mt-1 text-primary">{stats.active}</p>
         </div>
-        <div className="glass rounded-xl p-4 border border-success/20">
-          <p className="text-xs text-success uppercase tracking-wider">Completados</p>
-          <p className="text-2xl font-bold mt-1 text-success">{stats.completed}</p>
+        <div className="glass rounded-xl p-3 lg:p-4 border border-success/20">
+          <p className="text-[10px] lg:text-xs text-success uppercase tracking-wider">Completados</p>
+          <p className="text-xl lg:text-2xl font-bold mt-1 text-success">{stats.completed}</p>
         </div>
-        <div className="glass rounded-xl p-4 border border-muted">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Pendientes</p>
-          <p className="text-2xl font-bold mt-1">{stats.pending}</p>
+        <div className="glass rounded-xl p-3 lg:p-4 border border-muted">
+          <p className="text-[10px] lg:text-xs text-muted-foreground uppercase tracking-wider">Pendientes</p>
+          <p className="text-xl lg:text-2xl font-bold mt-1">{stats.pending}</p>
         </div>
       </div>
 
       {/* Filters & Actions Bar */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
+      <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+        <div className="relative flex-1 min-w-[160px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
-            placeholder="Buscar proyectos..." 
-            className="pl-10 bg-secondary/50"
+            placeholder="Buscar..." 
+            className="pl-10 bg-secondary/50 h-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[140px] bg-secondary/50">
-            <Filter className="w-4 h-4 mr-2" />
+          <SelectTrigger className="w-[110px] lg:w-[140px] bg-secondary/50 h-9 text-xs lg:text-sm">
+            <Filter className="w-3.5 h-3.5 mr-1 lg:mr-2 flex-shrink-0" />
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
           <SelectContent>
@@ -268,11 +268,11 @@ export default function Projects() {
         </Select>
         
         <Select value={filterService} onValueChange={setFilterService}>
-          <SelectTrigger className="w-[160px] bg-secondary/50">
+          <SelectTrigger className="w-[120px] lg:w-[160px] bg-secondary/50 h-9 text-xs lg:text-sm hidden sm:flex">
             <SelectValue placeholder="Servicio" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos los servicios</SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="software_development">Software</SelectItem>
             <SelectItem value="digital_marketing">Marketing</SelectItem>
             <SelectItem value="audiovisual">Audiovisual</SelectItem>
@@ -281,8 +281,8 @@ export default function Projects() {
         </Select>
         
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[140px] bg-secondary/50">
-            <SortAsc className="w-4 h-4 mr-2" />
+          <SelectTrigger className="w-[110px] lg:w-[140px] bg-secondary/50 h-9 text-xs lg:text-sm hidden sm:flex">
+            <SortAsc className="w-3.5 h-3.5 mr-1 lg:mr-2 flex-shrink-0" />
             <SelectValue placeholder="Ordenar" />
           </SelectTrigger>
           <SelectContent>
