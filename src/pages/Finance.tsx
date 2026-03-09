@@ -468,25 +468,25 @@ export default function Finance() {
         </div>
 
         {/* Total Expenses */}
-        <div className="glass rounded-xl p-5 animate-fade-in group hover:border-destructive/30 transition-all">
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2.5 rounded-lg bg-destructive/10 group-hover:bg-destructive/20 transition-colors">
-              <TrendingDown className="w-5 h-5 text-destructive" />
+        <div className="glass rounded-xl p-3 lg:p-5 animate-fade-in group hover:border-destructive/30 transition-all">
+          <div className="flex items-start justify-between mb-2 lg:mb-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-destructive/10 group-hover:bg-destructive/20 transition-colors">
+              <TrendingDown className="w-4 h-4 lg:w-5 lg:h-5 text-destructive" />
             </div>
             {analytics && analytics.expenseGrowth !== 0 && (
               <Badge variant="outline" className={cn(
-                "text-xs border",
+                "text-[10px] lg:text-xs border hidden sm:flex",
                 analytics.expenseGrowth < 0 ? "bg-success/10 text-success border-success/30" : "bg-warning/10 text-warning border-warning/30"
               )}>
                 {analytics.expenseGrowth > 0 ? "+" : ""}{analytics.expenseGrowth.toFixed(1)}%
               </Badge>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mb-1">Gastos Totales</p>
-          <p className="text-2xl lg:text-3xl font-bold">${stats?.totalExpenses.toLocaleString() || 0}</p>
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <ArrowDownRight className="w-3.5 h-3.5 text-destructive" />
-            <span>Este mes: ${analytics?.currentExpenses.toLocaleString() || 0}</span>
+          <p className="text-[10px] lg:text-xs text-muted-foreground mb-0.5 lg:mb-1">Gastos</p>
+          <p className="text-lg sm:text-xl lg:text-3xl font-bold truncate">${stats?.totalExpenses.toLocaleString() || 0}</p>
+          <div className="mt-1.5 lg:mt-2 flex items-center gap-1 text-[10px] lg:text-xs text-muted-foreground hidden sm:flex">
+            <ArrowDownRight className="w-3 h-3 text-destructive" />
+            <span>Mes: ${analytics?.currentExpenses.toLocaleString() || 0}</span>
           </div>
         </div>
 
