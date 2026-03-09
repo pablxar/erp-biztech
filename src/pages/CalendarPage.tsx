@@ -385,79 +385,78 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <CalendarDays className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">Calendario</h1>
-              <p className="text-muted-foreground">Gestiona eventos, reuniones y fechas importantes</p>
-            </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 lg:gap-3">
+          <div className="p-1.5 lg:p-2 rounded-lg bg-primary/10">
+            <CalendarDays className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold">Calendario</h1>
+            <p className="text-muted-foreground text-xs lg:text-sm hidden sm:block">Gestiona eventos y reuniones</p>
           </div>
         </div>
-        <Button className="gap-2" onClick={() => setIsDialogOpen(true)}>
+        <Button className="gap-2 text-sm" size="sm" onClick={() => setIsDialogOpen(true)}>
           <Plus className="w-4 h-4" />
-          Nuevo Evento
+          <span className="hidden sm:inline">Nuevo Evento</span>
+          <span className="sm:hidden">Evento</span>
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatsCard icon={CalendarDays} label="Total Eventos" value={stats.total} color="primary" />
-        <StatsCard icon={Target} label="Eventos Hoy" value={stats.today} color={stats.today > 0 ? "success" : "primary"} />
-        <StatsCard icon={CalendarClock} label="Esta Semana" value={stats.thisWeek} color="warning" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
+        <StatsCard icon={CalendarDays} label="Total" value={stats.total} color="primary" />
+        <StatsCard icon={Target} label="Hoy" value={stats.today} color={stats.today > 0 ? "success" : "primary"} />
+        <StatsCard icon={CalendarClock} label="Semana" value={stats.thisWeek} color="warning" />
         <StatsCard icon={Sparkles} label="Próximos" value={stats.upcoming} color="primary" />
       </div>
 
       {/* Controls Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 p-1 bg-secondary/50 rounded-lg">
-            <Button variant={viewMode === "month" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("month")} className="gap-1.5">
-              <LayoutGrid className="w-4 h-4" /><span className="hidden sm:inline">Mes</span>
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="flex items-center gap-1.5 lg:gap-2 flex-wrap">
+          <div className="flex items-center gap-0.5 p-0.5 lg:p-1 bg-secondary/50 rounded-lg">
+            <Button variant={viewMode === "month" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("month")} className="gap-1 h-7 lg:h-8 px-2 lg:px-3 text-xs lg:text-sm">
+              <LayoutGrid className="w-3.5 h-3.5" /><span className="hidden sm:inline">Mes</span>
             </Button>
-            <Button variant={viewMode === "week" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("week")} className="gap-1.5">
-              <List className="w-4 h-4" /><span className="hidden sm:inline">Semana</span>
+            <Button variant={viewMode === "week" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("week")} className="gap-1 h-7 lg:h-8 px-2 lg:px-3 text-xs lg:text-sm">
+              <List className="w-3.5 h-3.5" /><span className="hidden sm:inline">Semana</span>
             </Button>
-            <Button variant={viewMode === "day" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("day")} className="gap-1.5">
-              <CalendarIcon className="w-4 h-4" /><span className="hidden sm:inline">Día</span>
+            <Button variant={viewMode === "day" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("day")} className="gap-1 h-7 lg:h-8 px-2 lg:px-3 text-xs lg:text-sm">
+              <CalendarIcon className="w-3.5 h-3.5" /><span className="hidden sm:inline">Día</span>
             </Button>
           </div>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={handlePrev}><ChevronLeft className="w-5 h-5" /></Button>
-            <Button variant="outline" size="sm" onClick={handleToday} className="hidden sm:flex">Hoy</Button>
-            <Button variant="ghost" size="icon" onClick={handleNext}><ChevronRight className="w-5 h-5" /></Button>
+          <div className="flex items-center gap-0.5">
+            <Button variant="ghost" size="icon" className="h-7 w-7 lg:h-8 lg:w-8" onClick={handlePrev}><ChevronLeft className="w-4 h-4" /></Button>
+            <Button variant="outline" size="sm" onClick={handleToday} className="hidden sm:flex h-7 lg:h-8 text-xs">Hoy</Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7 lg:h-8 lg:w-8" onClick={handleNext}><ChevronRight className="w-4 h-4" /></Button>
           </div>
-          <h2 className="text-lg font-semibold capitalize ml-2">{getNavigationTitle()}</h2>
+          <h2 className="text-sm lg:text-lg font-semibold capitalize">{getNavigationTitle()}</h2>
         </div>
-        <div className="relative w-full md:w-64">
+        <div className="relative w-full sm:w-56 lg:w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input placeholder="Buscar eventos..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
+          <Input placeholder="Buscar eventos..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-8 lg:h-9 text-sm" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
         {/* Calendar */}
-        <div className="lg:col-span-3 glass rounded-xl p-6 animate-fade-in">
-          <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1">
-            <GripVertical className="w-3 h-3" />Arrastra los eventos para moverlos a otra fecha
+        <div className="lg:col-span-3 glass rounded-xl p-3 sm:p-4 lg:p-6 animate-fade-in">
+          <p className="text-[10px] lg:text-xs text-muted-foreground mb-3 lg:mb-4 flex items-center gap-1 hidden sm:flex">
+            <GripVertical className="w-3 h-3" />Arrastra los eventos para moverlos
           </p>
 
           {/* Month View */}
           {viewMode === "month" && (
             <>
-              <div className="grid grid-cols-7 gap-1 mb-2">
+              <div className="grid grid-cols-7 gap-0.5 lg:gap-1 mb-2">
                 {daysOfWeek.map((day) => (
-                  <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">{day}</div>
+                  <div key={day} className="text-center text-[10px] lg:text-sm font-medium text-muted-foreground py-1 lg:py-2">{day}</div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-0.5 lg:gap-1">
                 {calendarDays.map((day, index) => {
-                  if (!day) return <div key={`empty-${index}`} className="min-h-[100px]" />;
+                  if (!day) return <div key={`empty-${index}`} className="min-h-[60px] lg:min-h-[100px]" />;
                   const dayEvents = getEventsForDay(day);
                   const isToday = isDateToday(day);
                   const isSelected = isSameDay(day, selectedDate);
@@ -472,21 +471,21 @@ export default function CalendarPage() {
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, day)}
                       className={cn(
-                        "min-h-[100px] p-2 rounded-lg transition-all cursor-pointer border border-transparent",
+                        "min-h-[60px] lg:min-h-[100px] p-1 lg:p-2 rounded-md lg:rounded-lg transition-all cursor-pointer border border-transparent",
                         "hover:bg-secondary/50",
                         isSelected && "bg-secondary border-primary/30",
-                        isToday && "ring-2 ring-primary",
+                        isToday && "ring-1 lg:ring-2 ring-primary",
                         isDropTarget && "bg-primary/20 ring-2 ring-primary ring-dashed",
                         !isCurrentMonth && "opacity-40"
                       )}
                     >
                       <span className={cn(
-                        "text-sm font-medium inline-flex items-center justify-center w-7 h-7 rounded-full",
+                        "text-[10px] lg:text-sm font-medium inline-flex items-center justify-center w-5 h-5 lg:w-7 lg:h-7 rounded-full",
                         isToday && "bg-primary text-primary-foreground"
                       )}>
                         {format(day, "d")}
                       </span>
-                      <div className="space-y-1 mt-1">
+                      <div className="space-y-0.5 lg:space-y-1 mt-0.5 lg:mt-1">
                         {dayEvents.slice(0, 2).map((event) => {
                           const colors = getEventColorClasses(event);
                           return (

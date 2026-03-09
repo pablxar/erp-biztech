@@ -343,85 +343,85 @@ export default function Leads() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 lg:space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
             Pipeline de Leads
           </h1>
-          <p className="text-muted-foreground mt-1">Arrastra los leads entre columnas para cambiar su estado</p>
+          <p className="text-muted-foreground mt-1 text-xs lg:text-sm hidden sm:block">Arrastra leads entre columnas para cambiar estado</p>
         </div>
         <CreateLeadDialog />
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass rounded-xl p-4 border border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-primary/10">
-              <Users className="w-5 h-5 text-primary" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-primary/10">
+              <Users className="w-4 h-4 lg:w-5 lg:h-5 text-primary" />
             </div>
-            <div>
-              <p className="text-2xl font-bold">{totalLeads}</p>
-              <p className="text-xs text-muted-foreground">Total Leads</p>
-            </div>
-          </div>
-        </div>
-        <div className="glass rounded-xl p-4 border border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-blue-500/10">
-              <Sparkles className="w-5 h-5 text-blue-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{newLeads}</p>
-              <p className="text-xs text-muted-foreground">Nuevos</p>
+            <div className="min-w-0">
+              <p className="text-lg lg:text-2xl font-bold">{totalLeads}</p>
+              <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Total Leads</p>
             </div>
           </div>
         </div>
-        <div className="glass rounded-xl p-4 border border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-violet-500/10">
-              <Zap className="w-5 h-5 text-violet-400" />
+        <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-blue-500/10">
+              <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-blue-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold">{convertedLeads}</p>
-              <p className="text-xs text-muted-foreground">Convertidos</p>
+            <div className="min-w-0">
+              <p className="text-lg lg:text-2xl font-bold">{newLeads}</p>
+              <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Nuevos</p>
             </div>
           </div>
         </div>
-        <div className="glass rounded-xl p-4 border border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-success/10">
-              <TrendingUp className="w-5 h-5 text-success" />
+        <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-violet-500/10">
+              <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-violet-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold">{conversionRate}%</p>
-              <p className="text-xs text-muted-foreground">Conversión</p>
+            <div className="min-w-0">
+              <p className="text-lg lg:text-2xl font-bold">{convertedLeads}</p>
+              <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Convertidos</p>
+            </div>
+          </div>
+        </div>
+        <div className="glass rounded-xl p-3 lg:p-4 border border-border/50">
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-success/10">
+              <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-success" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-lg lg:text-2xl font-bold">{conversionRate}%</p>
+              <p className="text-[10px] lg:text-xs text-muted-foreground truncate">Conversión</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex flex-1 gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="flex flex-1 gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar leads..."
-              className="pl-10 bg-background/50"
+              placeholder="Buscar..."
+              className="pl-10 bg-background/50 h-8 lg:h-9 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as LeadStatus | "all")}>
-            <SelectTrigger className="w-44 bg-background/50">
-              <Filter className="w-4 h-4 mr-2" />
+            <SelectTrigger className="w-32 lg:w-44 bg-background/50 h-8 lg:h-9 text-xs lg:text-sm">
+              <Filter className="w-3.5 h-3.5 mr-1.5" />
               <SelectValue placeholder="Filtrar" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               {statusOrder.map((status) => (
                 <SelectItem key={status} value={status}>
                   {statusConfig[status].label}
@@ -435,31 +435,31 @@ export default function Leads() {
             variant={viewMode === "kanban" ? "secondary" : "ghost"}
             size="sm"
             onClick={() => setViewMode("kanban")}
-            className="gap-2"
+            className="gap-1.5 h-7 lg:h-8"
           >
-            <LayoutGrid className="w-4 h-4" />
+            <LayoutGrid className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
           </Button>
           <Button
             variant={viewMode === "list" ? "secondary" : "ghost"}
             size="sm"
             onClick={() => setViewMode("list")}
-            className="gap-2"
+            className="gap-1.5 h-7 lg:h-8"
           >
-            <List className="w-4 h-4" />
+            <List className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
           </Button>
         </div>
       </div>
 
       {filteredLeads.length === 0 ? (
-        <div className="glass rounded-2xl p-12 text-center border border-border/50">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-            <UserPlus className="w-8 h-8 text-primary" />
+        <div className="glass rounded-xl lg:rounded-2xl p-8 lg:p-12 text-center border border-border/50">
+          <div className="w-12 h-12 lg:w-16 lg:h-16 mx-auto rounded-xl lg:rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+            <UserPlus className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
           </div>
-          <h3 className="text-xl font-semibold mb-2">No hay leads</h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+          <h3 className="text-lg lg:text-xl font-semibold mb-2">No hay leads</h3>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
             {searchQuery || statusFilter !== "all"
-              ? "No se encontraron leads con ese criterio de búsqueda"
-              : "Comienza a agregar leads manualmente o conéctalos desde tu landing page"}
+              ? "No se encontraron leads"
+              : "Agrega leads manualmente o conéctalos desde tu landing"}
           </p>
           {!searchQuery && statusFilter === "all" && <CreateLeadDialog />}
         </div>
@@ -469,8 +469,8 @@ export default function Leads() {
           onDragEnd={handleDragEnd}
           renderOverlay={(lead) => <LeadCardContent lead={lead} />}
         >
-          <ScrollArea className="w-full">
-            <div className="flex gap-4 pb-4 min-w-max">
+          <ScrollArea className="w-full pb-4">
+            <div className="flex gap-3 lg:gap-4 min-w-max px-0.5">
               {statusOrder.map((status) => {
                 const config = statusConfig[status];
                 const StatusIcon = config.icon;

@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -597,28 +598,31 @@ export default function Clients() {
     );
   }
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
             Clientes
           </h1>
-          <p className="text-muted-foreground mt-1">Gestiona y administra las relaciones con tus clientes</p>
+          <p className="text-muted-foreground mt-1 text-sm hidden sm:block">Gestiona las relaciones con tus clientes</p>
         </div>
         <CreateClientDialog
           trigger={
-            <Button className="gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-shadow">
+            <Button className="gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-shadow text-sm">
               <Plus className="w-4 h-4" />
-              Nuevo Cliente
+              <span className="hidden sm:inline">Nuevo Cliente</span>
+              <span className="sm:hidden">Nuevo</span>
             </Button>
           }
         />
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
         <StatsCard
           icon={Users}
           label="Total Clientes"
@@ -634,13 +638,13 @@ export default function Clients() {
         />
         <StatsCard
           icon={TrendingUp}
-          label="Promedio por Cliente"
+          label="Promedio"
           value={`$${Math.round(globalStats.avgRevenue).toLocaleString()}`}
           color="bg-info/20"
         />
         <StatsCard
           icon={Briefcase}
-          label="Clientes con Proyectos"
+          label="Con Proyectos"
           value={globalStats.withProjects}
           subValue={`${globalStats.total > 0 ? Math.round((globalStats.withProjects / globalStats.total) * 100) : 0}% del total`}
           color="bg-warning/20"
@@ -648,12 +652,12 @@ export default function Clients() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nombre, email o empresa..."
-            className="pl-10 bg-secondary/30 border-border/50 focus:bg-background transition-colors"
+            placeholder="Buscar clientes..."
+            className="pl-10 bg-secondary/30 border-border/50 h-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -675,35 +679,35 @@ export default function Clients() {
 
       {/* Content */}
       {filteredClients.length === 0 ? (
-        <div className="glass rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Users className="w-8 h-8 text-primary" />
+        <div className="glass rounded-xl lg:rounded-2xl p-8 lg:p-12 text-center">
+          <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <Users className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold mb-2">No hay clientes</h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
             {searchQuery
-              ? "No se encontraron clientes con ese criterio de búsqueda"
-              : "Comienza agregando tu primer cliente para gestionar tus relaciones comerciales"}
+              ? "No se encontraron clientes con ese criterio"
+              : "Comienza agregando tu primer cliente"}
           </p>
           {!searchQuery && (
             <CreateClientDialog
               trigger={
                 <Button className="gap-2">
                   <Plus className="w-4 h-4" />
-                  Agregar Primer Cliente
+                  Agregar Cliente
                 </Button>
               }
             />
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Client List/Grid */}
-          <div className={cn("space-y-4", selectedClient ? "lg:col-span-2" : "lg:col-span-3")}>
+          <div className={cn("space-y-3 lg:space-y-4", selectedClient ? "lg:col-span-2" : "lg:col-span-3")}>
             {viewMode === "grid" ? (
               <div
                 className={cn(
-                  "grid gap-4",
+                  "grid gap-3 lg:gap-4",
                   selectedClient ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-2 xl:grid-cols-3",
                 )}
               >
@@ -720,13 +724,24 @@ export default function Clients() {
             )}
           </div>
 
-          {/* Detail Panel */}
-          {selectedClient && (
-            <div className="lg:col-span-1">
+          {/* Detail Panel - Desktop */}
+          {selectedClient && !isMobile && (
+            <div className="hidden lg:block lg:col-span-1">
               <DetailPanel />
             </div>
           )}
         </div>
+      )}
+
+      {/* Detail Panel - Mobile Sheet */}
+      {isMobile && (
+        <Sheet open={!!selectedClient} onOpenChange={(open) => { if (!open) setSelectedClientId(null); }}>
+          <SheetContent side="bottom" className="h-[85vh] p-0 rounded-t-2xl">
+            <ScrollArea className="h-full">
+              <DetailPanel />
+            </ScrollArea>
+          </SheetContent>
+        </Sheet>
       )}
 
       {/* Dialogs */}

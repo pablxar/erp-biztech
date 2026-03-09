@@ -366,38 +366,38 @@ export default function Finance() {
   }
 
   return (
-    <div className="space-y-6 p-1">
+    <div className="space-y-4 lg:space-y-6 p-0 lg:p-1">
       {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
-              <DollarSign className="w-6 h-6 text-primary" />
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="p-2 lg:p-2.5 rounded-lg lg:rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
+              <DollarSign className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold">Centro Financiero</h1>
-              <p className="text-muted-foreground text-sm">
-                Análisis en tiempo real • {format(new Date(), "EEEE, d 'de' MMMM", { locale: es })}
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Centro Financiero</h1>
+              <p className="text-muted-foreground text-xs lg:text-sm hidden sm:block">
+                Análisis en tiempo real • {format(new Date(), "d 'de' MMMM", { locale: es })}
               </p>
             </div>
           </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[200px] lg:w-64">
+        <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+          <div className="relative flex-1 min-w-[140px] lg:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar transacciones..."
+              placeholder="Buscar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-secondary/50 border-border/50"
+              className="pl-9 bg-secondary/50 border-border/50 h-8 lg:h-9 text-sm"
             />
           </div>
-          <Button variant="outline" size="icon" className="shrink-0">
-            <Filter className="w-4 h-4" />
+          <Button variant="outline" size="icon" className="shrink-0 h-8 w-8 lg:h-9 lg:w-9">
+            <Filter className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
           </Button>
-          <Button variant="outline" className="gap-2 shrink-0">
-            <Download className="w-4 h-4" />
+          <Button variant="outline" className="gap-1.5 shrink-0 h-8 lg:h-9 text-xs lg:text-sm px-2.5 lg:px-3">
+            <Download className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
             <span className="hidden sm:inline">Exportar</span>
           </Button>
           <CreateTransactionDialog />
@@ -443,102 +443,102 @@ export default function Finance() {
       )}
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         {/* Total Income */}
-        <div className="glass rounded-xl p-5 animate-fade-in group hover:border-primary/30 transition-all">
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2.5 rounded-lg bg-success/10 group-hover:bg-success/20 transition-colors">
-              <TrendingUp className="w-5 h-5 text-success" />
+        <div className="glass rounded-xl p-3 lg:p-5 animate-fade-in group hover:border-primary/30 transition-all">
+          <div className="flex items-start justify-between mb-2 lg:mb-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-success/10 group-hover:bg-success/20 transition-colors">
+              <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-success" />
             </div>
             {analytics && analytics.incomeGrowth !== 0 && (
               <Badge variant="outline" className={cn(
-                "text-xs border",
+                "text-[10px] lg:text-xs border hidden sm:flex",
                 analytics.incomeGrowth > 0 ? "bg-success/10 text-success border-success/30" : "bg-destructive/10 text-destructive border-destructive/30"
               )}>
                 {analytics.incomeGrowth > 0 ? "+" : ""}{analytics.incomeGrowth.toFixed(1)}%
               </Badge>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mb-1">Ingresos Totales</p>
-          <p className="text-2xl lg:text-3xl font-bold">${stats?.totalIncome.toLocaleString() || 0}</p>
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <ArrowUpRight className="w-3.5 h-3.5 text-success" />
-            <span>Este mes: ${analytics?.currentIncome.toLocaleString() || 0}</span>
+          <p className="text-[10px] lg:text-xs text-muted-foreground mb-0.5 lg:mb-1">Ingresos</p>
+          <p className="text-lg sm:text-xl lg:text-3xl font-bold truncate">${stats?.totalIncome.toLocaleString() || 0}</p>
+          <div className="mt-1.5 lg:mt-2 flex items-center gap-1 text-[10px] lg:text-xs text-muted-foreground hidden sm:flex">
+            <ArrowUpRight className="w-3 h-3 text-success" />
+            <span>Mes: ${analytics?.currentIncome.toLocaleString() || 0}</span>
           </div>
         </div>
 
         {/* Total Expenses */}
-        <div className="glass rounded-xl p-5 animate-fade-in group hover:border-destructive/30 transition-all">
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2.5 rounded-lg bg-destructive/10 group-hover:bg-destructive/20 transition-colors">
-              <TrendingDown className="w-5 h-5 text-destructive" />
+        <div className="glass rounded-xl p-3 lg:p-5 animate-fade-in group hover:border-destructive/30 transition-all">
+          <div className="flex items-start justify-between mb-2 lg:mb-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-destructive/10 group-hover:bg-destructive/20 transition-colors">
+              <TrendingDown className="w-4 h-4 lg:w-5 lg:h-5 text-destructive" />
             </div>
             {analytics && analytics.expenseGrowth !== 0 && (
               <Badge variant="outline" className={cn(
-                "text-xs border",
+                "text-[10px] lg:text-xs border hidden sm:flex",
                 analytics.expenseGrowth < 0 ? "bg-success/10 text-success border-success/30" : "bg-warning/10 text-warning border-warning/30"
               )}>
                 {analytics.expenseGrowth > 0 ? "+" : ""}{analytics.expenseGrowth.toFixed(1)}%
               </Badge>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mb-1">Gastos Totales</p>
-          <p className="text-2xl lg:text-3xl font-bold">${stats?.totalExpenses.toLocaleString() || 0}</p>
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <ArrowDownRight className="w-3.5 h-3.5 text-destructive" />
-            <span>Este mes: ${analytics?.currentExpenses.toLocaleString() || 0}</span>
+          <p className="text-[10px] lg:text-xs text-muted-foreground mb-0.5 lg:mb-1">Gastos</p>
+          <p className="text-lg sm:text-xl lg:text-3xl font-bold truncate">${stats?.totalExpenses.toLocaleString() || 0}</p>
+          <div className="mt-1.5 lg:mt-2 flex items-center gap-1 text-[10px] lg:text-xs text-muted-foreground hidden sm:flex">
+            <ArrowDownRight className="w-3 h-3 text-destructive" />
+            <span>Mes: ${analytics?.currentExpenses.toLocaleString() || 0}</span>
           </div>
         </div>
 
         {/* Net Margin */}
-        <div className="glass rounded-xl p-5 animate-fade-in group hover:border-primary/30 transition-all">
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-              <PiggyBank className="w-5 h-5 text-primary" />
+        <div className="glass rounded-xl p-3 lg:p-5 animate-fade-in group hover:border-primary/30 transition-all">
+          <div className="flex items-start justify-between mb-2 lg:mb-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <PiggyBank className="w-4 h-4 lg:w-5 lg:h-5 text-primary" />
             </div>
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-[10px] lg:text-xs">
               {stats?.marginPercentage.toFixed(1) || 0}%
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground mb-1">Margen Neto</p>
-          <p className="text-2xl lg:text-3xl font-bold">${stats?.netMargin.toLocaleString() || 0}</p>
-          <div className="mt-2">
+          <p className="text-[10px] lg:text-xs text-muted-foreground mb-0.5 lg:mb-1">Margen</p>
+          <p className="text-lg sm:text-xl lg:text-3xl font-bold truncate">${stats?.netMargin.toLocaleString() || 0}</p>
+          <div className="mt-1.5 lg:mt-2">
             <Progress 
               value={Math.min(stats?.marginPercentage || 0, 100)} 
-              className="h-1.5"
+              className="h-1 lg:h-1.5"
             />
           </div>
         </div>
 
         {/* Pending Invoices - Clickable */}
         <div 
-          className="glass rounded-xl p-5 animate-fade-in group hover:border-warning/30 transition-all cursor-pointer"
+          className="glass rounded-xl p-3 lg:p-5 animate-fade-in group hover:border-warning/30 transition-all cursor-pointer"
           onClick={() => setShowReceivables(true)}
         >
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2.5 rounded-lg bg-warning/10 group-hover:bg-warning/20 transition-colors">
-              <Receipt className="w-5 h-5 text-warning" />
+          <div className="flex items-start justify-between mb-2 lg:mb-3">
+            <div className="p-1.5 lg:p-2.5 rounded-lg bg-warning/10 group-hover:bg-warning/20 transition-colors">
+              <Receipt className="w-4 h-4 lg:w-5 lg:h-5 text-warning" />
             </div>
             {pendingInvoices.urgent > 0 && (
-              <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30 text-xs animate-pulse">
+              <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30 text-[10px] lg:text-xs animate-pulse">
                 {pendingInvoices.urgent} vencidas
               </Badge>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mb-1">Por Cobrar</p>
-          <p className="text-2xl lg:text-3xl font-bold">${pendingInvoices.total.toLocaleString()}</p>
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{pendingInvoices.count} pendientes • Click para desglosar</span>
+          <p className="text-[10px] lg:text-xs text-muted-foreground mb-0.5 lg:mb-1">Por Cobrar</p>
+          <p className="text-lg sm:text-xl lg:text-3xl font-bold truncate">${pendingInvoices.total.toLocaleString()}</p>
+          <div className="mt-1.5 lg:mt-2 flex items-center gap-1 text-[10px] lg:text-xs text-muted-foreground hidden sm:flex">
+            <Clock className="w-3 h-3" />
+            <span>{pendingInvoices.count} pendientes</span>
           </div>
         </div>
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
         {/* Main Revenue Chart */}
-        <div className="xl:col-span-2 glass rounded-xl p-6 animate-slide-up">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="xl:col-span-2 glass rounded-xl p-4 lg:p-6 animate-slide-up">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 lg:gap-4 mb-4 lg:mb-6">
             <div>
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Activity className="w-5 h-5 text-primary" />
