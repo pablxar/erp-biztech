@@ -443,9 +443,9 @@ export default function Finance() {
       )}
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         {/* Total Income */}
-        <div className="glass rounded-xl p-5 animate-fade-in group hover:border-primary/30 transition-all">
+        <div className="glass rounded-xl p-3 lg:p-5 animate-fade-in group hover:border-primary/30 transition-all">
           <div className="flex items-start justify-between mb-3">
             <div className="p-2.5 rounded-lg bg-success/10 group-hover:bg-success/20 transition-colors">
               <TrendingUp className="w-5 h-5 text-success" />
