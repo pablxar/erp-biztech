@@ -295,7 +295,7 @@ export default function TeamTasks() {
     const StatusIcon = config.icon;
 
     return (
-      <div className="w-[400px] border-l border-border bg-card/50 backdrop-blur-sm flex flex-col">
+      <div className="fixed inset-0 z-50 lg:relative lg:inset-auto lg:w-[400px] lg:border-l lg:border-border bg-card/95 lg:bg-card/50 backdrop-blur-sm flex flex-col">
         <div className="p-4 border-b border-border flex items-center justify-between">
           <h3 className="font-semibold">Detalle de Tarea</h3>
           <Button variant="ghost" size="icon" onClick={() => setSelectedTodo(null)}>
