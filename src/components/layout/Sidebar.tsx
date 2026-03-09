@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import bizTechLogo from "@/assets/biztech_logo.png";
 import {
@@ -7,15 +7,18 @@ import {
   DollarSign,
   Calendar,
   Users,
-  BarChart3,
   Settings,
   Sparkles,
   UserPlus,
   ListTodo,
   Target,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNewLeadsCount } from "@/hooks/useLeads";
+import { useSidebarContext } from "@/contexts/SidebarContext";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useEffect } from "react";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -29,7 +32,7 @@ const navItems = [
   { icon: Target, label: "Metas & Ideas", path: "/goals" },
 ];
 
-export function Sidebar() {
+function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const { data: newLeadsCount } = useNewLeadsCount();
 
   const NavItem = ({ item }: { item: (typeof navItems)[0] }) => {
@@ -38,6 +41,7 @@ export function Sidebar() {
     return (
       <NavLink
         to={item.path}
+        onClick={onNavClick}
         className={({ isActive }) =>
           cn(
             "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
@@ -64,7 +68,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-72 border-r border-sidebar-border flex flex-col bg-gradient-to-b from-sidebar to-background">
+    <div className="flex flex-col h-full bg-gradient-to-b from-sidebar to-background">
       {/* Subtle glow overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
 
@@ -84,6 +88,7 @@ export function Sidebar() {
       <div className="py-5 px-4 border-t border-sidebar-border/50 relative">
         <NavLink
           to="/settings"
+          onClick={onNavClick}
           className={({ isActive }) =>
             cn(
               "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300",
@@ -97,6 +102,36 @@ export function Sidebar() {
           <span className="font-medium text-sm">Configuración</span>
         </NavLink>
       </div>
+    </div>
+  );
+}
+
+export function Sidebar() {
+  const { isMobile, mobileOpen, setMobileOpen } = useSidebarContext();
+  const location = useLocation();
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    if (isMobile && mobileOpen) {
+      setMobileOpen(false);
+    }
+  }, [location.pathname]);
+
+  // Mobile: Sheet sidebar
+  if (isMobile) {
+    return (
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent side="left" className="p-0 w-72 border-r border-sidebar-border">
+          <SidebarContent onNavClick={() => setMobileOpen(false)} />
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: Fixed sidebar
+  return (
+    <aside className="fixed left-0 top-0 z-40 h-screen w-72 border-r border-sidebar-border flex flex-col">
+      <SidebarContent />
     </aside>
   );
 }
