@@ -584,19 +584,18 @@ export default function TeamTasks() {
 
         {/* Content */}
         {filteredTodos.length === 0 ? (
-          <div className="glass rounded-2xl p-12 text-center border border-border/50">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-              <ListTodo className="w-8 h-8 text-primary" />
+          <div className="glass rounded-xl lg:rounded-2xl p-8 lg:p-12 text-center border border-border/50">
+            <div className="w-12 h-12 lg:w-16 lg:h-16 mx-auto rounded-xl lg:rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+              <ListTodo className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">No hay tareas</h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            <h3 className="text-lg lg:text-xl font-semibold mb-2">No hay tareas</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
               {searchQuery || statusFilter !== "all" || priorityFilter !== "all"
-                ? "No se encontraron tareas con esos filtros"
-                : "Crea tu primera tarea para comenzar a organizar el trabajo del equipo"
-              }
+                ? "No se encontraron tareas"
+                : "Crea tu primera tarea para organizar el trabajo"}
             </p>
             {!searchQuery && statusFilter === "all" && priorityFilter === "all" && (
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
                 <Plus className="mr-2 h-4 w-4" />
                 Nueva Tarea
               </Button>
@@ -608,30 +607,33 @@ export default function TeamTasks() {
             onDragEnd={handleDragEnd}
             renderOverlay={(todo) => <TodoCardContent todo={todo} />}
           >
-            <div className="flex gap-4 pb-4 overflow-x-auto">
-              {(Object.keys(statusConfig) as TodoStatus[]).map((status) => {
-                const config = statusConfig[status];
-                const StatusIcon = config.icon;
-                return (
-                  <KanbanColumn
-                    key={status}
-                    id={status}
-                    title={config.label}
-                    count={todosByStatus[status].length}
-                    icon={<StatusIcon className="h-4 w-4" />}
-                    iconColor={config.color}
-                    bgColor={config.bgColor}
-                    emptyMessage="Arrastra tareas aquí"
-                  >
-                    {todosByStatus[status].map((todo) => (
-                      <KanbanCard key={todo.id} id={todo.id}>
-                        <TodoCardContent todo={todo} />
-                      </KanbanCard>
-                    ))}
-                  </KanbanColumn>
-                );
-              })}
-            </div>
+            <ScrollArea className="w-full pb-4">
+              <div className="flex gap-3 lg:gap-4 min-w-max">
+                {(Object.keys(statusConfig) as TodoStatus[]).map((status) => {
+                  const config = statusConfig[status];
+                  const StatusIcon = config.icon;
+                  return (
+                    <KanbanColumn
+                      key={status}
+                      id={status}
+                      title={config.label}
+                      count={todosByStatus[status].length}
+                      icon={<StatusIcon className="h-4 w-4" />}
+                      iconColor={config.color}
+                      bgColor={config.bgColor}
+                      emptyMessage="Arrastra tareas aquí"
+                    >
+                      {todosByStatus[status].map((todo) => (
+                        <KanbanCard key={todo.id} id={todo.id}>
+                          <TodoCardContent todo={todo} />
+                        </KanbanCard>
+                      ))}
+                    </KanbanColumn>
+                  );
+                })}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </KanbanBoard>
         ) : (
           <div className="space-y-2">
