@@ -451,15 +451,15 @@ export default function Leads() {
       </div>
 
       {filteredLeads.length === 0 ? (
-        <div className="glass rounded-2xl p-12 text-center border border-border/50">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-            <UserPlus className="w-8 h-8 text-primary" />
+        <div className="glass rounded-xl lg:rounded-2xl p-8 lg:p-12 text-center border border-border/50">
+          <div className="w-12 h-12 lg:w-16 lg:h-16 mx-auto rounded-xl lg:rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+            <UserPlus className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
           </div>
-          <h3 className="text-xl font-semibold mb-2">No hay leads</h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+          <h3 className="text-lg lg:text-xl font-semibold mb-2">No hay leads</h3>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
             {searchQuery || statusFilter !== "all"
-              ? "No se encontraron leads con ese criterio de búsqueda"
-              : "Comienza a agregar leads manualmente o conéctalos desde tu landing page"}
+              ? "No se encontraron leads"
+              : "Agrega leads manualmente o conéctalos desde tu landing"}
           </p>
           {!searchQuery && statusFilter === "all" && <CreateLeadDialog />}
         </div>
