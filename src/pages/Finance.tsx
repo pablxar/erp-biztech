@@ -1033,6 +1033,18 @@ export default function Finance() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Register Payment Dialog */}
+      {paymentProject && (
+        <RegisterPaymentDialog
+          project={paymentProject.project}
+          open={!!paymentProject}
+          onOpenChange={(open) => {
+            if (!open) setPaymentProject(null);
+          }}
+          previousPayments={paymentProject.paid}
+        />
+      )}
     </div>
   );
 }
