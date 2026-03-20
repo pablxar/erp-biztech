@@ -255,8 +255,21 @@ export default function Finance() {
 
 
   // Pending invoices with urgency
+  // Calculate payments made per project from transactions
+  const projectPaymentsMap = useMemo(() => {
+    if (!transactions) return new Map<string, number>();
+    const map = new Map<string, number>();
+    transactions
+      .filter(t => t.type === 'income' && t.project_id)
+      .forEach(t => {
+        const current = map.get(t.project_id!) || 0;
+        map.set(t.project_id!, current + Number(t.amount));
+      });
+    return map;
+  }, [transactions]);
+
   const pendingInvoices = useMemo(() => {
-    if (!invoices) return { total: 0, count: 0, urgent: 0, items: [] };
+    if (!invoices) return { total: 0, count: 0, urgent: 0, items: [], pendingProjects: [], projectPayments: new Map<string, number>() };
     
     const pending = invoices.filter(inv => inv.status === 'pending' || inv.status === 'overdue');
     const urgent = pending.filter(inv => inv.status === 'overdue').length;
@@ -266,9 +279,13 @@ export default function Finance() {
       p => (p.payment_status === 'pending' || p.payment_status === 'partial') 
         && Number(p.budget) > 0
     );
-    const projectsTotal = pendingProjects.reduce(
-      (sum, p) => sum + Number(p.budget), 0
-    );
+    
+    // Calculate remaining balance per project (budget - payments made)
+    const projectsTotal = pendingProjects.reduce((sum, p) => {
+      const paid = projectPaymentsMap.get(p.id) || 0;
+      const remaining = Math.max(0, Number(p.budget) - paid);
+      return sum + remaining;
+    }, 0);
     
     return {
       total: pending.reduce((sum, inv) => sum + Number(inv.amount), 0) + projectsTotal,
@@ -276,8 +293,9 @@ export default function Finance() {
       urgent,
       items: pending.slice(0, 5),
       pendingProjects,
+      projectPayments: projectPaymentsMap,
     };
-  }, [invoices, projects]);
+  }, [invoices, projects, projectPaymentsMap]);
 
   // Recent transactions filtered
   const filteredTransactions = useMemo(() => {
