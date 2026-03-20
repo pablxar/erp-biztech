@@ -37,6 +37,7 @@ import {
   Eye,
   MoreHorizontal,
   RefreshCw,
+  Banknote,
 } from "lucide-react";
 import {
   Area,
