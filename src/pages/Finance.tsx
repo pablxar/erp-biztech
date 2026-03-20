@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import { RegisterPaymentDialog } from "@/components/projects/RegisterPaymentDialog";
+import { Project } from "@/hooks/useProjects";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Plus,
