@@ -86,7 +86,7 @@ export default function Finance() {
   const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "quarter" | "year">("month");
   const [activeView, setActiveView] = useState<"overview" | "transactions" | "invoices" | "budgets">("overview");
   const [showReceivables, setShowReceivables] = useState(false);
-  
+  const [paymentProject, setPaymentProject] = useState<{ project: Project; paid: number } | null>(null);
   const { data: transactions, isLoading: transactionsLoading } = useTransactions();
   const { data: stats, isLoading: statsLoading } = useFinancialStats();
   const { data: invoices } = useInvoices();
