@@ -969,7 +969,10 @@ export default function Finance() {
                 </h3>
                 <div className="space-y-2">
                   {pendingInvoices.pendingProjects.map((project) => {
-                    const amount = Number(project.budget);
+                    const budget = Number(project.budget);
+                    const paid = pendingInvoices.projectPayments.get(project.id) || 0;
+                    const remaining = Math.max(0, budget - paid);
+                    const progress = budget > 0 ? (paid / budget) * 100 : 0;
                     return (
                       <div key={project.id} className="flex items-center justify-between p-3 rounded-lg border bg-secondary/30 hover:bg-secondary/50 transition-colors">
                         <div className="min-w-0 flex-1">
@@ -986,10 +989,32 @@ export default function Finance() {
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             {project.clients?.name || 'Sin cliente'}
-                            {project.service_type && ` • ${project.service_type.replace('_', ' ')}`}
+                            {paid > 0 && ` • Cobrado: $${paid.toLocaleString()}`}
                           </p>
+                          {paid > 0 && (
+                            <Progress value={progress} className="h-1 mt-1.5" />
+                          )}
                         </div>
-                        <span className="font-semibold text-sm">${amount.toLocaleString()}</span>
+                        <div className="flex items-center gap-2 ml-3">
+                          <div className="text-right">
+                            <span className="font-semibold text-sm">${remaining.toLocaleString()}</span>
+                            {paid > 0 && (
+                              <p className="text-[10px] text-muted-foreground">de ${budget.toLocaleString()}</p>
+                            )}
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs gap-1 shrink-0"
+                            onClick={() => {
+                              setShowReceivables(false);
+                              setPaymentProject({ project, paid });
+                            }}
+                          >
+                            <Banknote className="w-3 h-3" />
+                            Cobrar
+                          </Button>
+                        </div>
                       </div>
                     );
                   })}
