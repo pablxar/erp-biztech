@@ -784,8 +784,10 @@ export default function Finance() {
               {filteredTransactions.map((tx, i) => (
                 <div 
                   key={tx.id} 
-                  className="flex items-center justify-between p-3 rounded-xl bg-secondary/20 hover:bg-secondary/40 transition-all group cursor-pointer"
+                  className="flex items-center justify-between p-3 rounded-xl bg-secondary/20 hover:bg-destructive/5 transition-all group cursor-pointer border border-transparent hover:border-destructive/20"
                   style={{ animationDelay: `${i * 50}ms` }}
+                  onClick={() => setDeleteTarget({ id: tx.id, description: tx.description })}
+                  title="Clic para eliminar"
                 >
                   <div className="flex items-center gap-3">
                     <div className={cn(
