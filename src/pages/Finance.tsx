@@ -57,7 +57,17 @@ import {
   Line,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { useTransactions, useFinancialStats } from "@/hooks/useTransactions";
+import { useTransactions, useFinancialStats, useDeleteTransaction } from "@/hooks/useTransactions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useProjects } from "@/hooks/useProjects";
 import { CreateTransactionDialog } from "@/components/finance/CreateTransactionDialog";
