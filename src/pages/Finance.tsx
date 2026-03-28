@@ -57,7 +57,17 @@ import {
   Line,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { useTransactions, useFinancialStats } from "@/hooks/useTransactions";
+import { useTransactions, useFinancialStats, useDeleteTransaction } from "@/hooks/useTransactions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useProjects } from "@/hooks/useProjects";
 import { CreateTransactionDialog } from "@/components/finance/CreateTransactionDialog";
@@ -88,7 +98,9 @@ export default function Finance() {
   const [activeView, setActiveView] = useState<"overview" | "transactions" | "invoices" | "budgets">("overview");
   const [showReceivables, setShowReceivables] = useState(false);
   const [paymentProject, setPaymentProject] = useState<{ project: Project; paid: number } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; description: string } | null>(null);
   const { data: transactions, isLoading: transactionsLoading } = useTransactions();
+  const deleteTransaction = useDeleteTransaction();
   const { data: stats, isLoading: statsLoading } = useFinancialStats();
   const { data: invoices } = useInvoices();
   const { data: projects } = useProjects();
@@ -772,8 +784,10 @@ export default function Finance() {
               {filteredTransactions.map((tx, i) => (
                 <div 
                   key={tx.id} 
-                  className="flex items-center justify-between p-3 rounded-xl bg-secondary/20 hover:bg-secondary/40 transition-all group cursor-pointer"
+                  className="flex items-center justify-between p-3 rounded-xl bg-secondary/20 hover:bg-destructive/5 transition-all group cursor-pointer border border-transparent hover:border-destructive/20"
                   style={{ animationDelay: `${i * 50}ms` }}
+                  onClick={() => setDeleteTarget({ id: tx.id, description: tx.description })}
+                  title="Clic para eliminar"
                 >
                   <div className="flex items-center gap-3">
                     <div className={cn(
@@ -1045,6 +1059,31 @@ export default function Finance() {
           previousPayments={paymentProject.paid}
         />
       )}
+      {/* Delete Transaction Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar transacción?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminará permanentemente la transacción <span className="font-medium text-foreground">"{deleteTarget?.description}"</span>. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) {
+                  deleteTransaction.mutate(deleteTarget.id);
+                  setDeleteTarget(null);
+                }
+              }}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
