@@ -306,7 +306,7 @@ export default function Finance() {
       total: pending.reduce((sum, inv) => sum + Number(inv.amount), 0) + projectsTotal,
       count: pending.length + pendingProjects.length,
       urgent,
-      items: pending.slice(0, 5),
+      items: showAllInvoices ? pending : pending.slice(0, 5),
       pendingProjects,
       projectPayments: projectPaymentsMap,
     };
