@@ -310,7 +310,7 @@ export default function Finance() {
       pendingProjects,
       projectPayments: projectPaymentsMap,
     };
-  }, [invoices, projects, projectPaymentsMap]);
+  }, [invoices, projects, projectPaymentsMap, showAllInvoices]);
 
   // Recent transactions filtered
   const filteredTransactions = useMemo(() => {
