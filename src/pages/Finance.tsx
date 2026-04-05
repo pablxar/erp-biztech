@@ -99,6 +99,8 @@ export default function Finance() {
   const [showReceivables, setShowReceivables] = useState(false);
   const [paymentProject, setPaymentProject] = useState<{ project: Project; paid: number } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; description: string } | null>(null);
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
+  const [showAllInvoices, setShowAllInvoices] = useState(false);
   const { data: transactions, isLoading: transactionsLoading } = useTransactions();
   const deleteTransaction = useDeleteTransaction();
   const { data: stats, isLoading: statsLoading } = useFinancialStats();
