@@ -99,6 +99,8 @@ export default function Finance() {
   const [showReceivables, setShowReceivables] = useState(false);
   const [paymentProject, setPaymentProject] = useState<{ project: Project; paid: number } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; description: string } | null>(null);
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
+  const [showAllInvoices, setShowAllInvoices] = useState(false);
   const { data: transactions, isLoading: transactionsLoading } = useTransactions();
   const deleteTransaction = useDeleteTransaction();
   const { data: stats, isLoading: statsLoading } = useFinancialStats();
@@ -304,23 +306,23 @@ export default function Finance() {
       total: pending.reduce((sum, inv) => sum + Number(inv.amount), 0) + projectsTotal,
       count: pending.length + pendingProjects.length,
       urgent,
-      items: pending.slice(0, 5),
+      items: showAllInvoices ? pending : pending.slice(0, 5),
       pendingProjects,
       projectPayments: projectPaymentsMap,
     };
-  }, [invoices, projects, projectPaymentsMap]);
+  }, [invoices, projects, projectPaymentsMap, showAllInvoices]);
 
   // Recent transactions filtered
   const filteredTransactions = useMemo(() => {
     if (!transactions) return [];
-    return transactions
+    const filtered = transactions
       .filter(tx => 
         searchQuery === "" || 
         tx.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tx.category?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      .slice(0, 8);
-  }, [transactions, searchQuery]);
+      );
+    return showAllTransactions ? filtered : filtered.slice(0, 8);
+  }, [transactions, searchQuery, showAllTransactions]);
 
   // Quick insights
   const insights = useMemo(() => {
@@ -765,8 +767,8 @@ export default function Finance() {
               <RefreshCw className="w-5 h-5 text-primary" />
               Transacciones Recientes
             </h3>
-            <Button variant="ghost" size="sm" className="text-xs gap-1.5">
-              Ver todas <ArrowRight className="w-3.5 h-3.5" />
+            <Button variant="ghost" size="sm" className="text-xs gap-1.5" onClick={() => setShowAllTransactions(!showAllTransactions)}>
+              {showAllTransactions ? "Ver menos" : "Ver todas"} <ArrowRight className="w-3.5 h-3.5" />
             </Button>
           </div>
           
@@ -832,8 +834,8 @@ export default function Finance() {
               <Receipt className="w-5 h-5 text-primary" />
               Facturas Pendientes
             </h3>
-            <Button variant="ghost" size="sm" className="text-xs gap-1.5">
-              Ver todas <ArrowRight className="w-3.5 h-3.5" />
+            <Button variant="ghost" size="sm" className="text-xs gap-1.5" onClick={() => setShowAllInvoices(!showAllInvoices)}>
+              {showAllInvoices ? "Ver menos" : "Ver todas"} <ArrowRight className="w-3.5 h-3.5" />
             </Button>
           </div>
           
