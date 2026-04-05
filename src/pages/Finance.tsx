@@ -315,14 +315,14 @@ export default function Finance() {
   // Recent transactions filtered
   const filteredTransactions = useMemo(() => {
     if (!transactions) return [];
-    return transactions
+    const filtered = transactions
       .filter(tx => 
         searchQuery === "" || 
         tx.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tx.category?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      .slice(0, 8);
-  }, [transactions, searchQuery]);
+      );
+    return showAllTransactions ? filtered : filtered.slice(0, 8);
+  }, [transactions, searchQuery, showAllTransactions]);
 
   // Quick insights
   const insights = useMemo(() => {
