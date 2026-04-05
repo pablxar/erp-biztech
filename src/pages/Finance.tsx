@@ -834,8 +834,8 @@ export default function Finance() {
               <Receipt className="w-5 h-5 text-primary" />
               Facturas Pendientes
             </h3>
-            <Button variant="ghost" size="sm" className="text-xs gap-1.5">
-              Ver todas <ArrowRight className="w-3.5 h-3.5" />
+            <Button variant="ghost" size="sm" className="text-xs gap-1.5" onClick={() => setShowAllInvoices(!showAllInvoices)}>
+              {showAllInvoices ? "Ver menos" : "Ver todas"} <ArrowRight className="w-3.5 h-3.5" />
             </Button>
           </div>
           
