@@ -50,7 +50,7 @@ export function RegisterPaymentDialog({
   const [paymentType, setPaymentType] = useState<PaymentType>("full");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentDate, setPaymentDate] = useState<Date>(new Date());
   const [step, setStep] = useState<"select" | "confirm">("select");
 
   const { mutateAsync: updateProject } = useUpdateProject();
