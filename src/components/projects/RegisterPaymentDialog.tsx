@@ -121,6 +121,7 @@ export function RegisterPaymentDialog({
     setPaymentType("full");
     setAmount("");
     setNote("");
+    setPaymentDate(new Date());
     setStep("select");
   };
 
