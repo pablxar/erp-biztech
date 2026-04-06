@@ -354,6 +354,10 @@ export function RegisterPaymentDialog({
                   <span className="text-sm text-muted-foreground">Monto a cobrar</span>
                   <span className="font-bold text-lg text-success">{formatCurrency(paymentAmount)}</span>
                 </div>
+                <div className="flex items-center justify-between p-4">
+                  <span className="text-sm text-muted-foreground">Fecha</span>
+                  <span className="font-medium text-sm">{format(paymentDate, "PPP", { locale: es })}</span>
+                </div>
                 {note && (
                   <div className="flex items-center justify-between p-4">
                     <span className="text-sm text-muted-foreground">Nota</span>
