@@ -289,6 +289,34 @@ export function RegisterPaymentDialog({
                 </div>
               )}
 
+              {/* Payment date */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Fecha del cobro</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !paymentDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(paymentDate, "PPP", { locale: es })}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={paymentDate}
+                      onSelect={(date) => date && setPaymentDate(date)}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
               {/* Note */}
               <div className="space-y-2">
                 <Label htmlFor="payment-note" className="text-sm">Nota (opcional)</Label>
