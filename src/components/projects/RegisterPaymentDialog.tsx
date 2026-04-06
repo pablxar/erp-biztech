@@ -26,7 +26,11 @@ import { Project, useUpdateProject } from "@/hooks/useProjects";
 import { useCreateTransaction } from "@/hooks/useTransactions";
 import { formatCurrency } from "@/lib/servicePricing";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { toast } from "sonner";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
 
 interface RegisterPaymentDialogProps {
   project: Project;
@@ -46,6 +50,7 @@ export function RegisterPaymentDialog({
   const [paymentType, setPaymentType] = useState<PaymentType>("full");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [paymentDate, setPaymentDate] = useState<Date>(new Date());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<"select" | "confirm">("select");
 
@@ -95,7 +100,7 @@ export function RegisterPaymentDialog({
         category: "Proyectos",
         project_id: project.id,
         client_id: project.client_id || undefined,
-        date: format(new Date(), "yyyy-MM-dd"),
+        date: format(paymentDate, "yyyy-MM-dd"),
       });
 
       toast.success(
@@ -116,6 +121,7 @@ export function RegisterPaymentDialog({
     setPaymentType("full");
     setAmount("");
     setNote("");
+    setPaymentDate(new Date());
     setStep("select");
   };
 
@@ -283,6 +289,34 @@ export function RegisterPaymentDialog({
                 </div>
               )}
 
+              {/* Payment date */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Fecha del cobro</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !paymentDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(paymentDate, "PPP", { locale: es })}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={paymentDate}
+                      onSelect={(date) => date && setPaymentDate(date)}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
               {/* Note */}
               <div className="space-y-2">
                 <Label htmlFor="payment-note" className="text-sm">Nota (opcional)</Label>
@@ -319,6 +353,10 @@ export function RegisterPaymentDialog({
                 <div className="flex items-center justify-between p-4">
                   <span className="text-sm text-muted-foreground">Monto a cobrar</span>
                   <span className="font-bold text-lg text-success">{formatCurrency(paymentAmount)}</span>
+                </div>
+                <div className="flex items-center justify-between p-4">
+                  <span className="text-sm text-muted-foreground">Fecha</span>
+                  <span className="font-medium text-sm">{format(paymentDate, "PPP", { locale: es })}</span>
                 </div>
                 {note && (
                   <div className="flex items-center justify-between p-4">
