@@ -100,7 +100,7 @@ export function RegisterPaymentDialog({
         category: "Proyectos",
         project_id: project.id,
         client_id: project.client_id || undefined,
-        date: format(new Date(), "yyyy-MM-dd"),
+        date: format(paymentDate, "yyyy-MM-dd"),
       });
 
       toast.success(
