@@ -26,7 +26,11 @@ import { Project, useUpdateProject } from "@/hooks/useProjects";
 import { useCreateTransaction } from "@/hooks/useTransactions";
 import { formatCurrency } from "@/lib/servicePricing";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { toast } from "sonner";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
 
 interface RegisterPaymentDialogProps {
   project: Project;
