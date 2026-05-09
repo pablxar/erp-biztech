@@ -187,7 +187,7 @@ export default function Finance() {
         const month = date.getMonth();
         if (tx.type === 'income') {
           monthlyData[month].ingresos += Number(tx.amount);
-        } else {
+        } else if (tx.type === 'expense') {
           monthlyData[month].gastos += Number(tx.amount);
         }
       }
