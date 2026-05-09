@@ -88,6 +88,8 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
       setPaymentDetails((project.payment_details as PaymentDetails) || {});
       setReferencePrice(Number(project.reference_price) || 0);
       setMarkAsPending(project.payment_status === 'pending' || project.payment_status === 'partial');
+      setVatExempt(!!project.vat_exempt);
+      setVatRate(Number(project.vat_rate) || 19);
     }
   }, [project]);
 
