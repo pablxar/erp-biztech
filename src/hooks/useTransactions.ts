@@ -3,12 +3,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
+export type TransactionType = 'income' | 'expense' | 'tax';
+export type TaxSubtype = 'iva_debito' | 'iva_credito' | 'iva_pago_fisco';
+
 export interface Transaction {
   id: string;
   description: string;
   amount: number;
-  type: 'income' | 'expense';
+  type: TransactionType;
   category: string | null;
+  tax_type: TaxSubtype | null;
   project_id: string | null;
   client_id: string | null;
   date: string;
@@ -27,8 +31,9 @@ export interface Transaction {
 export interface CreateTransactionInput {
   description: string;
   amount: number;
-  type: 'income' | 'expense';
+  type: TransactionType;
   category?: string;
+  tax_type?: TaxSubtype;
   project_id?: string;
   client_id?: string;
   date?: string;
