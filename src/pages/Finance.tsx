@@ -567,7 +567,46 @@ export default function Finance() {
             <Clock className="w-3 h-3" />
             <span>{pendingInvoices.count} pendientes</span>
           </div>
+      </div>
+
+      {/* IVA Summary */}
+      {stats && (stats.ivaDebito > 0 || stats.ivaCredito > 0 || stats.ivaPagado > 0) && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <div className="glass rounded-xl p-3 lg:p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Landmark className="w-4 h-4 text-info" />
+              <span className="text-[11px] lg:text-xs text-muted-foreground">IVA Débito (cobrado)</span>
+            </div>
+            <p className="text-base lg:text-xl font-bold">${stats.ivaDebito.toLocaleString()}</p>
+          </div>
+          <div className="glass rounded-xl p-3 lg:p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Landmark className="w-4 h-4 text-success" />
+              <span className="text-[11px] lg:text-xs text-muted-foreground">IVA Crédito (compras)</span>
+            </div>
+            <p className="text-base lg:text-xl font-bold">${stats.ivaCredito.toLocaleString()}</p>
+          </div>
+          <div className="glass rounded-xl p-3 lg:p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Landmark className="w-4 h-4 text-muted-foreground" />
+              <span className="text-[11px] lg:text-xs text-muted-foreground">Pagado al Fisco</span>
+            </div>
+            <p className="text-base lg:text-xl font-bold">${stats.ivaPagado.toLocaleString()}</p>
+          </div>
+          <div className={cn(
+            "glass rounded-xl p-3 lg:p-4 border",
+            stats.ivaNeto > 0 ? "border-warning/30 bg-warning/5" : "border-success/30 bg-success/5"
+          )}>
+            <div className="flex items-center gap-2 mb-1.5">
+              <Landmark className={cn("w-4 h-4", stats.ivaNeto > 0 ? "text-warning" : "text-success")} />
+              <span className="text-[11px] lg:text-xs text-muted-foreground">IVA neto a pagar</span>
+            </div>
+            <p className={cn("text-base lg:text-xl font-bold", stats.ivaNeto > 0 ? "text-warning" : "text-success")}>
+              ${stats.ivaNeto.toLocaleString()}
+            </p>
+          </div>
         </div>
+      )}
       </div>
 
       {/* Charts Section */}
