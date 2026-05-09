@@ -834,16 +834,23 @@ export default function Finance() {
                   <div className="flex items-center gap-3">
                     <div className={cn(
                       "p-2.5 rounded-xl transition-transform group-hover:scale-110",
-                      tx.type === "income" ? "bg-success/10" : "bg-destructive/10"
+                      tx.type === "income" ? "bg-success/10" : tx.type === "tax" ? "bg-info/10" : "bg-destructive/10"
                     )}>
                       {tx.type === "income" ? (
                         <ArrowUpRight className="w-4 h-4 text-success" />
+                      ) : tx.type === "tax" ? (
+                        <Landmark className="w-4 h-4 text-info" />
                       ) : (
                         <ArrowDownRight className="w-4 h-4 text-destructive" />
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-sm truncate max-w-[180px]">{tx.description}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-medium text-sm truncate max-w-[180px]">{tx.description}</p>
+                        {tx.type === "tax" && (
+                          <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 bg-info/10 text-info border-info/30">IVA</Badge>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{format(new Date(tx.date), "d MMM", { locale: es })}</span>
                         {tx.category && (
@@ -857,9 +864,9 @@ export default function Finance() {
                   </div>
                   <span className={cn(
                     "font-semibold tabular-nums",
-                    tx.type === "income" ? "text-success" : "text-destructive"
+                    tx.type === "income" ? "text-success" : tx.type === "tax" ? "text-info" : "text-destructive"
                   )}>
-                    {tx.type === "income" ? "+" : "-"}${Number(tx.amount).toLocaleString()}
+                    {tx.type === "income" ? "+" : tx.type === "tax" ? "" : "-"}${Number(tx.amount).toLocaleString()}
                   </span>
                 </div>
               ))}
