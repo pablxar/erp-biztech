@@ -567,6 +567,7 @@ export default function Finance() {
             <Clock className="w-3 h-3" />
             <span>{pendingInvoices.count} pendientes</span>
           </div>
+        </div>
       </div>
 
       {/* IVA Summary */}
@@ -607,7 +608,6 @@ export default function Finance() {
           </div>
         </div>
       )}
-      </div>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
