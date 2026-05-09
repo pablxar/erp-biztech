@@ -107,7 +107,7 @@ export function CreateTransactionDialog({ trigger }: Props) {
             <Label htmlFor="type">Tipo *</Label>
             <Select
               value={formData.type}
-              onValueChange={(value: any) => setFormData({ ...formData, type: value })}
+              onValueChange={(value: any) => setFormData({ ...formData, type: value, tax_type: value === 'tax' ? formData.tax_type : '' })}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -115,9 +115,34 @@ export function CreateTransactionDialog({ trigger }: Props) {
               <SelectContent>
                 <SelectItem value="income">Ingreso</SelectItem>
                 <SelectItem value="expense">Gasto</SelectItem>
+                <SelectItem value="tax">IVA / Impuesto</SelectItem>
               </SelectContent>
             </Select>
+            {formData.type === 'tax' && (
+              <p className="text-xs text-muted-foreground">
+                Las transacciones de IVA no afectan el cálculo de margen ni gastos operativos.
+              </p>
+            )}
           </div>
+
+          {formData.type === 'tax' && (
+            <div className="space-y-2">
+              <Label htmlFor="tax_type">Subtipo de IVA *</Label>
+              <Select
+                value={formData.tax_type}
+                onValueChange={(value: any) => setFormData({ ...formData, tax_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="iva_debito">IVA Débito (cobrado a clientes)</SelectItem>
+                  <SelectItem value="iva_credito">IVA Crédito (pagado en compras)</SelectItem>
+                  <SelectItem value="iva_pago_fisco">Pago al Fisco (SII)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="description">Descripción *</Label>
