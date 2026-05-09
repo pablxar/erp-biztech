@@ -546,6 +546,34 @@ export function CreateProjectDialog({ trigger }: Props) {
                 hidePaymentStatus
               />
 
+              {/* IVA settings */}
+              <div className="rounded-lg border border-border/50 bg-secondary/20 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Receipt className="w-4 h-4 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium">Afecto a IVA</p>
+                      <p className="text-xs text-muted-foreground">El precio acordado incluye IVA</p>
+                    </div>
+                  </div>
+                  <Switch checked={!vatExempt} onCheckedChange={(v) => setVatExempt(!v)} />
+                </div>
+                {!vatExempt && (
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="create-vat-rate" className="text-xs text-muted-foreground">Tasa IVA (%)</Label>
+                    <Input
+                      id="create-vat-rate"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      className="h-8 w-24"
+                      value={vatRate}
+                      onChange={(e) => setVatRate(parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                )}
+              </div>
+
               {/* Review summary */}
               <div className="rounded-xl border border-border/50 bg-secondary/20 divide-y divide-border/50">
                 <div className="px-4 py-3 flex items-center gap-2">
