@@ -44,7 +44,9 @@ import {
   Building,
   Sparkles,
   UserPlus,
+  Receipt,
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { PricingSection } from './PricingSection';
 import {
@@ -99,6 +101,8 @@ export function CreateProjectDialog({ trigger }: Props) {
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({});
   const [referencePrice, setReferencePrice] = useState(0);
   const [markAsPending, setMarkAsPending] = useState(true);
+  const [vatExempt, setVatExempt] = useState(false);
+  const [vatRate, setVatRate] = useState(19);
 
   const { mutate: createProject, isPending } = useCreateProject();
   const { data: clients } = useClients();
@@ -121,6 +125,8 @@ export function CreateProjectDialog({ trigger }: Props) {
     setPaymentDetails({});
     setReferencePrice(0);
     setMarkAsPending(true);
+    setVatExempt(false);
+    setVatRate(19);
   };
 
   const handleServiceTypeChange = (value: ServiceType) => {
@@ -164,6 +170,8 @@ export function CreateProjectDialog({ trigger }: Props) {
         payment_mode: paymentMode || undefined,
         reference_price: referencePrice || undefined,
         payment_details: Object.keys(paymentDetails).length > 0 ? paymentDetails : undefined,
+        vat_exempt: vatExempt,
+        vat_rate: vatRate,
       },
       {
         onSuccess: () => {
@@ -537,6 +545,34 @@ export function CreateProjectDialog({ trigger }: Props) {
                 onMarkAsPendingChange={setMarkAsPending}
                 hidePaymentStatus
               />
+
+              {/* IVA settings */}
+              <div className="rounded-lg border border-border/50 bg-secondary/20 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Receipt className="w-4 h-4 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium">Afecto a IVA</p>
+                      <p className="text-xs text-muted-foreground">El precio acordado incluye IVA</p>
+                    </div>
+                  </div>
+                  <Switch checked={!vatExempt} onCheckedChange={(v) => setVatExempt(!v)} />
+                </div>
+                {!vatExempt && (
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="create-vat-rate" className="text-xs text-muted-foreground">Tasa IVA (%)</Label>
+                    <Input
+                      id="create-vat-rate"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      className="h-8 w-24"
+                      value={vatRate}
+                      onChange={(e) => setVatRate(parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                )}
+              </div>
 
               {/* Review summary */}
               <div className="rounded-xl border border-border/50 bg-secondary/20 divide-y divide-border/50">

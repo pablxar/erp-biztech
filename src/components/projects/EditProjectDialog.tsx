@@ -22,7 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon, Loader2, Code2, Megaphone, Video, Globe } from "lucide-react";
+import { CalendarIcon, Loader2, Code2, Megaphone, Video, Globe, Receipt } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -63,6 +64,8 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({});
   const [referencePrice, setReferencePrice] = useState(0);
   const [markAsPending, setMarkAsPending] = useState(true);
+  const [vatExempt, setVatExempt] = useState(false);
+  const [vatRate, setVatRate] = useState(19);
 
   const { mutate: updateProject, isPending } = useUpdateProject();
   const { data: clients } = useClients();
@@ -85,6 +88,8 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
       setPaymentDetails((project.payment_details as PaymentDetails) || {});
       setReferencePrice(Number(project.reference_price) || 0);
       setMarkAsPending(project.payment_status === 'pending' || project.payment_status === 'partial');
+      setVatExempt(!!project.vat_exempt);
+      setVatRate(Number(project.vat_rate) || 19);
     }
   }, [project]);
 
@@ -109,6 +114,8 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
         payment_mode: paymentMode || null,
         reference_price: referencePrice || 0,
         payment_details: Object.keys(paymentDetails).length > 0 ? paymentDetails : {},
+        vat_exempt: vatExempt,
+        vat_rate: vatRate,
       },
       {
         onSuccess: () => {
@@ -221,6 +228,34 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
             onMarkAsPendingChange={setMarkAsPending}
             hidePaymentStatus
           />
+
+          {/* IVA settings */}
+          <div className="rounded-lg border border-border/50 bg-secondary/20 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Afecto a IVA</p>
+                  <p className="text-xs text-muted-foreground">El precio acordado incluye IVA</p>
+                </div>
+              </div>
+              <Switch checked={!vatExempt} onCheckedChange={(v) => setVatExempt(!v)} />
+            </div>
+            {!vatExempt && (
+              <div className="flex items-center gap-2">
+                <Label htmlFor="vat-rate" className="text-xs text-muted-foreground">Tasa IVA (%)</Label>
+                <Input
+                  id="vat-rate"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  className="h-8 w-24"
+                  value={vatRate}
+                  onChange={(e) => setVatRate(parseFloat(e.target.value) || 0)}
+                />
+              </div>
+            )}
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

@@ -40,7 +40,8 @@ export function CreateTransactionDialog({ trigger }: Props) {
   const [formData, setFormData] = useState({
     description: '',
     amount: '',
-    type: 'income' as const,
+    type: 'income' as 'income' | 'expense' | 'tax',
+    tax_type: '' as '' | 'iva_debito' | 'iva_credito' | 'iva_pago_fisco',
     category: '',
     project_id: '',
     client_id: '',
@@ -51,14 +52,29 @@ export function CreateTransactionDialog({ trigger }: Props) {
   const { data: projects } = useProjects();
   const { data: clients } = useClients();
 
+  const resetForm = () => setFormData({
+    description: '',
+    amount: '',
+    type: 'income',
+    tax_type: '',
+    category: '',
+    project_id: '',
+    client_id: '',
+    date: new Date().toISOString().split('T')[0],
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.type === 'tax' && !formData.tax_type) {
+      return;
+    }
     createTransaction(
       {
         description: formData.description,
         amount: parseFloat(formData.amount),
         type: formData.type,
         category: formData.category || undefined,
+        tax_type: formData.type === 'tax' ? (formData.tax_type as any) : undefined,
         project_id: formData.project_id || undefined,
         client_id: formData.client_id || undefined,
         date: formData.date,
@@ -66,15 +82,7 @@ export function CreateTransactionDialog({ trigger }: Props) {
       {
         onSuccess: () => {
           setOpen(false);
-          setFormData({
-            description: '',
-            amount: '',
-            type: 'income',
-            category: '',
-            project_id: '',
-            client_id: '',
-            date: new Date().toISOString().split('T')[0],
-          });
+          resetForm();
         },
       }
     );
@@ -99,7 +107,7 @@ export function CreateTransactionDialog({ trigger }: Props) {
             <Label htmlFor="type">Tipo *</Label>
             <Select
               value={formData.type}
-              onValueChange={(value: any) => setFormData({ ...formData, type: value })}
+              onValueChange={(value: any) => setFormData({ ...formData, type: value, tax_type: value === 'tax' ? formData.tax_type : '' })}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -107,9 +115,34 @@ export function CreateTransactionDialog({ trigger }: Props) {
               <SelectContent>
                 <SelectItem value="income">Ingreso</SelectItem>
                 <SelectItem value="expense">Gasto</SelectItem>
+                <SelectItem value="tax">IVA / Impuesto</SelectItem>
               </SelectContent>
             </Select>
+            {formData.type === 'tax' && (
+              <p className="text-xs text-muted-foreground">
+                Las transacciones de IVA no afectan el cálculo de margen ni gastos operativos.
+              </p>
+            )}
           </div>
+
+          {formData.type === 'tax' && (
+            <div className="space-y-2">
+              <Label htmlFor="tax_type">Subtipo de IVA *</Label>
+              <Select
+                value={formData.tax_type}
+                onValueChange={(value: any) => setFormData({ ...formData, tax_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="iva_debito">IVA Débito (cobrado a clientes)</SelectItem>
+                  <SelectItem value="iva_credito">IVA Crédito (pagado en compras)</SelectItem>
+                  <SelectItem value="iva_pago_fisco">Pago al Fisco (SII)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="description">Descripción *</Label>
@@ -210,7 +243,7 @@ export function CreateTransactionDialog({ trigger }: Props) {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={isPending || !formData.description || !formData.amount}>
+            <Button type="submit" disabled={isPending || !formData.description || !formData.amount || (formData.type === 'tax' && !formData.tax_type)}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Registrar
             </Button>

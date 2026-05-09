@@ -40,7 +40,7 @@ export function RevenueChart() {
         if (tx.type === 'income') {
           monthlyData[month].ingresos += Number(tx.amount);
           totalIncome += Number(tx.amount);
-        } else {
+        } else if (tx.type === 'expense') {
           monthlyData[month].gastos += Number(tx.amount);
           totalExpenses += Number(tx.amount);
         }

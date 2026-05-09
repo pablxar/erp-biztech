@@ -64,6 +64,11 @@ export function RegisterPaymentDialog({
   const paymentAmount = paymentType === "full" ? remaining : parseFloat(amount) || 0;
   const newProgressPercent = agreedPrice > 0 ? ((previousPayments + paymentAmount) / agreedPrice) * 100 : 0;
 
+  const isVatExempt = !!project.vat_exempt;
+  const vatRate = Number(project.vat_rate) || 19;
+  // El precio acordado es bruto (incluye IVA si aplica)
+  const netFactor = isVatExempt ? 1 : 1 + vatRate / 100;
+
   const handleSubmit = async () => {
     if (paymentAmount <= 0) {
       toast.error("El monto debe ser mayor a 0");
@@ -89,19 +94,38 @@ export function RegisterPaymentDialog({
         },
       });
 
+      // Calcular neto e IVA a partir del bruto cobrado
+      const netAmount = isVatExempt ? paymentAmount : Math.round((paymentAmount / netFactor) * 100) / 100;
+      const vatAmount = isVatExempt ? 0 : Math.round((paymentAmount - netAmount) * 100) / 100;
+
+      const baseDescription = note
+        ? `${isFullPayment ? "Cobro" : "Abono"} proyecto: ${project.name} — ${note}`
+        : isFullPayment
+          ? `Cobro proyecto: ${project.name}${previousPayments > 0 ? " (saldo final)" : ""}`
+          : `Abono proyecto: ${project.name}`;
+
       await createTransaction({
-        description: note
-          ? `${isFullPayment ? "Cobro" : "Abono"} proyecto: ${project.name} — ${note}`
-          : isFullPayment
-            ? `Cobro proyecto: ${project.name}${previousPayments > 0 ? " (saldo final)" : ""}`
-            : `Abono proyecto: ${project.name}`,
-        amount: paymentAmount,
+        description: isVatExempt ? baseDescription : `${baseDescription} (neto)`,
+        amount: netAmount,
         type: "income",
         category: "Proyectos",
         project_id: project.id,
         client_id: project.client_id || undefined,
         date: format(paymentDate, "yyyy-MM-dd"),
       });
+
+      if (vatAmount > 0) {
+        await createTransaction({
+          description: `IVA Débito ${vatRate}% — ${project.name}`,
+          amount: vatAmount,
+          type: "tax",
+          tax_type: "iva_debito",
+          category: "IVA",
+          project_id: project.id,
+          client_id: project.client_id || undefined,
+          date: format(paymentDate, "yyyy-MM-dd"),
+        });
+      }
 
       toast.success(
         isFullPayment
@@ -351,9 +375,27 @@ export function RegisterPaymentDialog({
                   <span className="font-medium text-sm">{paymentType === "full" ? "Pago Completo" : "Abono Parcial"}</span>
                 </div>
                 <div className="flex items-center justify-between p-4">
-                  <span className="text-sm text-muted-foreground">Monto a cobrar</span>
+                  <span className="text-sm text-muted-foreground">Monto bruto</span>
                   <span className="font-bold text-lg text-success">{formatCurrency(paymentAmount)}</span>
                 </div>
+                {!isVatExempt && (
+                  <>
+                    <div className="flex items-center justify-between px-4 py-2 text-xs">
+                      <span className="text-muted-foreground">Neto</span>
+                      <span className="font-medium">{formatCurrency(Math.round((paymentAmount / netFactor) * 100) / 100)}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-4 py-2 text-xs">
+                      <span className="text-muted-foreground">IVA Débito ({vatRate}%)</span>
+                      <span className="font-medium">{formatCurrency(Math.round((paymentAmount - paymentAmount / netFactor) * 100) / 100)}</span>
+                    </div>
+                  </>
+                )}
+                {isVatExempt && (
+                  <div className="flex items-center justify-between px-4 py-2 text-xs">
+                    <span className="text-muted-foreground">IVA</span>
+                    <span className="font-medium">Exento</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between p-4">
                   <span className="text-sm text-muted-foreground">Fecha</span>
                   <span className="font-medium text-sm">{format(paymentDate, "PPP", { locale: es })}</span>

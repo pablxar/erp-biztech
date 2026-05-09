@@ -38,6 +38,7 @@ import {
   MoreHorizontal,
   RefreshCw,
   Banknote,
+  Landmark,
 } from "lucide-react";
 import {
   Area,
@@ -186,7 +187,7 @@ export default function Finance() {
         const month = date.getMonth();
         if (tx.type === 'income') {
           monthlyData[month].ingresos += Number(tx.amount);
-        } else {
+        } else if (tx.type === 'expense') {
           monthlyData[month].gastos += Number(tx.amount);
         }
       }
@@ -255,7 +256,7 @@ export default function Finance() {
         const dayIndex = (6 - diffDays + date.getDay()) % 7;
         if (tx.type === 'income') {
           dayData[dayIndex].ingresos += Number(tx.amount);
-        } else {
+        } else if (tx.type === 'expense') {
           dayData[dayIndex].gastos += Number(tx.amount);
         }
       }
@@ -569,6 +570,45 @@ export default function Finance() {
         </div>
       </div>
 
+      {/* IVA Summary */}
+      {stats && (stats.ivaDebito > 0 || stats.ivaCredito > 0 || stats.ivaPagado > 0) && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <div className="glass rounded-xl p-3 lg:p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Landmark className="w-4 h-4 text-info" />
+              <span className="text-[11px] lg:text-xs text-muted-foreground">IVA Débito (cobrado)</span>
+            </div>
+            <p className="text-base lg:text-xl font-bold">${stats.ivaDebito.toLocaleString()}</p>
+          </div>
+          <div className="glass rounded-xl p-3 lg:p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Landmark className="w-4 h-4 text-success" />
+              <span className="text-[11px] lg:text-xs text-muted-foreground">IVA Crédito (compras)</span>
+            </div>
+            <p className="text-base lg:text-xl font-bold">${stats.ivaCredito.toLocaleString()}</p>
+          </div>
+          <div className="glass rounded-xl p-3 lg:p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Landmark className="w-4 h-4 text-muted-foreground" />
+              <span className="text-[11px] lg:text-xs text-muted-foreground">Pagado al Fisco</span>
+            </div>
+            <p className="text-base lg:text-xl font-bold">${stats.ivaPagado.toLocaleString()}</p>
+          </div>
+          <div className={cn(
+            "glass rounded-xl p-3 lg:p-4 border",
+            stats.ivaNeto > 0 ? "border-warning/30 bg-warning/5" : "border-success/30 bg-success/5"
+          )}>
+            <div className="flex items-center gap-2 mb-1.5">
+              <Landmark className={cn("w-4 h-4", stats.ivaNeto > 0 ? "text-warning" : "text-success")} />
+              <span className="text-[11px] lg:text-xs text-muted-foreground">IVA neto a pagar</span>
+            </div>
+            <p className={cn("text-base lg:text-xl font-bold", stats.ivaNeto > 0 ? "text-warning" : "text-success")}>
+              ${stats.ivaNeto.toLocaleString()}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Charts Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
         {/* Main Revenue Chart */}
@@ -794,16 +834,23 @@ export default function Finance() {
                   <div className="flex items-center gap-3">
                     <div className={cn(
                       "p-2.5 rounded-xl transition-transform group-hover:scale-110",
-                      tx.type === "income" ? "bg-success/10" : "bg-destructive/10"
+                      tx.type === "income" ? "bg-success/10" : tx.type === "tax" ? "bg-info/10" : "bg-destructive/10"
                     )}>
                       {tx.type === "income" ? (
                         <ArrowUpRight className="w-4 h-4 text-success" />
+                      ) : tx.type === "tax" ? (
+                        <Landmark className="w-4 h-4 text-info" />
                       ) : (
                         <ArrowDownRight className="w-4 h-4 text-destructive" />
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-sm truncate max-w-[180px]">{tx.description}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-medium text-sm truncate max-w-[180px]">{tx.description}</p>
+                        {tx.type === "tax" && (
+                          <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 bg-info/10 text-info border-info/30">IVA</Badge>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{format(new Date(tx.date), "d MMM", { locale: es })}</span>
                         {tx.category && (
@@ -817,9 +864,9 @@ export default function Finance() {
                   </div>
                   <span className={cn(
                     "font-semibold tabular-nums",
-                    tx.type === "income" ? "text-success" : "text-destructive"
+                    tx.type === "income" ? "text-success" : tx.type === "tax" ? "text-info" : "text-destructive"
                   )}>
-                    {tx.type === "income" ? "+" : "-"}${Number(tx.amount).toLocaleString()}
+                    {tx.type === "income" ? "+" : tx.type === "tax" ? "" : "-"}${Number(tx.amount).toLocaleString()}
                   </span>
                 </div>
               ))}
