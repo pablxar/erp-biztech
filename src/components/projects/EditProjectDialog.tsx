@@ -22,7 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon, Loader2, Code2, Megaphone, Video, Globe } from "lucide-react";
+import { CalendarIcon, Loader2, Code2, Megaphone, Video, Globe, Receipt } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
