@@ -256,7 +256,7 @@ export default function Finance() {
         const dayIndex = (6 - diffDays + date.getDay()) % 7;
         if (tx.type === 'income') {
           dayData[dayIndex].ingresos += Number(tx.amount);
-        } else {
+        } else if (tx.type === 'expense') {
           dayData[dayIndex].gastos += Number(tx.amount);
         }
       }
