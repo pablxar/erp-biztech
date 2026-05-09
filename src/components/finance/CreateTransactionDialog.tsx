@@ -40,7 +40,8 @@ export function CreateTransactionDialog({ trigger }: Props) {
   const [formData, setFormData] = useState({
     description: '',
     amount: '',
-    type: 'income' as const,
+    type: 'income' as 'income' | 'expense' | 'tax',
+    tax_type: '' as '' | 'iva_debito' | 'iva_credito' | 'iva_pago_fisco',
     category: '',
     project_id: '',
     client_id: '',
@@ -51,14 +52,29 @@ export function CreateTransactionDialog({ trigger }: Props) {
   const { data: projects } = useProjects();
   const { data: clients } = useClients();
 
+  const resetForm = () => setFormData({
+    description: '',
+    amount: '',
+    type: 'income',
+    tax_type: '',
+    category: '',
+    project_id: '',
+    client_id: '',
+    date: new Date().toISOString().split('T')[0],
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.type === 'tax' && !formData.tax_type) {
+      return;
+    }
     createTransaction(
       {
         description: formData.description,
         amount: parseFloat(formData.amount),
         type: formData.type,
         category: formData.category || undefined,
+        tax_type: formData.type === 'tax' ? (formData.tax_type as any) : undefined,
         project_id: formData.project_id || undefined,
         client_id: formData.client_id || undefined,
         date: formData.date,
@@ -66,15 +82,7 @@ export function CreateTransactionDialog({ trigger }: Props) {
       {
         onSuccess: () => {
           setOpen(false);
-          setFormData({
-            description: '',
-            amount: '',
-            type: 'income',
-            category: '',
-            project_id: '',
-            client_id: '',
-            date: new Date().toISOString().split('T')[0],
-          });
+          resetForm();
         },
       }
     );
