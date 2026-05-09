@@ -75,7 +75,7 @@ export function useFinancialStats() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('transactions')
-        .select('amount, type, date');
+        .select('amount, type, tax_type, date');
       
       if (error) throw error;
       
@@ -104,7 +104,19 @@ export function useFinancialStats() {
           return t.type === 'expense' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
         })
         .reduce((sum, t) => sum + Number(t.amount), 0);
-      
+
+      // IVA: débito (cobrado a clientes) − crédito (pagado en compras) − pagos al fisco
+      const ivaDebito = data
+        .filter(t => t.type === 'tax' && t.tax_type === 'iva_debito')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+      const ivaCredito = data
+        .filter(t => t.type === 'tax' && t.tax_type === 'iva_credito')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+      const ivaPagado = data
+        .filter(t => t.type === 'tax' && t.tax_type === 'iva_pago_fisco')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+      const ivaNeto = ivaDebito - ivaCredito - ivaPagado;
+
       return {
         totalIncome: income,
         totalExpenses: expenses,
@@ -112,6 +124,10 @@ export function useFinancialStats() {
         monthlyExpenses,
         netMargin: income - expenses,
         marginPercentage: income > 0 ? ((income - expenses) / income * 100) : 0,
+        ivaDebito,
+        ivaCredito,
+        ivaPagado,
+        ivaNeto,
       };
     },
     enabled: !!user,
