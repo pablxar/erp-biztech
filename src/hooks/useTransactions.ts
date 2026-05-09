@@ -168,16 +168,58 @@ export function useDeleteTransaction() {
   
   return useMutation({
     mutationFn: async (id: string) => {
+      // Cargar la transacción para saber si está vinculada a un proyecto
+      const { data: tx, error: fetchError } = await supabase
+        .from('transactions')
+        .select('id, type, amount, project_id')
+        .eq('id', id)
+        .maybeSingle();
+      if (fetchError) throw fetchError;
+
       const { error } = await supabase
         .from('transactions')
         .delete()
         .eq('id', id);
-      
       if (error) throw error;
+
+      // Si era un ingreso de proyecto, recalcular el estado de pago del proyecto
+      if (tx?.project_id && tx.type === 'income') {
+        const { data: project } = await supabase
+          .from('projects')
+          .select('id, budget, payment_details')
+          .eq('id', tx.project_id)
+          .maybeSingle();
+
+        const { data: remainingTx } = await supabase
+          .from('transactions')
+          .select('amount')
+          .eq('project_id', tx.project_id)
+          .eq('type', 'income');
+
+        const totalPaid = (remainingTx || []).reduce((sum, t) => sum + Number(t.amount), 0);
+        const budget = Number(project?.budget) || 0;
+
+        let newStatus: 'pending' | 'partial' | 'paid' = 'pending';
+        if (budget > 0 && totalPaid >= budget) newStatus = 'paid';
+        else if (totalPaid > 0) newStatus = 'partial';
+
+        const currentDetails = (project?.payment_details as Record<string, unknown>) || {};
+        await supabase
+          .from('projects')
+          .update({
+            payment_status: newStatus,
+            payment_details: {
+              ...currentDetails,
+              partialAmount: newStatus === 'partial' ? totalPaid : undefined,
+            },
+          })
+          .eq('id', tx.project_id);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['financial-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       toast.success('Transacción eliminada');
     },
     onError: (error) => {
