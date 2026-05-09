@@ -64,6 +64,8 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({});
   const [referencePrice, setReferencePrice] = useState(0);
   const [markAsPending, setMarkAsPending] = useState(true);
+  const [vatExempt, setVatExempt] = useState(false);
+  const [vatRate, setVatRate] = useState(19);
 
   const { mutate: updateProject, isPending } = useUpdateProject();
   const { data: clients } = useClients();
