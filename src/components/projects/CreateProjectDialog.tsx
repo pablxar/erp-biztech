@@ -44,7 +44,9 @@ import {
   Building,
   Sparkles,
   UserPlus,
+  Receipt,
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { PricingSection } from './PricingSection';
 import {
