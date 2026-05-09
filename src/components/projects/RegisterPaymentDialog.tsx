@@ -375,9 +375,27 @@ export function RegisterPaymentDialog({
                   <span className="font-medium text-sm">{paymentType === "full" ? "Pago Completo" : "Abono Parcial"}</span>
                 </div>
                 <div className="flex items-center justify-between p-4">
-                  <span className="text-sm text-muted-foreground">Monto a cobrar</span>
+                  <span className="text-sm text-muted-foreground">Monto bruto</span>
                   <span className="font-bold text-lg text-success">{formatCurrency(paymentAmount)}</span>
                 </div>
+                {!isVatExempt && (
+                  <>
+                    <div className="flex items-center justify-between px-4 py-2 text-xs">
+                      <span className="text-muted-foreground">Neto</span>
+                      <span className="font-medium">{formatCurrency(Math.round((paymentAmount / netFactor) * 100) / 100)}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-4 py-2 text-xs">
+                      <span className="text-muted-foreground">IVA Débito ({vatRate}%)</span>
+                      <span className="font-medium">{formatCurrency(Math.round((paymentAmount - paymentAmount / netFactor) * 100) / 100)}</span>
+                    </div>
+                  </>
+                )}
+                {isVatExempt && (
+                  <div className="flex items-center justify-between px-4 py-2 text-xs">
+                    <span className="text-muted-foreground">IVA</span>
+                    <span className="font-medium">Exento</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between p-4">
                   <span className="text-sm text-muted-foreground">Fecha</span>
                   <span className="font-medium text-sm">{format(paymentDate, "PPP", { locale: es })}</span>
