@@ -168,6 +168,8 @@ export function CreateProjectDialog({ trigger }: Props) {
         payment_mode: paymentMode || undefined,
         reference_price: referencePrice || undefined,
         payment_details: Object.keys(paymentDetails).length > 0 ? paymentDetails : undefined,
+        vat_exempt: vatExempt,
+        vat_rate: vatRate,
       },
       {
         onSuccess: () => {
