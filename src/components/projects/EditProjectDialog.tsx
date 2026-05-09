@@ -114,6 +114,8 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
         payment_mode: paymentMode || null,
         reference_price: referencePrice || 0,
         payment_details: Object.keys(paymentDetails).length > 0 ? paymentDetails : {},
+        vat_exempt: vatExempt,
+        vat_rate: vatRate,
       },
       {
         onSuccess: () => {
