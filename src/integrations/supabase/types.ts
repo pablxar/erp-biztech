@@ -529,6 +529,8 @@ export type Database = {
           start_date: string | null
           status: Database["public"]["Enums"]["project_status"]
           updated_at: string
+          vat_exempt: boolean
+          vat_rate: number
         }
         Insert: {
           budget?: number | null
@@ -548,6 +550,8 @@ export type Database = {
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           updated_at?: string
+          vat_exempt?: boolean
+          vat_rate?: number
         }
         Update: {
           budget?: number | null
@@ -567,6 +571,8 @@ export type Database = {
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           updated_at?: string
+          vat_exempt?: boolean
+          vat_rate?: number
         }
         Relationships: [
           {
@@ -828,6 +834,7 @@ export type Database = {
           description: string
           id: string
           project_id: string | null
+          tax_type: string | null
           type: Database["public"]["Enums"]["transaction_type"]
         }
         Insert: {
@@ -840,6 +847,7 @@ export type Database = {
           description: string
           id?: string
           project_id?: string | null
+          tax_type?: string | null
           type: Database["public"]["Enums"]["transaction_type"]
         }
         Update: {
@@ -852,6 +860,7 @@ export type Database = {
           description?: string
           id?: string
           project_id?: string | null
+          tax_type?: string | null
           type?: Database["public"]["Enums"]["transaction_type"]
         }
         Relationships: [
@@ -918,7 +927,7 @@ export type Database = {
         | "web_development"
       task_priority: "high" | "medium" | "low"
       task_status: "todo" | "in_progress" | "completed"
-      transaction_type: "income" | "expense"
+      transaction_type: "income" | "expense" | "tax"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1058,7 +1067,7 @@ export const Constants = {
       ],
       task_priority: ["high", "medium", "low"],
       task_status: ["todo", "in_progress", "completed"],
-      transaction_type: ["income", "expense"],
+      transaction_type: ["income", "expense", "tax"],
     },
   },
 } as const
