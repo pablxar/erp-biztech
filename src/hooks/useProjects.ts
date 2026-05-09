@@ -23,6 +23,8 @@ export interface Project {
   payment_mode: string | null;
   reference_price: number | null;
   payment_details: Record<string, any> | null;
+  vat_exempt: boolean;
+  vat_rate: number;
   clients?: {
     id: string;
     name: string;
@@ -43,6 +45,8 @@ export interface CreateProjectInput {
   payment_mode?: string;
   reference_price?: number;
   payment_details?: Record<string, any>;
+  vat_exempt?: boolean;
+  vat_rate?: number;
 }
 
 export function useProjects() {
