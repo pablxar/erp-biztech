@@ -99,6 +99,8 @@ export function CreateProjectDialog({ trigger }: Props) {
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({});
   const [referencePrice, setReferencePrice] = useState(0);
   const [markAsPending, setMarkAsPending] = useState(true);
+  const [vatExempt, setVatExempt] = useState(false);
+  const [vatRate, setVatRate] = useState(19);
 
   const { mutate: createProject, isPending } = useCreateProject();
   const { data: clients } = useClients();
