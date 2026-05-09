@@ -243,7 +243,7 @@ export function CreateTransactionDialog({ trigger }: Props) {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={isPending || !formData.description || !formData.amount}>
+            <Button type="submit" disabled={isPending || !formData.description || !formData.amount || (formData.type === 'tax' && !formData.tax_type)}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Registrar
             </Button>
