@@ -123,6 +123,8 @@ export function CreateProjectDialog({ trigger }: Props) {
     setPaymentDetails({});
     setReferencePrice(0);
     setMarkAsPending(true);
+    setVatExempt(false);
+    setVatRate(19);
   };
 
   const handleServiceTypeChange = (value: ServiceType) => {
